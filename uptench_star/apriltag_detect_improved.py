@@ -1,8 +1,5 @@
-import cv2
 import apriltag
-import sys
-import numpy as np
-import time
+import cv2
 
 
 class ApriltagDetect:

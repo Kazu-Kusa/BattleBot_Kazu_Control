@@ -1,10 +1,6 @@
-import cv2
 import apriltag
-import sys
-import numpy as np
-import time
-from multiprocessing import Process
-from multiprocessing.managers import BaseManager
+import cv2
+
 
 class ApriltagDetect:
     def __init__(self):
