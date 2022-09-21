@@ -1,6 +1,8 @@
-import uptech
 import time
+
 import cv2
+
+import uptech
 
 '''
 init up

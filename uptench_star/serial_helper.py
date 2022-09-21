@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-import sys
-import time
-import serial
 import logging
-import binascii
 import platform
 import threading
+import time
+
+import serial
 
 if platform.system() == "Windows":
     from  serial.tools import list_ports

@@ -1,5 +1,6 @@
-import numpy as np
 import cv2
+import numpy as np
+
 
 def rotate90(src):
     r_Img = cv2.rotate(src, cv2.ROTATE_90_CLOCKWISE)

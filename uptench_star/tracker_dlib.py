@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import sys
-import dlib
+
 import cv2
+import dlib
+
 
 class myCorrelationTracker(object):
     def __init__(self, windowName='default window', cameraNum=0):

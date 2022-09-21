@@ -1,5 +1,7 @@
 import math
 from uptench_star.uptech import UpTech
+from uptench_star.up_controller import UpController
+from uptench_star import apriltag_detect_improved
 
 class BattleBot(UpTech):
     def __init__(self):
@@ -7,4 +9,12 @@ class BattleBot(UpTech):
         self.current_player = None
         self.current_player_name = None
 
+    def run(self):
+        pass
+    def get_enemy_position(self)->int:
+        pass
+    def get_cur_position(self):
+        pass
+    def motion(self,motionCode:int):
+        pass
     def

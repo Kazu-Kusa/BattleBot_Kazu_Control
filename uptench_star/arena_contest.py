@@ -1,11 +1,11 @@
-import cv2
-import apriltag
-import sys
-import numpy as np
-from up_controller import UpController
-import time
 from multiprocessing import Process
 from multiprocessing.managers import BaseManager
+
+import apriltag
+import cv2
+
+from up_controller import UpController
+
 
 class ArenaContest:
     def __init__(self):

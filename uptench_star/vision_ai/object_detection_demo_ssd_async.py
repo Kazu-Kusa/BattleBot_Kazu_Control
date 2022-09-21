@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-import sys
-import os
-from argparse import ArgumentParser, SUPPRESS
-import cv2
-import time
 import logging as log
+import os
+import sys
+import time
+from argparse import ArgumentParser, SUPPRESS
 
+import cv2
 from openvino.inference_engine import IECore
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))

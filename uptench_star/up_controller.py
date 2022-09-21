@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import uptech
-import time
 import threading
-class UpController:
+import time
 
+import uptech
+
+
+class UpController:
     # cmd
     NO_CONTROLLER = 0
     MOVE_UP = 1
@@ -24,7 +26,7 @@ class UpController:
     CHASSIS_MODE_CONTROLLER = 2
 
     def __init__(self):
-        self.up=uptech.UpTech()
+        self.up = uptech.UpTech()
         self.up.LCD_Open(2)
         open_flag = self.up.ADC_IO_Open()
         print("ad_io_open = {}".format(open_flag))
@@ -32,14 +34,14 @@ class UpController:
         self.cmd = 0
         self.adc_data = []
         self.io_data = []
-        controller_thread = threading.Thread(name = "up_controller_thread",target=self.send_cmd)
+        controller_thread = threading.Thread(name="up_controller_thread", target=self.send_cmd)
         controller_thread.setDaemon(True)
         controller_thread.start()
 
         self.open_edge_detect()
 
     def open_edge_detect(self):
-        edge_thread = threading.Thread(name = "edge_detect_thread",target=self.edge_detect_thread)
+        edge_thread = threading.Thread(name="edge_detect_thread", target=self.edge_detect_thread)
         edge_thread.setDaemon(True)
         edge_thread.start()
         time.sleep(1)
@@ -75,7 +77,7 @@ class UpController:
                 self.move_stop()
             if self.cmd == self.PICK_UP_BALL:
                 self.pick_up_ball()
-            
+
     def get_ad_data(self):
         return self.adc_data
 
@@ -84,14 +86,13 @@ class UpController:
         self.up.CDS_SetSpeed(1, left_speed)
         self.up.CDS_SetSpeed(2, -right_speed)
 
-
     def move_up(self):
         if self.chassis_mode == self.CHASSIS_MODE_SERVO:
             self.up.CDS_SetSpeed(1, self.SPEED)
             self.up.CDS_SetSpeed(2, self.SPEED)
             self.up.CDS_SetSpeed(3, self.SPEED)
-            self.up.CDS_SetSpeed(4, self.SPEED) 
-        
+            self.up.CDS_SetSpeed(4, self.SPEED)
+
         if self.chassis_mode == self.CHASSIS_MODE_CONTROLLER:
             self.up.CDS_SetSpeed(1, self.SPEED)
             self.up.CDS_SetSpeed(2, -self.SPEED + 10)
@@ -103,10 +104,10 @@ class UpController:
             self.up.CDS_SetSpeed(1, -self.SPEED)
             self.up.CDS_SetSpeed(2, -self.SPEED)
             self.up.CDS_SetSpeed(3, self.SPEED)
-            self.up.CDS_SetSpeed(4, self.SPEED) 
-        
+            self.up.CDS_SetSpeed(4, self.SPEED)
+
         if self.chassis_mode == self.CHASSIS_MODE_CONTROLLER:
-            self.up.CDS_SetSpeed(1,156)
+            self.up.CDS_SetSpeed(1, 156)
             self.up.CDS_SetSpeed(2, -200)
         self.cmd = self.NO_CONTROLLER
 
@@ -115,8 +116,8 @@ class UpController:
             self.up.CDS_SetSpeed(1, self.SPEED)
             self.up.CDS_SetSpeed(2, self.SPEED)
             self.up.CDS_SetSpeed(3, -self.SPEED)
-            self.up.CDS_SetSpeed(4, -self.SPEED) 
-        
+            self.up.CDS_SetSpeed(4, -self.SPEED)
+
         if self.chassis_mode == self.CHASSIS_MODE_CONTROLLER:
             self.up.CDS_SetSpeed(1, 200)
             self.up.CDS_SetSpeed(2, -156)
@@ -127,8 +128,8 @@ class UpController:
             self.up.CDS_SetSpeed(1, -self.SPEED)
             self.up.CDS_SetSpeed(2, self.SPEED)
             self.up.CDS_SetSpeed(3, -self.SPEED)
-            self.up.CDS_SetSpeed(4, self.SPEED) 
-        
+            self.up.CDS_SetSpeed(4, self.SPEED)
+
         if self.chassis_mode == self.CHASSIS_MODE_CONTROLLER:
             self.up.CDS_SetSpeed(1, -self.YAW_SPEED)
             self.up.CDS_SetSpeed(2, -self.YAW_SPEED)
@@ -139,8 +140,8 @@ class UpController:
             self.up.CDS_SetSpeed(1, -self.SPEED)
             self.up.CDS_SetSpeed(2, self.SPEED)
             self.up.CDS_SetSpeed(3, -self.SPEED)
-            self.up.CDS_SetSpeed(4, self.SPEED) 
-        
+            self.up.CDS_SetSpeed(4, self.SPEED)
+
         if self.chassis_mode == self.CHASSIS_MODE_CONTROLLER:
             self.up.CDS_SetSpeed(1, self.YAW_SPEED)
             self.up.CDS_SetSpeed(2, self.YAW_SPEED)
@@ -150,55 +151,54 @@ class UpController:
         self.up.CDS_SetSpeed(1, 0)
         self.up.CDS_SetSpeed(2, 0)
         self.up.CDS_SetSpeed(3, 0)
-        self.up.CDS_SetSpeed(4, 0) 
+        self.up.CDS_SetSpeed(4, 0)
         self.cmd = self.NO_CONTROLLER
 
     def pick_up_ball(self):
         self.move_stop()
         time.sleep(2)
-        self.up.CDS_SetAngle(5,512,self.SPEED)
+        self.up.CDS_SetAngle(5, 512, self.SPEED)
         time.sleep(2)
-        self.up.CDS_SetAngle(6,580,self.SPEED)
-        self.up.CDS_SetAngle(7,450,self.SPEED)
+        self.up.CDS_SetAngle(6, 580, self.SPEED)
+        self.up.CDS_SetAngle(7, 450, self.SPEED)
         time.sleep(2)
-        self.up.CDS_SetAngle(5,921,self.SPEED)
+        self.up.CDS_SetAngle(5, 921, self.SPEED)
         time.sleep(2)
-        self.up.CDS_SetAngle(6,495,self.SPEED)
-        self.up.CDS_SetAngle(7,530,self.SPEED)
+        self.up.CDS_SetAngle(6, 495, self.SPEED)
+        self.up.CDS_SetAngle(7, 530, self.SPEED)
         self.cmd = self.NO_CONTROLLER
 
     def go_up_platform(self):
-        self.move_up();
+        self.move_up()
         time.sleep(1)
-        self.up.CDS_SetAngle(5,900,self.SPEED)
-        self.up.CDS_SetAngle(6,100,self.SPEED)
+        self.up.CDS_SetAngle(5, 900, self.SPEED)
+        self.up.CDS_SetAngle(6, 100, self.SPEED)
         time.sleep(3)
-        self.up.CDS_SetAngle(5,512,self.SPEED)
-        self.up.CDS_SetAngle(6,512,self.SPEED)
+        self.up.CDS_SetAngle(5, 512, self.SPEED)
+        self.up.CDS_SetAngle(6, 512, self.SPEED)
         time.sleep(2)
-        self.up.CDS_SetAngle(7,100,self.SPEED)
-        self.up.CDS_SetAngle(8,900,self.SPEED)
+        self.up.CDS_SetAngle(7, 100, self.SPEED)
+        self.up.CDS_SetAngle(8, 900, self.SPEED)
         time.sleep(2)
         time.sleep(1)
-        self.up.CDS_SetAngle(7,512,self.SPEED)
-        self.up.CDS_SetAngle(8,512,self.SPEED)
-        #self.up.CDS_SetAngle(9,500,self.SPEED * 3)
+        self.up.CDS_SetAngle(7, 512, self.SPEED)
+        self.up.CDS_SetAngle(8, 512, self.SPEED)
+        # self.up.CDS_SetAngle(9,500,self.SPEED * 3)
 
     def servo_reset(self):
-        self.up.CDS_SetAngle(5,512,self.SPEED)
-        self.up.CDS_SetAngle(6,512,self.SPEED)
-        self.up.CDS_SetAngle(7,512,self.SPEED)
-        self.up.CDS_SetAngle(8,512,self.SPEED)
+        self.up.CDS_SetAngle(5, 512, self.SPEED)
+        self.up.CDS_SetAngle(6, 512, self.SPEED)
+        self.up.CDS_SetAngle(7, 512, self.SPEED)
+        self.up.CDS_SetAngle(8, 512, self.SPEED)
 
-
-    def set_cds_mode(self,ids,mode):
+    def set_cds_mode(self, ids, mode):
         for id in ids:
-            self.up.CDS_SetMode(id,mode)
+            self.up.CDS_SetMode(id, mode)
 
-    def set_controller_cmd(self,cmd):
+    def set_controller_cmd(self, cmd):
         self.cmd = cmd
 
-    def lcd_display(self,content):
+    def lcd_display(self, content):
         self.up.LCD_PutString(30, 0, content)
         self.up.LCD_Refresh()
         self.up.LCD_SetFont(self.up.FONT_8X14)
@@ -214,13 +214,6 @@ if __name__ == '__main__':
     # # up_controller.go_up_platform()
     # up_controller.servo_reset()
     # up_controller.open_edge_detect()
-    b = int("0x0b",16)
+    b = int("0x0b", 16)
     c = '{:08b}'.format(b)
     print(c)
-
-
-    
-
-
-
-
