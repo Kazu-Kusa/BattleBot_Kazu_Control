@@ -1,6 +1,5 @@
 # battleBot_Kazu
-
-a wheeled battlebot
+ a wheeled battlebot
 
 - 主控
 

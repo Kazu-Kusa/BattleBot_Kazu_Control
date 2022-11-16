@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import threading
-import time
-
 import uptech
+import time
+import threading
 
 
 class UpController:
@@ -169,7 +168,7 @@ class UpController:
         self.cmd = self.NO_CONTROLLER
 
     def go_up_platform(self):
-        self.move_up()
+        self.move_up();
         time.sleep(1)
         self.up.CDS_SetAngle(5, 900, self.SPEED)
         self.up.CDS_SetAngle(6, 100, self.SPEED)

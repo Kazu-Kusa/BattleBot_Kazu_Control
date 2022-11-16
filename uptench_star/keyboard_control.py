@@ -1,11 +1,8 @@
-import select
-import sys
-import termios
-import threading
-import tty
-
 import uptech
-
+import time
+import cv2
+import threading
+import sys, select, termios, tty
 
 def getKey(key_timeout):
     tty.setraw(sys.stdin.fileno())

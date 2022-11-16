@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 
 from __future__ import print_function
-
-import logging as log
-import os
 import sys
-import time
+import os
 from argparse import ArgumentParser, SUPPRESS
-
 import cv2
+import time
+import logging as log
+
 from openvino.inference_engine import IECore
 
 

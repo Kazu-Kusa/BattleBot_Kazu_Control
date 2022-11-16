@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import uptech
 import time
 
-import uptech
 
 if __name__ == '__main__':
     up=uptech.UpTech()

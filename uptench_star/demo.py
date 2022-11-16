@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import fcntl
-import os
-import socket
-import struct
-import time
-
-import psutil
-
 import uptech
+import time
+import threading
 
+import socket
+import fcntl
+import struct
+import os
+import psutil
 
 #fcntl.ioctl(s.fileno(),0x8915,struct.pack('256s',ifname[:15]))
 # def get_ip_address():
