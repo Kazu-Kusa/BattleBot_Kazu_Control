@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="0a0009f1-bdea-4d90-9eaa-7688c85f2206" name="劲草-树莓派">
+        <fileTransfer rootFolder="/home/pi" accessType="SFTP" host="169.254.134.168" port="22" sshConfigId="d9e3f1b6-9662-425a-a704-d8665ce84033" sshConfig="pi@169.254.134.168:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+    <groups>
+      <group>
+        <name>树莓派</name>
+        <servers>
+          <name value="劲草-树莓派" />
+        </servers>
+      </group>
+    </groups>
+  </component>
+</project>

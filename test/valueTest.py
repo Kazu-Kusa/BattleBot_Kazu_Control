@@ -1,5 +1,6 @@
-import uptech
 import time
+
+import uptech
 
 up = uptech.UpTech()
 

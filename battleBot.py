@@ -1,9 +1,8 @@
-from uptench_star.uptech import UpTech
 from uptench_star.up_controller import UpController
 from uptench_star.uptech import UpTech
 
 
-class BattleBot(UpTech, UpController, apriltag_detect_improved):
+class BattleBot(UpTech, UpController):
     def __init__(self):
         super().__init__()
         self.current_player = None
