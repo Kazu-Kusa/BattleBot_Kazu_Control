@@ -3,8 +3,8 @@ import cv2
 import threading
 import time
 
-from up_controller import UpController
-from uptech import UpTech
+from repo.uptechStar.up_controller import UpController
+from repo.uptechStar.uptech import UpTech
 
 
 class MatchDemo(UpController, UpTech):
@@ -58,7 +58,7 @@ class MatchDemo(UpController, UpTech):
         self.apriltag_width = 0
         self.tag_id = -1
         apriltag_detect = threading.Thread(target=self.apriltag_detect_thread)
-        apriltag_detect.setDaemon(True)
+        apriltag_detect.daemon=True
         apriltag_detect.start()
 
         self.tag_monitor_switch = False

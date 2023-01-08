@@ -1,7 +1,6 @@
 from repo.uptechStar.up_controller import UpController
 from repo.uptechStar.uptech import UpTech
 
-
 class BattleBot(UpTech, UpController):
     def __init__(self):
         super().__init__()
