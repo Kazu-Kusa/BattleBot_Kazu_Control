@@ -1,6 +1,6 @@
 import time
 
-import uptech
+from repo.uptechStar import uptech
 
 up = uptech.UpTech()
 
@@ -54,52 +54,53 @@ def display(mode):
         up.LCD_PutString(0, 54, str_accel_z)
     up.LCD_Refresh()
 
+if __name__ == '__main__':
 
-while True:
-    adc_value = up.ADC_Get_All_Channle()
-    battery_voltage_float = adc_value[9] * 3.3 * 4.0 / 4096
-    str_battery_voltage_float = '%.2fV' % battery_voltage_float
+    while True:
+        adc_value = up.ADC_Get_All_Channle()
+        battery_voltage_float = adc_value[9] * 3.3 * 4.0 / 4096
+        str_battery_voltage_float = '%.2fV' % battery_voltage_float
 
-    up.LCD_PutString(0, 16, 'Battery:' + str_battery_voltage_float + '  ')
+        up.LCD_PutString(0, 16, 'Battery:' + str_battery_voltage_float + '  ')
 
-    # print(str_battery_voltage_float)
+        # print(str_battery_voltage_float)
 
-    io_all_input = up.ADC_IO_GetAllInputLevel()
-    io_array = '{:08b}'.format(io_all_input)
-    io_data.clear()
+        io_all_input = up.ADC_IO_GetAllInputLevel()
+        io_array = '{:08b}'.format(io_all_input)
+        io_data.clear()
 
-    display(1)
+        display(1)
 
-    for index, value in enumerate(io_array):
-        io = int(value)
-        io_data.insert(0, io)
+        for index, value in enumerate(io_array):
+            io = int(value)
+            io_data.insert(0, io)
 
-    print("adc_value : ", end="")
+        print("adc_value : ", end="")
 
-    for i in range(len(adc_value)-1):
-        print(f"({i}):", adc_value[i], end=" |")
-    print("\n")
+        for i in range(len(adc_value)-1):
+            print(f"({i}):", adc_value[i], end=" |")
+        print("\n")
 
-    print("io_value : ", end="")
+        print("io_value : ", end="")
 
-    for i in range(len(io_data)):
-        print(f"({i}):", io_data[i], end=" |")
-    print("\n")
-    time.sleep(1.8)
-    # if count >= 20:
-    #     if sign != 0:
-    #         up.CDS_SetAngle(5,0,250)
-    #         #up.ADC_Led_Set(0,0x002F00)
-    #         up.ADC_Led_SetColor(1,0x2F0000)
-    #         sign = 0
-    #     else:
-    #         up.CDS_SetAngle(5,512,250)
-    #         #up.ADC_Led_Set(0,0x2F0000)
-    #         up.ADC_Led_SetColor(1,0x002F00)
-    #         sign = 1
-    #     count = 0
-    # else:
-    #     count += 1
+        for i in range(len(io_data)):
+            print(f"({i}):", io_data[i], end=" |")
+        print("\n")
+        # time.sleep(1.8)
+        # if count >= 20:
+        #     if sign != 0:
+        #         up.CDS_SetAngle(5,0,250)
+        #         #up.ADC_Led_Set(0,0x002F00)
+        #         up.ADC_Led_SetColor(1,0x2F0000)
+        #         sign = 0
+        #     else:
+        #         up.CDS_SetAngle(5,512,250)
+        #         #up.ADC_Led_Set(0,0x2F0000)
+        #         up.ADC_Led_SetColor(1,0x002F00)
+        #         sign = 1
+        #     count = 0
+        # else:
+        #     count += 1
 
 
 

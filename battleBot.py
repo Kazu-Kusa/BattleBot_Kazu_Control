@@ -1,5 +1,5 @@
-from uptench_star.up_controller import UpController
-from uptench_star.uptech import UpTech
+from repo.uptechStar.up_controller import UpController
+from repo.uptechStar.uptech import UpTech
 
 
 class BattleBot(UpTech, UpController):
@@ -18,4 +18,3 @@ class BattleBot(UpTech, UpController):
         pass
     def motion(self,motionCode:int):
         pass
-    def
