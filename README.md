@@ -1,5 +1,4 @@
-# battleBot_Kazu
- a wheeled battlebot
+# 轮式格斗车主控程序
 
 - 主控
 
