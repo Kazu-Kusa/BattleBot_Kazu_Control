@@ -32,4 +32,6 @@
 *.app
 *.xml
 *.iml
-/.idea/BattleBot_Kazu_Control.iml
+
+/testRoot/
+/.idea/
