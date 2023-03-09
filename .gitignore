@@ -32,6 +32,9 @@
 *.app
 *.xml
 *.iml
-
+*.zip
+*.tgz
+*.gz
+*.deb
 /testRoot/
 /.idea/
