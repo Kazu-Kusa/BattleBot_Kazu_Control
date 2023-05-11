@@ -4,9 +4,3 @@
 [submodule "repo/uptechStar"]
 	path = repo/uptechStar
 	url = https://github.com/Kazu-Kusa/uptech_star.git
-[submodule "repo/RPI4_NCS2"]
-	path = repo/RPI4_NCS2
-	url = https://github.com/leswright1977/RPI4_NCS2
-[submodule "repo/rasp-cv-tag-detection"]
-	path = repo/rasp-cv-tag-detection
-	url = https://github.com/egnchen/rasp-cv-tag-detection
