@@ -1,4 +1,4 @@
-from repo.uptechStar.valueTest import read_sensors
+from repo.uptechStar.hotConfigure.valueTest import read_sensors
 from repo.uptechStar.uptech import UpTech
 
 if __name__ == '__main__':
