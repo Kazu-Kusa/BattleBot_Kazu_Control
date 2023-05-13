@@ -1,6 +1,3 @@
-[submodule "repo/previousMains"]
-	path = repo/previousMains
-	url = https://github.com/Kazu-Kusa/previousMains.git
 [submodule "repo/uptechStar"]
 	path = repo/uptechStar
 	url = https://github.com/Kazu-Kusa/uptech_star.git
