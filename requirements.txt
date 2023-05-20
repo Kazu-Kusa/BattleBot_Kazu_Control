@@ -1,5 +1,9 @@
 pigpio==1.78
 pyserial~=3.5b0
-pip~=22.3.1
+pip==22.3.1
 wheel~=0.38.4
 setuptools~=65.5.1
+psutil==5.8.0
+numpy==1.19.5
+apriltag==0.0.16
+typing==3.7.4.3
