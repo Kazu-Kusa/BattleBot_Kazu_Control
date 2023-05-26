@@ -1,4 +1,4 @@
-from repo.uptechStar.hotConfigure.valueTest import read_sensors
+from repo.uptechStar.module.hotConfigure.valueTest import read_sensors
 from ctypes import cdll
 
 if __name__ == '__main__':
