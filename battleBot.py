@@ -1,26 +1,26 @@
 import threading
 import time
 
-from repo.uptechStar.up_controller import UpController
+from repo.uptechStar.module.up_controller import UpController
 from typing import Optional, Union
 import cv2
 import apriltag
 
 
 class BattleBot:
-    controller = UpController()
+    controller = UpController(debug=False, fan_control=False)
 
     def __init__(self, config_path: str = './config.json'):
         self.load_config(config_path=config_path)
 
-        # self.at_detector = apriltag.Detector(apriltag.DetectorOptions(families='tag36h11 tag25h9'))
-        # self.apriltag_width = 0
-        # self.tag_id = -1
-        # apriltag_detect = threading.Thread(target=self.apriltag_detect_thread)
-        # apriltag_detect.daemon = True
-        # apriltag_detect.start()
-        #
-        # self.tag_monitor_switch = False
+        self.at_detector = apriltag.Detector(apriltag.DetectorOptions(families='tag36h11 tag25h9'))
+        self.apriltag_width = 0
+        self.tag_id = -1
+        apriltag_detect = threading.Thread(target=self.apriltag_detect_thread)
+        apriltag_detect.daemon = True
+        apriltag_detect.start()
+
+        self.tag_monitor_switch = True
 
     def apriltag_detect_thread(self):
         """
@@ -50,6 +50,7 @@ class BattleBot:
         cup_h = int((h - weight) / 2) + 50
 
         while True:
+
             if self.tag_monitor_switch:  # 台上开启 台下关闭 节约性能
                 ret, frame = cap.read()
                 frame = frame[cup_h:cup_h + weight, cup_w:cup_w + weight]
@@ -128,10 +129,10 @@ class BattleBot:
         l_gray io 1
         r_gray io 0
         """
-        print(f'{self.controller.adc_all}')
-        print(f'{self.controller.io_all}')
         try:
             while True:
+                print('holding')
+                time.sleep(1)
                 if self.controller.adc_all[8] > 1650 and self.controller.adc_all[7]:
                     self.controller.move_cmd(-10000, -10000)
                     time.sleep(0.8)
