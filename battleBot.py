@@ -203,16 +203,22 @@ class BattleBot:
         delay_ms(160)
         self.controller.move_cmd(0, 0)
 
-    def on_thing_surrounding(self, type: int = 0):
+    def on_thing_surrounding(self, position_type: int = 0):
+        """
+        1 for left
+        2 for right
+        3 for behind
+        :param position_type:
+        :return:
+        """
         rotate_time = 60
         rotate_speed = 5000
-        if type == 1:
+        if position_type == 1:
             self.controller.move_cmd(-rotate_speed, rotate_speed)
-        elif type == 2:
-            self.controller.move_cmd(rotate_speed, rotate_speed)
-
-        if type == 3:
-            rotate_time = 2 * rotate_time
+        else:
+            self.controller.move_cmd(rotate_speed, -rotate_speed)
+            if position_type == 3:
+                rotate_time = 2 * rotate_time
         delay_ms(rotate_time)
         self.controller.move_cmd(0, 0)
 
