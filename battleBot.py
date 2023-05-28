@@ -72,17 +72,9 @@ class BattleBot:
                     self.tag_id = tag.tag_id
 
                     print("tag_id = {}".format(tag.tag_id))
-                    cv2.circle(frame, tuple(tag.corners[0].astype(int)), 4, (255, 0, 0), 2)  # left-top
-                    cv2.circle(frame, tuple(tag.corners[1].astype(int)), 4, (255, 0, 0), 2)  # right-top
-                    cv2.circle(frame, tuple(tag.corners[2].astype(int)), 4, (255, 0, 0), 2)  # right-bottom
-                    cv2.circle(frame, tuple(tag.corners[3].astype(int)), 4, (255, 0, 0), 2)  # left-bottom
-                # cv2.imshow("img", frame)
-                # if cv2.waitKey(100) & 0xff == ord('q'):
-                #     break
+
             else:
                 time.sleep(2)
-        cap.release()
-        # cv2.destroyAllWindows()
 
     def action_BT(self, back_speed: int = 5000, back_time: int = 120,
                   turn_speed: int = 6000, turn_time: int = 120,
