@@ -1,10 +1,14 @@
 import threading
 import time
+import ctypes
 
 from repo.uptechStar.module.up_controller import UpController
+
+from repo.uptechStar.module.timer import delay_ms
 from typing import Optional, Union
 import cv2
 import apriltag
+from repo.uptechStar.module.screen import Screen
 
 
 class BattleBot:
@@ -12,7 +16,7 @@ class BattleBot:
 
     def __init__(self, config_path: str = './config.json'):
         self.load_config(config_path=config_path)
-
+        self.screen = Screen()
         self.at_detector = apriltag.Detector(apriltag.DetectorOptions(families='tag36h11 tag25h9'))
         self.apriltag_width = 0
         self.tag_id = -1
@@ -21,6 +25,16 @@ class BattleBot:
         apriltag_detect.start()
 
         self.tag_monitor_switch = True
+        self._enemy_tag = 2
+        self._ally_tag = 1
+
+    @property
+    def enemy_tag(self):
+        return self._enemy_tag
+
+    @property
+    def ally_tag(self):
+        return self._ally_tag
 
     def apriltag_detect_thread(self):
         """
@@ -59,18 +73,72 @@ class BattleBot:
 
                 for tag in tags:
                     self.tag_id = tag.tag_id
+
                     print("tag_id = {}".format(tag.tag_id))
                     cv2.circle(frame, tuple(tag.corners[0].astype(int)), 4, (255, 0, 0), 2)  # left-top
                     cv2.circle(frame, tuple(tag.corners[1].astype(int)), 4, (255, 0, 0), 2)  # right-top
                     cv2.circle(frame, tuple(tag.corners[2].astype(int)), 4, (255, 0, 0), 2)  # right-bottom
                     cv2.circle(frame, tuple(tag.corners[3].astype(int)), 4, (255, 0, 0), 2)  # left-bottom
-                cv2.imshow("img", frame)
-                if cv2.waitKey(100) & 0xff == ord('q'):
-                    break
+                # cv2.imshow("img", frame)
+                # if cv2.waitKey(100) & 0xff == ord('q'):
+                #     break
             else:
                 time.sleep(2)
         cap.release()
-        cv2.destroyAllWindows()
+        # cv2.destroyAllWindows()
+
+    def normal_behave(self, adc_list: list[int], io_list: list[int], edge_a: int = 1800):
+        """
+        handles the normal edge case using both adc_list and io_list.
+        :param adc_list:
+        :param io_list:
+        :param edge_a:
+        :return:
+        """
+        self.screen.ADC_Led_SetColor(0, self.screen.COLOR_BLUE)
+        edge_rr_sensor = adc_list[0]
+        edge_fr_sensor = adc_list[1]
+        edge_fl_sensor = adc_list[2]
+        edge_rl_sensor = adc_list[3]
+
+        l_gray = io_list[6]
+        r_gray = io_list[7]
+
+        high_spead = int((edge_rl_sensor + edge_fl_sensor + edge_fr_sensor + edge_rr_sensor) * 0.8)
+        normal_spead = high_spead * 0.6
+        backing_time = 180
+        rotate_time = 130
+
+        if l_gray + r_gray <= 1:
+            self.controller.move_cmd(-high_spead, -high_spead)
+            delay_ms(int(backing_time * 0.6))
+            self.controller.move_cmd(-high_spead, high_spead)
+            delay_ms(int(1.5 * rotate_time))
+        elif edge_fl_sensor < edge_a:
+            self.controller.move_cmd(-high_spead, -high_spead)
+            delay_ms(backing_time)
+            # front left edge encounter
+            self.controller.move_cmd(high_spead, -high_spead)
+            delay_ms(rotate_time)
+
+        elif edge_fr_sensor < edge_a:
+            # front left edge encounter
+            self.controller.move_cmd(-high_spead, -high_spead)
+            delay_ms(backing_time)
+            self.controller.move_cmd(-high_spead, high_spead)
+            delay_ms(rotate_time)
+
+        elif edge_rl_sensor < edge_a:
+            # front left edge encounter
+            self.controller.move_cmd(high_spead, -high_spead)
+            delay_ms(rotate_time)
+
+        elif edge_rr_sensor < edge_a:
+            # front left edge encounter
+            self.controller.move_cmd(-high_spead, high_spead)
+            delay_ms(rotate_time)
+
+        self.controller.move_cmd(normal_spead, normal_spead)
 
     def load_config(self, config_path: str):
         """
@@ -81,35 +149,80 @@ class BattleBot:
 
         pass
 
-    def check_sensors(self):
+    def on_ally_box(self, speed: int = 5000, multiplier: float = 0):
+        if multiplier:
+            speed = int(multiplier * speed)
+        self.controller.move_cmd(-speed, speed)
+        delay_ms(200)
+
+    def check_surround(self, adc_list: list[int], baseline=2000):
+        self.screen.ADC_Led_SetColor(0, self.screen.COLOR_CYAN)
+        timestep = 120
+        speed = 6000
+
+        if self.tag_id == self.ally_tag and adc_list[4] > baseline:
+            self.on_ally_box(speed, 0.6)
+        elif self.tag_id == self.enemy_tag and adc_list[4] > baseline:
+            self.on_enemy_box(speed, 1.2)
+        elif adc_list[4] > baseline:
+            self.on_enemy_car(speed, 0.6)
+        elif adc_list[8] > baseline:
+            self.on_thing_surrounding(1)
+        elif adc_list[7] > baseline:
+            self.on_thing_surrounding(2)
+        elif adc_list[5] > baseline:
+            self.on_thing_surrounding(3)
+
+    def util_edge(self, using_gray: bool = True, using_edge_sensor: bool = False, edge_a: int = 1800):
+        if using_gray:
+            io_list = self.controller.ADC_IO_GetAllInputLevel(make_str_list=False)
+            while int(io_list[6]) + int(io_list[7]) > 1:
+                io_list = self.controller.ADC_IO_GetAllInputLevel(make_str_list=False)
+        elif using_edge_sensor:
+            adc_list = self.controller.ADC_Get_All_Channel()
+            while adc_list[1] < edge_a or adc_list[2] < edge_a:
+                adc_list = self.controller.ADC_Get_All_Channel()
+
+    def on_enemy_box(self, speed: int = 8000, multiplier: float = 0):
+        if multiplier:
+            speed = int(multiplier * speed)
+        self.controller.move_cmd(speed, speed)
+        self.util_edge()
+        self.controller.move_cmd(-speed, -speed)
+        delay_ms(160)
+        self.controller.move_cmd(0, 0)
+
+    def on_enemy_car(self, speed: int = 8000, multiplier: float = 0):
+        if multiplier:
+            speed = int(multiplier * speed)
+        self.controller.move_cmd(speed, speed)
+        self.util_edge()
+        if multiplier:
+            speed = int(multiplier * speed)
+        self.controller.move_cmd(-speed, -speed)
+        delay_ms(160)
+        self.controller.move_cmd(0, 0)
+
+    def on_thing_surrounding(self, position_type: int = 0):
         """
-        sensors function check
+        1 for left
+        2 for right
+        3 for behind
+        :param position_type:
         :return:
         """
-        pass
+        rotate_time = 60
+        rotate_speed = 5000
+        if position_type == 1:
+            self.controller.move_cmd(-rotate_speed, rotate_speed)
+        else:
+            self.controller.move_cmd(rotate_speed, -rotate_speed)
+            if position_type == 3:
+                rotate_time = 2 * rotate_time
+        delay_ms(rotate_time)
+        self.controller.move_cmd(0, 0)
 
-    def on_stage_check(self, using_dst_assistance: bool = True):
-        """
-        check if the bot is on the stage
-        :param using_dst_assistance:
-        :return:
-        """
-
-    def load_models(self, model_path: str):
-        """
-        load vision model to memory
-        :param model_path:
-        :return:
-        """
-        pass
-
-    def open_camera(self):
-        """
-
-        :return:
-        """
-
-    def Battle(self):
+    def Battle(self, interval: int = 10):
         """
         the main function of the BattleBot
         :return:
@@ -125,69 +238,42 @@ class BattleBot:
         fr 6
         fb 4
         rb 5
+        [edge_rr, edge_fr, edge_fl, edge_rl, fb,rb,fr,r2,l2]
+        {0:edge_rr,1:edge_fr,2:edge_fl, 3:edge_rl, 4:fb,5:rb,6:fr,7:r2,8:l2}
         
+        {0:r_gray,1:l_gray}
         l_gray io 1
         r_gray io 0
         """
         try:
+
             while True:
                 print('holding')
-                time.sleep(1)
-                if self.controller.adc_all[8] > 1650 and self.controller.adc_all[7]:
-                    self.controller.move_cmd(-10000, -10000)
+                time.sleep(0.1)
+                temp_list = self.controller.ADC_Get_All_Channel()
+                if temp_list[8] > 1800 and temp_list[7] > 1800:
+                    print('dashing')
+                    self.controller.move_cmd(-30000, -30000)
                     time.sleep(0.8)
+                    self.controller.move_cmd(0, 0)
+
                     break
-            edge_a = 1650
+
             while True:
-                edge_rr_sensor = self.controller.adc_all[0]
-                edge_fr_sensor = self.controller.adc_all[1]
-                edge_fl_sensor = self.controller.adc_all[2]
-                edge_rl_sensor = self.controller.adc_all[3]
-                # l_gray = self.controller.io_all[1]
-                # r_gray = self.controller.io_all[0]
-                if edge_fl_sensor < edge_a:
-                    self.controller.move_cmd(-4000, -4000)
-                    time.sleep(0.5)
-                    # front left edge encounter
-                    self.controller.move_cmd(4000, -4000)
-                    time.sleep(1.5)
-                    self.controller.move_cmd(5000, 5000)
-                    time.sleep(1)
-                if edge_fr_sensor < edge_a:
-                    # front left edge encounter
-                    self.controller.move_cmd(-4000, -4000)
-                    time.sleep(0.5)
-                    self.controller.move_cmd(-4000, 4000)
-                    time.sleep(1.5)
-                    self.controller.move_cmd(5000, 5000)
-                    time.sleep(1)
-                if edge_rl_sensor < edge_a:
-                    # front left edge encounter
-                    self.controller.move_cmd(-4000, -4000)
-                    time.sleep(0.5)
-                    self.controller.move_cmd(4000, -4000)
-                    time.sleep(1.5)
-                    self.controller.move_cmd(5000, 5000)
-                    time.sleep(1)
-                if edge_rr_sensor < edge_a:
-                    # front left edge encounter
-                    self.controller.move_cmd(-4000, -4000)
-                    time.sleep(0.5)
-                    self.controller.move_cmd(-4000, 4000)
-                    time.sleep(1.5)
-                    self.controller.move_cmd(5000, 5000)
-                    time.sleep(1)
-                # if not l_gray or not r_gray:
-                #     self.controller.move_cmd(-4000, -4000)
-                #     time.sleep(1.5)
-                #     self.controller.move_cmd(5000, 5000)
-                #     time.sleep(0.5)
-                self.controller.move_cmd(1000, 1000)
+                adc_list = self.controller.ADC_Get_All_Channel()
+                io_list = self.controller.ADC_IO_GetAllInputLevel(make_str_list=False)
+                self.normal_behave(adc_list, io_list)
+                self.check_surround(adc_list)
+                delay_ms(interval)
+
         except KeyboardInterrupt:
             print('exiting')
             self.controller.move_cmd(0, 0)
+        self.controller.move_cmd(0, 0)
 
 
 if __name__ == '__main__':
     bot = BattleBot()
+    bot.controller.move_cmd(0, 0)
+    # breakpoint()
     bot.Battle()
