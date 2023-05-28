@@ -162,14 +162,10 @@ class BattleBot:
                            t_multiplier=0.6, turn_type=0)
 
         elif edge_rl_sensor < edge_a:
-            self.action_BT(back_speed=high_spead, back_time=backing_time,
-                           turn_speed=high_spead, turn_time=rotate_time,
-                           t_multiplier=0.6, turn_type=0)
+            self.action_T(turn_type=1)
 
         elif edge_rr_sensor < edge_a:
-            # front left edge encounter
-            self.controller.move_cmd(-high_spead, high_spead)
-            delay_ms(rotate_time)
+            self.action_T(turn_type=0)
 
     def load_config(self, config_path: str):
         """
@@ -187,6 +183,12 @@ class BattleBot:
         delay_ms(200)
 
     def check_surround(self, adc_list: list[int], baseline=2000):
+        """
+
+        :param adc_list:
+        :param baseline:
+        :return:
+        """
         self.screen.ADC_Led_SetColor(0, self.screen.COLOR_CYAN)
         timestep = 120
         speed = 6000
