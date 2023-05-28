@@ -187,7 +187,9 @@ class BattleBot:
             speed = int(multiplier * speed)
         self.controller.move_cmd(speed, speed)
         self.util_edge()
-        self.controller.move_cmd(-int(speed * 0.75), -int(speed * 0.75))
+        if multiplier:
+            speed = int(multiplier * speed)
+        self.controller.move_cmd(-speed, -speed)
         delay_ms(160)
         self.controller.move_cmd(0, 0)
 
