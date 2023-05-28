@@ -1,3 +1,4 @@
+import random
 import threading
 import time
 import ctypes
@@ -87,9 +88,39 @@ class BattleBot:
         cap.release()
         # cv2.destroyAllWindows()
 
-    def normal_behave(self, adc_list: list[int], io_list: list[int], edge_a: int = 1800):
+    def action_BT(self, back_speed: int = 5000, back_time: int = 120,
+                  turn_speed: int = 6000, turn_time: int = 120,
+                  b_multiplier: float = 0, t_multiplier: float = 0,
+                  turn_type: int = random.randint(0, 1)):
+        """
+        function that execute the action of  backwards and turns
+        :param back_speed:
+        :param back_time:
+        :param turn_speed:
+        :param turn_time:
+        :param b_multiplier:
+        :param t_multiplier:
+        :param turn_type: 0 for left,1 for right,default random
+        :return:
+        """
+        if b_multiplier:
+            back_speed = int(back_speed * b_multiplier)
+        self.controller.move_cmd(-back_speed, -back_speed)
+        delay_ms(back_time)
+
+        if t_multiplier:
+            turn_speed = int(turn_speed)
+        if turn_type:
+            self.controller.move_cmd(-turn_speed, turn_speed)
+        else:
+            self.controller.move_cmd(turn_speed, -turn_speed)
+        delay_ms(turn_time)
+        self.controller.move_cmd(0, 0)
+
+    def normal_behave(self, adc_list: list[int], io_list: list[int], edge_a: int = 1680):
         """
         handles the normal edge case using both adc_list and io_list.
+        but well do not do anything if no edge case
         :param adc_list:
         :param io_list:
         :param edge_a:
@@ -105,7 +136,6 @@ class BattleBot:
         r_gray = io_list[7]
 
         high_spead = int((edge_rl_sensor + edge_fl_sensor + edge_fr_sensor + edge_rr_sensor) * 0.8)
-        normal_spead = high_spead * 0.6
         backing_time = 180
         rotate_time = 130
 
@@ -138,8 +168,6 @@ class BattleBot:
             self.controller.move_cmd(-high_spead, high_spead)
             delay_ms(rotate_time)
 
-        self.controller.move_cmd(normal_spead, normal_spead)
-
     def load_config(self, config_path: str):
         """
         load configuration form json
@@ -161,11 +189,11 @@ class BattleBot:
         speed = 6000
 
         if self.tag_id == self.ally_tag and adc_list[4] > baseline:
-            self.on_ally_box(speed, 0.6)
+            self.on_ally_box(speed, 0.3)
         elif self.tag_id == self.enemy_tag and adc_list[4] > baseline:
-            self.on_enemy_box(speed, 1.2)
+            self.on_enemy_box(speed, 0.4)
         elif adc_list[4] > baseline:
-            self.on_enemy_car(speed, 0.6)
+            self.on_enemy_car(speed, 0.5)
         elif adc_list[8] > baseline:
             self.on_thing_surrounding(1)
         elif adc_list[7] > baseline:
@@ -246,7 +274,7 @@ class BattleBot:
         r_gray io 0
         """
         try:
-
+            normal_spead = 3000
             while True:
                 print('holding')
                 time.sleep(0.1)
@@ -262,8 +290,9 @@ class BattleBot:
             while True:
                 adc_list = self.controller.ADC_Get_All_Channel()
                 io_list = self.controller.ADC_IO_GetAllInputLevel(make_str_list=False)
-                self.normal_behave(adc_list, io_list)
+                self.normal_behave(adc_list, io_list, edge_a=1650)
                 self.check_surround(adc_list)
+                self.controller.move_cmd(3000, 3000)
                 delay_ms(interval)
 
         except KeyboardInterrupt:
