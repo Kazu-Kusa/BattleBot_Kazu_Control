@@ -1,14 +1,17 @@
 import threading
 import time
+import ctypes
 
-from repo.uptechStar.module.up_controller import UpController
+from repo.uptechStar.extension import up_controller
+
+from repo.uptechStar.extension.timer import delay_ms
 from typing import Optional, Union
 import cv2
 import apriltag
 
 
 class BattleBot:
-    controller = UpController(debug=False, fan_control=False)
+    controller = up_controller.UpController(debug=False, fan_control=False)
 
     def __init__(self, config_path: str = './config.json'):
         self.load_config(config_path=config_path)
@@ -64,13 +67,13 @@ class BattleBot:
                     cv2.circle(frame, tuple(tag.corners[1].astype(int)), 4, (255, 0, 0), 2)  # right-top
                     cv2.circle(frame, tuple(tag.corners[2].astype(int)), 4, (255, 0, 0), 2)  # right-bottom
                     cv2.circle(frame, tuple(tag.corners[3].astype(int)), 4, (255, 0, 0), 2)  # left-bottom
-                cv2.imshow("img", frame)
-                if cv2.waitKey(100) & 0xff == ord('q'):
-                    break
+                # cv2.imshow("img", frame)
+                # if cv2.waitKey(100) & 0xff == ord('q'):
+                #     break
             else:
                 time.sleep(2)
         cap.release()
-        cv2.destroyAllWindows()
+        # cv2.destroyAllWindows()
 
     def load_config(self, config_path: str):
         """
@@ -125,69 +128,81 @@ class BattleBot:
         fr 6
         fb 4
         rb 5
+        [edge_rr, edge_fr, edge_fl, edge_rl, fb,rb,fr,r2,l2]
+        {0:edge_rr,1:edge_fr,2:edge_fl, 3:edge_rl, 4:fb,5:rb,6:fr,7:r2,8:l2}
         
+        {0:r_gray,1:l_gray}
         l_gray io 1
         r_gray io 0
         """
         try:
+
             while True:
                 print('holding')
-                time.sleep(1)
-                if self.controller.adc_all[8] > 1650 and self.controller.adc_all[7]:
-                    self.controller.move_cmd(-10000, -10000)
+                time.sleep(0.1)
+                temp_list = self.controller.ADC_Get_All_Channel()
+                if temp_list[8] > 1650 and temp_list[7] > 1650:
+                    print('dashing')
+                    self.controller.move_cmd(-30000, -30000)
                     time.sleep(0.8)
+                    self.controller.move_cmd(0, 0)
                     break
+            self.controller.move_cmd(0, 0)
+
             edge_a = 1650
             while True:
-                edge_rr_sensor = self.controller.adc_all[0]
-                edge_fr_sensor = self.controller.adc_all[1]
-                edge_fl_sensor = self.controller.adc_all[2]
-                edge_rl_sensor = self.controller.adc_all[3]
-                # l_gray = self.controller.io_all[1]
-                # r_gray = self.controller.io_all[0]
-                if edge_fl_sensor < edge_a:
-                    self.controller.move_cmd(-4000, -4000)
-                    time.sleep(0.5)
+                temp_list = self.controller.ADC_Get_All_Channel()
+                temp_list_1 = self.controller.ADC_IO_GetAllInputLevel()
+                edge_rr_sensor = temp_list[0]
+                edge_fr_sensor = temp_list[1]
+                edge_fl_sensor = temp_list[2]
+                edge_rl_sensor = temp_list[3]
+
+                l_gray = temp_list_1[1]
+                r_gray = temp_list_1[0]
+                normal_spead = 4000
+                high_spead = 5000
+                backing_time = 0.4
+                rotate_time = 0.3
+                if l_gray == '0' or r_gray == '0':
+                    self.controller.move_cmd(-high_spead, -high_spead)
+                    time.sleep(backing_time)
+                    self.controller.move_cmd(-high_spead, high_spead)
+                    time.sleep(1.5 * rotate_time)
+                elif edge_fl_sensor < edge_a:
+                    self.controller.move_cmd(-high_spead, -high_spead)
+                    time.sleep(backing_time)
                     # front left edge encounter
-                    self.controller.move_cmd(4000, -4000)
-                    time.sleep(1.5)
-                    self.controller.move_cmd(5000, 5000)
-                    time.sleep(1)
-                if edge_fr_sensor < edge_a:
+                    self.controller.move_cmd(high_spead, -high_spead)
+                    time.sleep(rotate_time)
+
+                elif edge_fr_sensor < edge_a:
                     # front left edge encounter
-                    self.controller.move_cmd(-4000, -4000)
-                    time.sleep(0.5)
-                    self.controller.move_cmd(-4000, 4000)
-                    time.sleep(1.5)
-                    self.controller.move_cmd(5000, 5000)
-                    time.sleep(1)
-                if edge_rl_sensor < edge_a:
+                    self.controller.move_cmd(-high_spead, -high_spead)
+                    time.sleep(backing_time)
+                    self.controller.move_cmd(-high_spead, high_spead)
+                    time.sleep(rotate_time)
+
+                elif edge_rl_sensor < edge_a:
                     # front left edge encounter
-                    self.controller.move_cmd(-4000, -4000)
-                    time.sleep(0.5)
-                    self.controller.move_cmd(4000, -4000)
-                    time.sleep(1.5)
-                    self.controller.move_cmd(5000, 5000)
-                    time.sleep(1)
-                if edge_rr_sensor < edge_a:
+                    self.controller.move_cmd(high_spead, -high_spead)
+                    time.sleep(rotate_time)
+
+                elif edge_rr_sensor < edge_a:
                     # front left edge encounter
-                    self.controller.move_cmd(-4000, -4000)
-                    time.sleep(0.5)
-                    self.controller.move_cmd(-4000, 4000)
-                    time.sleep(1.5)
-                    self.controller.move_cmd(5000, 5000)
-                    time.sleep(1)
-                # if not l_gray or not r_gray:
-                #     self.controller.move_cmd(-4000, -4000)
-                #     time.sleep(1.5)
-                #     self.controller.move_cmd(5000, 5000)
-                #     time.sleep(0.5)
-                self.controller.move_cmd(1000, 1000)
+                    self.controller.move_cmd(-high_spead, high_spead)
+                    time.sleep(rotate_time)
+
+                self.controller.move_cmd(normal_spead, normal_spead)
+                delay_ms(200)
         except KeyboardInterrupt:
             print('exiting')
             self.controller.move_cmd(0, 0)
+        self.controller.move_cmd(0, 0)
 
 
 if __name__ == '__main__':
     bot = BattleBot()
+    bot.controller.move_cmd(0, 0)
+    # breakpoint()
     bot.Battle()
