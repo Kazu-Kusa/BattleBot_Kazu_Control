@@ -24,6 +24,16 @@ class BattleBot:
         apriltag_detect.start()
 
         self.tag_monitor_switch = True
+        self._enemy_tag = 2
+        self._ally_tag = 1
+
+    @property
+    def enemy_tag(self):
+        return self._enemy_tag
+
+    @property
+    def ally_tag(self):
+        return self._ally_tag
 
     def apriltag_detect_thread(self):
         """
@@ -62,6 +72,7 @@ class BattleBot:
 
                 for tag in tags:
                     self.tag_id = tag.tag_id
+
                     print("tag_id = {}".format(tag.tag_id))
                     cv2.circle(frame, tuple(tag.corners[0].astype(int)), 4, (255, 0, 0), 2)  # left-top
                     cv2.circle(frame, tuple(tag.corners[1].astype(int)), 4, (255, 0, 0), 2)  # right-top
@@ -75,14 +86,14 @@ class BattleBot:
         cap.release()
         # cv2.destroyAllWindows()
 
-    def normal_behave(self, adc_list: list[int], io_list: list[str], interval: int = 10, edge_a: int = 1800):
+    def normal_behave(self, adc_list: list[int], io_list: list[str], edge_a: int = 1800):
         edge_rr_sensor = adc_list[0]
         edge_fr_sensor = adc_list[1]
         edge_fl_sensor = adc_list[2]
         edge_rl_sensor = adc_list[3]
 
-        l_gray = io_list[1]
-        r_gray = io_list[0]
+        l_gray = io_list[6]
+        r_gray = io_list[7]
 
         high_spead = edge_rl_sensor + edge_fl_sensor + edge_fr_sensor + edge_rr_sensor
         normal_spead = high_spead * 0.6
@@ -119,7 +130,6 @@ class BattleBot:
             delay_ms(rotate_time)
 
         self.controller.move_cmd(normal_spead, normal_spead)
-        delay_ms(interval)
 
     def load_config(self, config_path: str):
         """
@@ -130,7 +140,64 @@ class BattleBot:
 
         pass
 
-    def Battle(self):
+    def on_ally_box(self, speed: int = 5000):
+        self.controller.move_cmd(-speed, speed)
+        delay_ms(200)
+
+    def check_surround(self, adc_list: list[int], baseline=2000):
+        rotate_time = 120
+        rotate_speed = 6000
+        if self.tag_id == self.ally_tag and adc_list[4] > baseline:
+            self.on_ally_box()
+        elif self.tag_id == self.enemy_tag and adc_list[4] > baseline:
+            self.on_enemy_box()
+        elif adc_list[4] > baseline:
+            self.on_enemy_car()
+        elif adc_list[8] > baseline:
+            self.on_thing_surrounding(1)
+        elif adc_list[7] > baseline:
+            self.on_thing_surrounding(2)
+        elif adc_list[5] > baseline:
+            self.on_thing_surrounding(3)
+
+    def util_edge(self, using_gray: bool = True, using_edge_sensor: bool = False, edge_a: int = 1800):
+        if using_gray:
+            io_list = self.controller.ADC_IO_GetAllInputLevel(make_str_list=False)
+            while int(io_list[6]) + int(io_list[7]) > 1:
+                io_list = self.controller.ADC_IO_GetAllInputLevel(make_str_list=False)
+        elif using_edge_sensor:
+            adc_list = self.controller.ADC_Get_All_Channel()
+            while adc_list[1] < edge_a or adc_list[2] < edge_a:
+                adc_list = self.controller.ADC_Get_All_Channel()
+
+    def on_enemy_box(self, speed: int = 8000):
+        self.controller.move_cmd(speed, speed)
+        self.util_edge()
+        self.controller.move_cmd(-speed, -speed)
+        delay_ms(160)
+        self.controller.move_cmd(0, 0)
+
+    def on_enemy_car(self, speed: int = 8000):
+        self.controller.move_cmd(speed, speed)
+        self.util_edge()
+        self.controller.move_cmd(-int(speed * 0.75), -int(speed * 0.75))
+        delay_ms(160)
+        self.controller.move_cmd(0, 0)
+
+    def on_thing_surrounding(self, type: int = 0):
+        rotate_time = 150
+        rotate_speed = 5000
+        if type == 1:
+            self.controller.move_cmd(-rotate_speed, rotate_speed)
+        elif type == 2:
+            self.controller.move_cmd(rotate_speed, rotate_speed)
+
+        if type == 3:
+            rotate_time = 2 * rotate_time
+        delay_ms(rotate_time)
+        self.controller.move_cmd(0, 0)
+
+    def Battle(self, interval: int = 10):
         """
         the main function of the BattleBot
         :return:
@@ -168,8 +235,11 @@ class BattleBot:
             self.controller.move_cmd(0, 0)
 
             while True:
-                self.normal_behave(self.controller.ADC_Get_All_Channel(), self.controller.ADC_IO_GetAllInputLevel())
-
+                adc_list = self.controller.ADC_Get_All_Channel()
+                io_list = self.controller.ADC_IO_GetAllInputLevel()
+                self.normal_behave(adc_list, io_list)
+                self.check_surround(adc_list)
+                delay_ms(interval)
 
         except KeyboardInterrupt:
             print('exiting')
