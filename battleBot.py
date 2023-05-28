@@ -250,8 +250,8 @@ class BattleBot:
                     self.controller.move_cmd(-30000, -30000)
                     time.sleep(0.8)
                     self.controller.move_cmd(0, 0)
+
                     break
-            self.controller.move_cmd(0, 0)
 
             while True:
                 adc_list = self.controller.ADC_Get_All_Channel()
