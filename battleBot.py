@@ -33,7 +33,7 @@ class BattleBot:
     def ally_tag(self):
         return self._ally_tag
 
-    def apriltag_detect_thread(self):
+    def apriltag_detect_thread(self, single_tag_mode: bool = True):
         """
         这是一个线程函数，它从摄像头捕获视频帧，处理帧以检测 AprilTags，
         并在视频帧上显示 AprilTag 检测结果（如果有）。这是这个函数的概述：
@@ -63,15 +63,13 @@ class BattleBot:
         while True:
 
             if self.tag_monitor_switch:  # 台上开启 台下关闭 节约性能
-                ret, frame = cap.read()
+                _, frame = cap.read()
                 frame = frame[cup_h:cup_h + weight, cup_w:cup_w + weight]
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 tags = self.at_detector.detect(gray)
-
-                for tag in tags:
-                    self.tag_id = tag.tag_id
-
-                    print("tag_id = {}".format(tag.tag_id))
+                if single_tag_mode:
+                    self.tag_id = tags[0].tag_id
+                    print(f"tag_id = {self.tag_id}")
 
             else:
                 time.sleep(2)
