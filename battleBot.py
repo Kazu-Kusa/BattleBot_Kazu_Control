@@ -143,7 +143,7 @@ class BattleBot:
         l_gray = io_list[6]
         r_gray = io_list[7]
 
-        high_spead = int((edge_rl_sensor + edge_fl_sensor + edge_fr_sensor + edge_rr_sensor) * 0.8)
+        high_spead = int((edge_rl_sensor + edge_fl_sensor + edge_fr_sensor + edge_rr_sensor) * 0.6)
         backing_time = 180
         rotate_time = 130
 
