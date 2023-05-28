@@ -95,7 +95,7 @@ class BattleBot:
         l_gray = io_list[6]
         r_gray = io_list[7]
 
-        high_spead = edge_rl_sensor + edge_fl_sensor + edge_fr_sensor + edge_rr_sensor
+        high_spead = int((edge_rl_sensor + edge_fl_sensor + edge_fr_sensor + edge_rr_sensor) * 0.8)
         normal_spead = high_spead * 0.6
         backing_time = 180
         rotate_time = 130
@@ -140,19 +140,22 @@ class BattleBot:
 
         pass
 
-    def on_ally_box(self, speed: int = 5000):
+    def on_ally_box(self, speed: int = 5000, multiplier: float = 0):
+        if multiplier:
+            speed = int(multiplier * speed)
         self.controller.move_cmd(-speed, speed)
         delay_ms(200)
 
     def check_surround(self, adc_list: list[int], baseline=2000):
-        rotate_time = 120
-        rotate_speed = 6000
+        timestep = 120
+        speed = 6000
+
         if self.tag_id == self.ally_tag and adc_list[4] > baseline:
-            self.on_ally_box()
+            self.on_ally_box(speed, 0.6)
         elif self.tag_id == self.enemy_tag and adc_list[4] > baseline:
-            self.on_enemy_box()
+            self.on_enemy_box(speed, 1.2)
         elif adc_list[4] > baseline:
-            self.on_enemy_car()
+            self.on_enemy_car(speed, 0.6)
         elif adc_list[8] > baseline:
             self.on_thing_surrounding(1)
         elif adc_list[7] > baseline:
@@ -170,14 +173,18 @@ class BattleBot:
             while adc_list[1] < edge_a or adc_list[2] < edge_a:
                 adc_list = self.controller.ADC_Get_All_Channel()
 
-    def on_enemy_box(self, speed: int = 8000):
+    def on_enemy_box(self, speed: int = 8000, multiplier: float = 0):
+        if multiplier:
+            speed = int(multiplier * speed)
         self.controller.move_cmd(speed, speed)
         self.util_edge()
         self.controller.move_cmd(-speed, -speed)
         delay_ms(160)
         self.controller.move_cmd(0, 0)
 
-    def on_enemy_car(self, speed: int = 8000):
+    def on_enemy_car(self, speed: int = 8000, multiplier: float = 0):
+        if multiplier:
+            speed = int(multiplier * speed)
         self.controller.move_cmd(speed, speed)
         self.util_edge()
         self.controller.move_cmd(-int(speed * 0.75), -int(speed * 0.75))
@@ -185,7 +192,7 @@ class BattleBot:
         self.controller.move_cmd(0, 0)
 
     def on_thing_surrounding(self, type: int = 0):
-        rotate_time = 150
+        rotate_time = 60
         rotate_speed = 5000
         if type == 1:
             self.controller.move_cmd(-rotate_speed, rotate_speed)
