@@ -114,6 +114,17 @@ class BattleBot:
         delay_ms(turn_time)
         self.controller.move_cmd(0, 0)
 
+    def action_T(self, turn_type: int = randint(0, 1), turn_speed: int = 5000, turn_time: int = 130,
+                 multiplier: float = 0):
+        if multiplier:
+            turn_speed = int(turn_speed * multiplier)
+
+        if turn_type:
+            self.controller.move_cmd(turn_speed, -turn_speed)
+        else:
+            self.controller.move_cmd(-turn_speed, turn_speed)
+        delay_ms(turn_time)
+
     def normal_behave(self, adc_list: list[int], io_list: list[int], edge_a: int = 1680):
         """
         handles the normal edge case using both adc_list and io_list.
