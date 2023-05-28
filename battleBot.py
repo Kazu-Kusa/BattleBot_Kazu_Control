@@ -123,6 +123,7 @@ class BattleBot:
         else:
             self.controller.move_cmd(-turn_speed, turn_speed)
         delay_ms(turn_time)
+        self.controller.move_cmd(0, 0)
 
     def normal_behave(self, adc_list: list[int], io_list: list[int], edge_a: int = 1680):
         """
