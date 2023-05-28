@@ -8,6 +8,7 @@ from repo.uptechStar.module.timer import delay_ms
 from typing import Optional, Union
 import cv2
 import apriltag
+from repo.uptechStar.module.screen import Screen
 
 
 class BattleBot:
@@ -15,7 +16,7 @@ class BattleBot:
 
     def __init__(self, config_path: str = './config.json'):
         self.load_config(config_path=config_path)
-
+        self.screen = Screen()
         self.at_detector = apriltag.Detector(apriltag.DetectorOptions(families='tag36h11 tag25h9'))
         self.apriltag_width = 0
         self.tag_id = -1
@@ -86,7 +87,15 @@ class BattleBot:
         cap.release()
         # cv2.destroyAllWindows()
 
-    def normal_behave(self, adc_list: list[int], io_list: list[str], edge_a: int = 1800):
+    def normal_behave(self, adc_list: list[int], io_list: list[int], edge_a: int = 1800):
+        """
+        handles the normal edge case using both adc_list and io_list.
+        :param adc_list:
+        :param io_list:
+        :param edge_a:
+        :return:
+        """
+        self.screen.ADC_Led_SetColor(0, self.screen.COLOR_BLUE)
         edge_rr_sensor = adc_list[0]
         edge_fr_sensor = adc_list[1]
         edge_fl_sensor = adc_list[2]
@@ -147,6 +156,7 @@ class BattleBot:
         delay_ms(200)
 
     def check_surround(self, adc_list: list[int], baseline=2000):
+        self.screen.ADC_Led_SetColor(0, self.screen.COLOR_CYAN)
         timestep = 120
         speed = 6000
 
