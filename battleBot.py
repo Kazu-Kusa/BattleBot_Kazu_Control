@@ -109,7 +109,7 @@ class BattleBot:
         backing_time = 180
         rotate_time = 130
 
-        if l_gray == '0' or r_gray == '0':
+        if l_gray + r_gray <= 1:
             self.controller.move_cmd(-high_spead, -high_spead)
             delay_ms(int(backing_time * 0.6))
             self.controller.move_cmd(-high_spead, high_spead)
@@ -255,7 +255,7 @@ class BattleBot:
 
             while True:
                 adc_list = self.controller.ADC_Get_All_Channel()
-                io_list = self.controller.ADC_IO_GetAllInputLevel()
+                io_list = self.controller.ADC_IO_GetAllInputLevel(make_str_list=False)
                 self.normal_behave(adc_list, io_list)
                 self.check_surround(adc_list)
                 delay_ms(interval)
