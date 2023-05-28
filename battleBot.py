@@ -295,7 +295,7 @@ class BattleBot:
                 io_list = self.controller.ADC_IO_GetAllInputLevel(make_str_list=False)
                 self.normal_behave(adc_list, io_list, edge_a=1650)
                 self.check_surround(adc_list)
-                self.controller.move_cmd(3000, 3000)
+                self.controller.move_cmd(normal_spead, normal_spead)
                 delay_ms(interval)
 
         except KeyboardInterrupt:
