@@ -148,28 +148,23 @@ class BattleBot:
         rotate_time = 130
 
         if l_gray + r_gray <= 1:
-            self.controller.move_cmd(-high_spead, -high_spead)
-            delay_ms(int(backing_time * 0.6))
-            self.controller.move_cmd(-high_spead, high_spead)
-            delay_ms(int(1.5 * rotate_time))
+            self.action_BT(back_speed=high_spead, back_time=backing_time,
+                           turn_speed=high_spead, turn_time=rotate_time,
+                           t_multiplier=0.6)
         elif edge_fl_sensor < edge_a:
-            self.controller.move_cmd(-high_spead, -high_spead)
-            delay_ms(backing_time)
-            # front left edge encounter
-            self.controller.move_cmd(high_spead, -high_spead)
-            delay_ms(rotate_time)
+            self.action_BT(back_speed=high_spead, back_time=backing_time,
+                           turn_speed=high_spead, turn_time=rotate_time,
+                           t_multiplier=0.6, turn_type=1)
 
         elif edge_fr_sensor < edge_a:
-            # front left edge encounter
-            self.controller.move_cmd(-high_spead, -high_spead)
-            delay_ms(backing_time)
-            self.controller.move_cmd(-high_spead, high_spead)
-            delay_ms(rotate_time)
+            self.action_BT(back_speed=high_spead, back_time=backing_time,
+                           turn_speed=high_spead, turn_time=rotate_time,
+                           t_multiplier=0.6, turn_type=0)
 
         elif edge_rl_sensor < edge_a:
-            # front left edge encounter
-            self.controller.move_cmd(high_spead, -high_spead)
-            delay_ms(rotate_time)
+            self.action_BT(back_speed=high_spead, back_time=backing_time,
+                           turn_speed=high_spead, turn_time=rotate_time,
+                           t_multiplier=0.6, turn_type=0)
 
         elif edge_rr_sensor < edge_a:
             # front left edge encounter
