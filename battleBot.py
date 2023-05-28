@@ -88,7 +88,7 @@ class BattleBot:
     def action_BT(self, back_speed: int = 5000, back_time: int = 120,
                   turn_speed: int = 6000, turn_time: int = 120,
                   b_multiplier: float = 0, t_multiplier: float = 0,
-                  turn_type: int = random.randint(0, 1)):
+                  turn_type: int = randint(0, 1)):
         """
         function that execute the action of  backwards and turns
         :param back_speed:
