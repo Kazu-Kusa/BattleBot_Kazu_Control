@@ -33,24 +33,19 @@ class BattleBot:
     def ally_tag(self):
         return self._ally_tag
 
-    def apriltag_detect_thread(self, single_tag_mode: bool = True, print_tag_id: bool = False):
+    def apriltag_detect_thread(self, single_tag_mode: bool = True, print_tag_id: bool = False,
+                               check_interval: int = 50):
         """
         这是一个线程函数，它从摄像头捕获视频帧，处理帧以检测 AprilTags，
-        并在视频帧上显示 AprilTag 检测结果（如果有）。这是这个函数的概述：
-
-        1.使用 cv2.VideoCapture(0) 创建视频捕获对象，从默认摄像头（通常是笔记本电脑的内置摄像头）捕获视频。
-        2.使用 cap.set(3, w) 和 cap.set(4, h) 设置帧的宽度和高度为 640x480，帧的 weight 为 320。
-        3.开始一个 while 循环，直到用户按下 'q' 键结束循环。
-        4.在循环内，从视频捕获对象中捕获帧并将其存储在 frame 变量中。然后将帧裁剪为中心区域的 weight x weight 大小。
-        5.将帧转换为灰度并存储在 gray 变量中。
-        6.使用 AprilTag 检测器对象（self.at_detector）在灰度帧中检测 AprilTags。检测到的标记存储在 tags 变量中。
-        7.对于每个检测到的标记，在原始帧上打印其标记 ID 并用圆圈标记其角落。
-        8.使用 cv2.imshow("img", frame) 显示带有 AprilTag 检测结果（如果有）的原始帧。
-        9.如果用户按下 'q' 键，则结束循环并关闭视频
+        :param single_tag_mode: if check only a single tag one time
+        :param print_tag_id: if print tag id on check
+        :return:
         """
         print("detect start")
+        # 使用 cv2.VideoCapture(0) 创建视频捕获对象，从默认摄像头（通常是笔记本电脑的内置摄像头）捕获视频。
         cap = cv2.VideoCapture(0)
 
+        # 使用 cap.set(3, w) 和 cap.set(4, h) 设置帧的宽度和高度为 640x480，帧的 weight 为 320。
         w = 640
         h = 480
         weight = 320
@@ -65,17 +60,20 @@ class BattleBot:
         while True:
 
             if self.tag_monitor_switch:  # 台上开启 台下关闭 节约性能
+                # 在循环内，从视频捕获对象中捕获帧并将其存储在 frame 变量中。然后将帧裁剪为中心区域的 weight x weight 大小。
                 _, frame = cap.read()
                 frame = frame[cup_h:cup_h + weight, cup_w:cup_w + weight]
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # 将帧转换为灰度并存储在 gray 变量中。
+                # 使用 AprilTag 检测器对象（self.at_detector）在灰度帧中检测 AprilTags。检测到的标记存储在 tags 变量中。
                 tags = self.at_detector.detect(gray)
                 if tags and single_tag_mode:
                     self.tag_id = tags[0].tag_id
                     if print_tag_id and time.time() - start_time > print_interval:
                         print(f"#DETECTED TAG: [{self.tag_id}]")
-
+                        start_time = time.time()
+                delay_ms(check_interval)
             else:
-                time.sleep(2)
+                delay_ms(1500)
 
     def action_BT(self, back_speed: int = 5000, back_time: int = 120,
                   turn_speed: int = 6000, turn_time: int = 120,
