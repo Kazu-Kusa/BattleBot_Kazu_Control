@@ -1,12 +1,9 @@
-import random
+from random import randint
 import threading
 import time
-import ctypes
-
 from repo.uptechStar.module.up_controller import UpController
-
 from repo.uptechStar.module.timer import delay_ms
-from typing import Optional, Union
+# from typing import Optional, Union
 import cv2
 import apriltag
 from repo.uptechStar.module.screen import Screen
