@@ -139,7 +139,7 @@ class BattleBot:
             self.controller.move_cmd(-turn_speed, turn_speed)
         delay_ms(turn_time)
 
-    def normal_behave(self, adc_list: list[int], io_list: list[int], edge_a: int = 1680):
+    def normal_behave(self, adc_list: list[int], io_list: list[int], edge_a: int = 1680, edge_multiplier: float = 0):
         """
         handles the normal edge case using both adc_list and io_list.
         but well do not do anything if no edge case
@@ -156,8 +156,9 @@ class BattleBot:
 
         l_gray = io_list[6]
         r_gray = io_list[7]
-
-        high_spead = int((edge_rl_sensor + edge_fl_sensor + edge_fr_sensor + edge_rr_sensor) * 0.6)
+        high_spead = edge_rl_sensor + edge_fl_sensor + edge_fr_sensor + edge_rr_sensor
+        if edge_multiplier:
+            high_spead = int(high_spead * edge_multiplier)
         backing_time = 180
         rotate_time = 130
 
@@ -269,7 +270,7 @@ class BattleBot:
         delay_ms(rotate_time)
         self.controller.move_cmd(0, 0)
 
-    def Battle(self, interval: int = 10):
+    def Battle(self, interval: int = 10, normal_spead: int = 3000):
         """
         the main function of the BattleBot
         :return:
@@ -293,35 +294,32 @@ class BattleBot:
         r_gray io 0
         """
         try:
-            normal_spead = 3000
+
             while True:
                 print('holding')
-                time.sleep(0.1)
+                delay_ms(150)
                 temp_list = self.controller.ADC_Get_All_Channel()
                 if temp_list[8] > 1800 and temp_list[7] > 1800:
                     print('dashing')
                     self.controller.move_cmd(-30000, -30000)
-                    time.sleep(0.8)
+                    delay_ms(800)
                     self.controller.move_cmd(0, 0)
-
                     break
-
             while True:
                 adc_list = self.controller.ADC_Get_All_Channel()
                 io_list = self.controller.ADC_IO_GetAllInputLevel(make_str_list=False)
-                self.normal_behave(adc_list, io_list, edge_a=1650)
-                self.check_surround(adc_list)
+                self.normal_behave(adc_list, io_list, edge_a=1650, edge_multiplier=0.6)
+                self.check_surround(adc_list, )
                 self.controller.move_cmd(normal_spead, normal_spead)
                 delay_ms(interval)
 
         except KeyboardInterrupt:
-            print('exiting')
             self.controller.move_cmd(0, 0)
-        self.controller.move_cmd(0, 0)
+            print('exiting')
 
 
 if __name__ == '__main__':
     bot = BattleBot()
     bot.controller.move_cmd(0, 0)
     # breakpoint()
-    bot.Battle()
+    bot.Battle(interval=10, normal_spead=3000)
