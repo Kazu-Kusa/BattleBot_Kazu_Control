@@ -14,7 +14,7 @@ class BattleBot:
 
     def __init__(self, config_path: str = './config.json'):
         self.load_config(config_path=config_path)
-        self.screen = Screen()
+        self.screen = Screen(init_screen=False)
         self.at_detector = apriltag.Detector(apriltag.DetectorOptions(families='tag36h11 tag25h9'))
         self.apriltag_width = 0
         self._tag_id = -1
