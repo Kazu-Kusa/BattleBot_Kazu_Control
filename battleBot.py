@@ -191,10 +191,7 @@ class BattleBot:
         pass
 
     def on_ally_box(self, speed: int = 5000, multiplier: float = 0):
-        if multiplier:
-            speed = int(multiplier * speed)
-        self.controller.move_cmd(-speed, speed)
-        delay_ms(200)
+        self.action_T(turn_speed=speed, multiplier=multiplier)
 
     def check_surround(self, adc_list: list[int], baseline=2000):
         """
@@ -250,24 +247,20 @@ class BattleBot:
         delay_ms(160)
         self.controller.move_cmd(0, 0)
 
-    def on_thing_surrounding(self, position_type: int = 0):
+    def on_thing_surrounding(self, position_type: int = 0, rotate_time: int = 60, rotate_speed: int = 5000):
         """
-        1 for left
-        2 for right
-        3 for behind
+        0 for left
+        1 for right
+        2 for behind
+        :param rotate_speed:
+        :param rotate_time:
         :param position_type:
         :return:
         """
-        rotate_time = 60
-        rotate_speed = 5000
-        if position_type == 1:
-            self.controller.move_cmd(-rotate_speed, rotate_speed)
+        if position_type == 2:
+            self.action_T(turn_speed=rotate_speed, turn_time=rotate_time, multiplier=2)
         else:
-            self.controller.move_cmd(rotate_speed, -rotate_speed)
-            if position_type == 3:
-                rotate_time = 2 * rotate_time
-        delay_ms(rotate_time)
-        self.controller.move_cmd(0, 0)
+            self.action_T(turn_type=position_type, turn_speed=rotate_speed, turn_time=rotate_time)
 
     def Battle(self, interval: int = 10, normal_spead: int = 3000):
         """
