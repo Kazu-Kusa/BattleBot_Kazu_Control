@@ -294,16 +294,7 @@ class BattleBot:
         """
         try:
 
-            while True:
-                print('holding')
-                delay_ms(150)
-                temp_list = self.controller.ADC_Get_All_Channel()
-                if temp_list[8] > 1800 and temp_list[7] > 1800:
-                    print('dashing')
-                    self.controller.move_cmd(-30000, -30000)
-                    delay_ms(800)
-                    self.controller.move_cmd(0, 0)
-                    break
+            self.wait_start(baseline=1800, with_turn=False)
             while True:
                 adc_list = self.controller.ADC_Get_All_Channel()
                 io_list = self.controller.ADC_IO_GetAllInputLevel(make_str_list=False)
@@ -315,6 +306,20 @@ class BattleBot:
         except KeyboardInterrupt:
             self.controller.move_cmd(0, 0)
             print('exiting')
+
+    def wait_start(self, baseline: int = 1800, with_turn: bool = False):
+        while True:
+            print('holding')
+            delay_ms(150)
+            temp_list = self.controller.ADC_Get_All_Channel()
+            if temp_list[8] > baseline and temp_list[7] > baseline:
+                print('dashing')
+                self.controller.move_cmd(-30000, -30000)
+                delay_ms(800)
+                self.controller.move_cmd(0, 0)
+                if with_turn:
+                    self.action_T(turn_speed=7000, turn_time=210)
+                break
 
 
 if __name__ == '__main__':
