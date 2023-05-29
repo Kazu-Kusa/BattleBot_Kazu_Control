@@ -121,14 +121,22 @@ class BattleBot:
         if t_multiplier:
             turn_speed = int(turn_speed)
         if turn_type:
-            self.controller.move_cmd(-turn_speed, turn_speed)
-        else:
             self.controller.move_cmd(turn_speed, -turn_speed)
+        else:
+            self.controller.move_cmd(-turn_speed, turn_speed)
         delay_ms(turn_time)
         self.controller.move_cmd(0, 0)
 
     def action_T(self, turn_type: int = randint(0, 1), turn_speed: int = 5000, turn_time: int = 130,
                  multiplier: float = 0):
+        """
+
+        :param turn_type: <- turn_type == 0  or turn_type == 1 ->
+        :param turn_speed:
+        :param turn_time:
+        :param multiplier:
+        :return:
+        """
         if multiplier:
             turn_speed = int(turn_speed * multiplier)
 
@@ -319,4 +327,4 @@ if __name__ == '__main__':
     bot = BattleBot()
     bot.controller.move_cmd(0, 0)
     # breakpoint()
-    bot.Battle(interval=10, normal_spead=3000)
+    bot.Battle(interval=2, normal_spead=3500)
