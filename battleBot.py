@@ -17,7 +17,14 @@ class BattleBot:
         self.screen = Screen(init_screen=False)
         self.at_detector = apriltag.Detector(apriltag.DetectorOptions(families='tag36h11 tag25h9'))
         self.apriltag_width = 0
+
+        self.apriltag_detect_start()
         self._tag_id = -1
+        self._tag_monitor_switch = True
+        self._enemy_tag = 2
+        self._ally_tag = 1
+
+    def apriltag_detect_start(self):
         apriltag_detect = threading.Thread(target=self.apriltag_detect_thread)
         apriltag_detect.daemon = True
         apriltag_detect.start()
