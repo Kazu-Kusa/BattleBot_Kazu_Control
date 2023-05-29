@@ -7,6 +7,7 @@ from repo.uptechStar.module.timer import delay_ms
 import cv2
 import apriltag
 from repo.uptechStar.module.screen import Screen
+from module.algrithm_tools import compute_error
 
 
 class BattleBot:
