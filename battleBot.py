@@ -5,32 +5,39 @@ from repo.uptechStar.module.up_controller import UpController
 from repo.uptechStar.module.timer import delay_ms
 # from typing import Optional, Union
 import cv2
-import apriltag
+from apriltag import Detector, DetectorOptions
 from repo.uptechStar.module.screen import Screen
 
 
 class BattleBot:
     controller = UpController(debug=False, fan_control=False)
+    screen = Screen(init_screen=False)
 
-    def __init__(self, config_path: str = './config.json'):
+    def __init__(self, config_path: str = './config.json', team_color: str = 'blue'):
         self.load_config(config_path=config_path)
-        self.screen = Screen(init_screen=False)
-        self.at_detector = apriltag.Detector(apriltag.DetectorOptions(families='tag36h11 tag25h9'))
 
-        self.apriltag_detect_start()
         self._tag_id = -1
         self._tag_monitor_switch = True
-        self._enemy_tag = 2
-        self._ally_tag = 1
+        self._enemy_tag = None
+        self._ally_tag = None
+
+        self._set_tags(team_color=team_color)
+
+        self.at_detector = Detector(DetectorOptions(families='tag36h11'))
+        self.apriltag_detect_start()
+
+    def _set_tags(self, team_color: str = 'blue'):
+        if team_color == 'blue':
+            self._enemy_tag = 2
+            self._ally_tag = 1
+        elif team_color == 'yellow':
+            self._enemy_tag = 1
+            self._ally_tag = 2
 
     def apriltag_detect_start(self):
         apriltag_detect = threading.Thread(target=self.apriltag_detect_thread)
         apriltag_detect.daemon = True
         apriltag_detect.start()
-
-        self._tag_monitor_switch = True
-        self._enemy_tag = 2
-        self._ally_tag = 1
 
     @property
     def tag_id(self):
