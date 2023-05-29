@@ -12,6 +12,7 @@ from repo.uptechStar.module.screen import Screen
 class BattleBot:
     controller = UpController(debug=False, fan_control=False)
     screen = Screen(init_screen=False)
+    tag_detector = Detector(DetectorOptions(families='tag36h11')).detect
 
     def __init__(self, config_path: str = './config.json', team_color: str = 'blue'):
         self.load_config(config_path=config_path)
@@ -23,7 +24,6 @@ class BattleBot:
 
         self._set_tags(team_color=team_color)
 
-        self.at_detector = Detector(DetectorOptions(families='tag36h11'))
         self.apriltag_detect_start()
 
     def _set_tags(self, team_color: str = 'blue'):
@@ -39,6 +39,7 @@ class BattleBot:
         apriltag_detect.daemon = True
         apriltag_detect.start()
 
+    # region properties
     @property
     def tag_id(self):
         return self._tag_id
@@ -63,10 +64,13 @@ class BattleBot:
     def ally_tag(self):
         return self._ally_tag
 
+    # endregion
+
     def apriltag_detect_thread(self, single_tag_mode: bool = True, print_tag_id: bool = False,
                                check_interval: int = 50):
         """
         这是一个线程函数，它从摄像头捕获视频帧，处理帧以检测 AprilTags，
+        :param check_interval:
         :param single_tag_mode: if check only a single tag one time
         :param print_tag_id: if print tag id on check
         :return:
@@ -94,8 +98,8 @@ class BattleBot:
                 _, frame = cap.read()
                 frame = frame[cup_h:cup_h + weight, cup_w:cup_w + weight]
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # 将帧转换为灰度并存储在 gray 变量中。
-                # 使用 AprilTag 检测器对象（self.at_detector）在灰度帧中检测 AprilTags。检测到的标记存储在 tags 变量中。
-                tags = self.at_detector.detect(gray)
+                # 使用 AprilTag 检测器对象（self.tag_detector）在灰度帧中检测 AprilTags。检测到的标记存储在 tags 变量中。
+                tags = self.tag_detector(gray)
                 if tags and single_tag_mode:
                     self.tag_id = tags[0].tag_id
                     if print_tag_id and time.time() - start_time > print_interval:
