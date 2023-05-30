@@ -182,19 +182,21 @@ class BattleBot:
         current_angle = self.controller.atti_all[2]
         target_angle = calculate_relative_angle(current_angle=current_angle, offset_angle=offset_angle)
         direction = determine_direction(current_angle=current_angle, target_angle=target_angle)
+        print(f'current_angle: {current_angle},target_angle: {target_angle}')
 
-        def control(left, right):
+        def control(left: int, right: int) -> None:
             self.controller.move_cmd(left, right)
 
-        def evaluate():
+        def evaluate() -> float:
             return self.controller.atti_all[2]
 
         PD_control(controller_func=control,
                    evaluator_func=evaluate,
                    error_func=compute_error,
                    target=target_angle,
-                   Kp=20, Kd=16,
-                   cs_limit=2000, target_tolerance=15, direction=direction)
+                   Kp=20, Kd=300,
+                   cs_limit=500, target_tolerance=10, direction=direction,
+                   logging=False)
 
     def action_T(self, turn_type: int = randint(0, 1), turn_speed: int = 5000, turn_time: int = 130,
                  multiplier: float = 0):
@@ -491,6 +493,18 @@ class BattleBot:
                 if with_turn:
                     self.action_T(turn_speed=7000, turn_time=210)
                 break
+
+    def test_run(self):
+        print('test')
+        self.controller.move_cmd(2000, 2000)
+        delay_ms(300)
+        self.controller.move_cmd(0, 0)
+        while True:
+            delay_ms(100)
+
+            if self.controller.adc_all_channels[7] > 1600:
+                print('rotates')
+                self.action_T_PD(80)
 
 
 if __name__ == '__main__':
