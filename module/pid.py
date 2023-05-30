@@ -51,11 +51,10 @@ def PD_control(controller_func: Callable[[int, int], None],
 
 def PID_control(controller_func: Callable[[int, int], None],
                 evaluator_func: Callable[[], float],
-                error_func: Callable[[float, float, int], float],
+                error_func: Callable[[float, float], float],
                 target: float,
                 Kp: float = 80, Kd: float = 16, Ki: float = 2,
-                cs_limit: float = 2000, target_tolerance: float = 15,
-                direction: int = 1):
+                cs_limit: float = 2000, target_tolerance: float = 15):
     """
     PID controller designed to control the action-T using MPU-6500
 
@@ -68,13 +67,12 @@ def PID_control(controller_func: Callable[[int, int], None],
     :param Ki:
     :param cs_limit:
     :param target_tolerance:
-    :param direction:
     :return:
     """
 
     last_state = evaluator_func()
     last_time = perf_counter_ns()
-    current_error = error_func(last_state, target, direction)
+    current_error = error_func(last_state, target)
 
     if current_error < target_tolerance and Kp * current_error < cs_limit:
         # control strength is small and current state is near the target
@@ -84,7 +82,7 @@ def PID_control(controller_func: Callable[[int, int], None],
         current_state = evaluator_func()
         current_time = perf_counter_ns()
 
-        current_error = error_func(current_state, target, direction)
+        current_error = error_func(current_state, target)
         delta_time = current_time - last_time
 
         d_target = (current_state - last_state) / delta_time
@@ -94,7 +92,7 @@ def PID_control(controller_func: Callable[[int, int], None],
         if current_error < target_tolerance and control_strength < cs_limit:
             controller_func(0, 0)
             break
-        controller_func(direction * control_strength, -direction * control_strength)
+        controller_func(control_strength, -control_strength)
 
         last_state = current_state
         last_time = current_time
