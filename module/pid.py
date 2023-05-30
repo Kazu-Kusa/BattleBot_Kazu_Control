@@ -5,20 +5,31 @@ from time import perf_counter_ns
 
 def PD_control(controller_func: Callable[[int, int], None],
                evaluator_func: Callable[[], float],
-               error_func: Callable[[float, float], float],
+               error_func: Callable[[float, float, int], float],
                target: float,
                Kp: float = 80, Kd: float = 16,
                cs_limit: float = 2000, target_tolerance: float = 15,
-               invert_direction: bool = False):
-    """"""
-    left_sign = 1
-    right_sign = -1
-    if invert_direction:
-        left_sign = -1
-        right_sign = 1
+               direction: int = 1):
+    """
+    PD controller designed to control the action-T using MPU-6500
+    :param controller_func:
+    :param evaluator_func:
+    :param error_func:
+    :param target:
+    :param Kp:
+    :param Kd:
+    :param cs_limit:
+    :param target_tolerance:
+    :param direction:
+    :return:
+    """
+
+    left_sign = direction
+    right_sign = -direction
+
     last_state = evaluator_func()
     last_time = perf_counter_ns()
-    current_error = error_func(last_state, target)
+    current_error = error_func(last_state, target, direction)
 
     if current_error < target_tolerance and Kp * current_error < cs_limit:
         # control strength is small and current state is near the target
@@ -28,7 +39,7 @@ def PD_control(controller_func: Callable[[int, int], None],
         current_state = evaluator_func()
         current_time = perf_counter_ns()
 
-        current_error = error_func(current_state, target)
+        current_error = error_func(current_state, target, direction)
 
         d_target = (current_state - last_state) / (current_time - last_time)
 

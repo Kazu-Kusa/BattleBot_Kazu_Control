@@ -25,7 +25,7 @@ def compute_error(current_angle, target_angle, direction=1):
     return error
 
 
-def calculate_relative_angle(current_angle, offset_angle):
+def calculate_relative_angle(current_angle: float, offset_angle: float) -> float:
     """
     计算相对偏移特定角度之后的目标角度，返回值范围 [-180, 180]。
     :param current_angle: 当前角度，单位：度数。取值范围 [-180, 180]
@@ -37,7 +37,7 @@ def calculate_relative_angle(current_angle, offset_angle):
     return target_angle
 
 
-def determine_direction(current_angle, target_angle):
+def determine_direction(current_angle: float, target_angle: float) -> int:
     """
     判断当前角度移动到目标角度是逆时针更近还是顺时针更近。
     :param current_angle: 当前角度，单位：度数。取值范围 [-180, 180]
