@@ -412,14 +412,26 @@ class BattleBot:
         r_gray io 0
         """
         try:
-
+            # wait for the battle starts
             self.wait_start(baseline=1800, with_turn=False)
             while True:
+                # update the sensors data
                 adc_list = self.controller.ADC_Get_All_Channel()
                 io_list = self.controller.ADC_IO_GetAllInputLevel(make_str_list=False)
+
+                # normal behave includes all edge encounter solution
+                # if encounters edge,must deal with it first
                 self.normal_behave(adc_list, io_list, edge_baseline=1650, edge_multiplier=0.6)
+
+                # TODO: no, i forget to update the sensor data here
+                # if no edge is encountered then check if there are anything surrounding
+                # will check surrounding and will act according the case to deal with it
                 self.check_surround(adc_list, )
+
+                # if no edge is encountered and nothing surrounding, then just keep moving up
                 self.controller.move_cmd(normal_spead, normal_spead)
+
+                # loop delay,this is to prevent sending to many cmds to driver causing jam
                 delay_ms(interval)
 
         except KeyboardInterrupt:
