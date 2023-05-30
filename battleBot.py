@@ -423,6 +423,7 @@ class BattleBot:
                 delay_ms(interval)
 
         except KeyboardInterrupt:
+            # forced stop
             self.controller.move_cmd(0, 0)
             print('exiting')
 
