@@ -163,7 +163,7 @@ class BattleBot:
         delay_ms(back_time)
 
         if t_multiplier:
-            turn_speed = int(turn_speed)
+            turn_speed = int(turn_speed * t_multiplier)
         if turn_type:
             self.controller.move_cmd(turn_speed, -turn_speed)
         else:
@@ -190,47 +190,95 @@ class BattleBot:
             self.controller.move_cmd(-turn_speed, turn_speed)
         delay_ms(turn_time)
 
-    def normal_behave(self, adc_list: list[int], io_list: list[int], edge_a: int = 1680, edge_multiplier: float = 0):
+    def normal_behave(self, adc_list: list[int], io_list: list[int], edge_baseline: int = 1680,
+                      edge_multiplier: float = 0):
         """
         handles the normal edge case using both adc_list and io_list.
         but well do not do anything if no edge case
-        :param adc_list:
-        :param io_list:
-        :param edge_a:
+        :param adc_list:the list of adc devices returns
+        :param io_list:the list of io devices returns
+        :param edge_baseline: the edge_check baseline
         :return:
         """
+        # change the light color to represent current state, state of in normal behave
         self.screen.ADC_Led_SetColor(0, self.screen.COLOR_BLUE)
+
+        # read the adc sensors
         edge_rr_sensor = adc_list[0]
         edge_fr_sensor = adc_list[1]
         edge_fl_sensor = adc_list[2]
         edge_rl_sensor = adc_list[3]
 
+        # read the io sensors
         l_gray = io_list[6]
         r_gray = io_list[7]
+
+        # use the sum of their returns to get the high_speed
+        # the closer to the edge ,the slower the wheels rotates
         high_spead = edge_rl_sensor + edge_fl_sensor + edge_fr_sensor + edge_rr_sensor
         if edge_multiplier:
+            # multiplier to adjust the high_speed
             high_spead = int(high_spead * edge_multiplier)
+
+        # fixed action duration
         backing_time = 180
         rotate_time = 130
 
         if l_gray + r_gray <= 1:
+            # at least one of the gray scaler is hanging over air
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=rotate_time,
                            t_multiplier=0.6)
-        elif edge_fl_sensor < edge_a:
+        elif edge_fl_sensor < edge_baseline:
+            """
+            [fl]         fr
+                O-----O
+                   |
+                O-----O
+            rl           rr
+            
+            front-left encounters the edge, turn right,turn type is 1
+            """
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=rotate_time,
                            t_multiplier=0.6, turn_type=1)
 
-        elif edge_fr_sensor < edge_a:
+        elif edge_fr_sensor < edge_baseline:
+            """
+            fl          [fr]
+                O-----O
+                   |
+                O-----O
+            rl           rr
+            
+            front-right encounters the edge, turn left,turn type is 0
+            """
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=rotate_time,
                            t_multiplier=0.6, turn_type=0)
 
-        elif edge_rl_sensor < edge_a:
+        elif edge_rl_sensor < edge_baseline:
+            """
+            fl           fr
+                O-----O
+                   |
+                O-----O
+            [rl]         rr
+
+            rear-left encounters the edge, turn right,turn type is 1
+            """
             self.action_T(turn_type=1)
 
-        elif edge_rr_sensor < edge_a:
+        elif edge_rr_sensor < edge_baseline:
+            """
+            fl           fr
+                O-----O
+                   |
+                O-----O
+            rl          [rr]
+
+            rear-right encounters the edge, turn left,turn type is 0
+            """
             self.action_T(turn_type=0)
 
     def load_config(self, config_path: str):
@@ -343,7 +391,7 @@ class BattleBot:
             while True:
                 adc_list = self.controller.ADC_Get_All_Channel()
                 io_list = self.controller.ADC_IO_GetAllInputLevel(make_str_list=False)
-                self.normal_behave(adc_list, io_list, edge_a=1650, edge_multiplier=0.6)
+                self.normal_behave(adc_list, io_list, edge_baseline=1650, edge_multiplier=0.6)
                 self.check_surround(adc_list, )
                 self.controller.move_cmd(normal_spead, normal_spead)
                 delay_ms(interval)
