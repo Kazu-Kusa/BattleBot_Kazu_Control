@@ -1,5 +1,12 @@
 import time
 from typing import Callable
+from time import perf_counter_ns
+
+
+def PD_control(controller_func: Callable[[int, int], None],
+               evaluator_func: Callable[[float, float], float],
+               Kp: float = 80, Kd: float = 16):
+    """"""
 
 
 class PIDController:
