@@ -191,14 +191,15 @@ class BattleBot:
         delay_ms(turn_time)
 
     def normal_behave(self, adc_list: list[int], io_list: list[int], edge_baseline: int = 1680,
-                      edge_multiplier: float = 0):
+                      edge_speed_multiplier: float = 0) -> bool:
         """
         handles the normal edge case using both adc_list and io_list.
         but well do not do anything if no edge case
+        :param edge_speed_multiplier:
         :param adc_list:the list of adc devices returns
         :param io_list:the list of io devices returns
         :param edge_baseline: the edge_check baseline
-        :return:
+        :return: if encounter the edge
         """
         # change the light color to represent current state, state of in normal behave
         self.screen.ADC_Led_SetColor(0, self.screen.COLOR_BLUE)
@@ -216,9 +217,9 @@ class BattleBot:
         # use the sum of their returns to get the high_speed
         # the closer to the edge ,the slower the wheels rotates
         high_spead = edge_rl_sensor + edge_fl_sensor + edge_fr_sensor + edge_rr_sensor
-        if edge_multiplier:
+        if edge_speed_multiplier:
             # multiplier to adjust the high_speed
-            high_spead = int(high_spead * edge_multiplier)
+            high_spead = int(high_spead * edge_speed_multiplier)
 
         # fixed action duration
         backing_time = 180
@@ -229,6 +230,7 @@ class BattleBot:
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=rotate_time,
                            t_multiplier=0.6)
+            return True
         elif edge_fl_sensor < edge_baseline:
             """
             [fl]         fr
@@ -242,6 +244,7 @@ class BattleBot:
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=rotate_time,
                            t_multiplier=0.6, turn_type=1)
+            return True
 
         elif edge_fr_sensor < edge_baseline:
             """
@@ -256,6 +259,7 @@ class BattleBot:
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=rotate_time,
                            t_multiplier=0.6, turn_type=0)
+            return True
 
         elif edge_rl_sensor < edge_baseline:
             """
@@ -268,7 +272,7 @@ class BattleBot:
             rear-left encounters the edge, turn right,turn type is 1
             """
             self.action_T(turn_type=1)
-
+            return True
         elif edge_rr_sensor < edge_baseline:
             """
             fl           fr
@@ -280,6 +284,9 @@ class BattleBot:
             rear-right encounters the edge, turn left,turn type is 0
             """
             self.action_T(turn_type=0)
+            return True
+        else:
+            return False
 
     def load_config(self, config_path: str):
         """
@@ -416,12 +423,13 @@ class BattleBot:
             self.wait_start(baseline=1800, with_turn=False)
             while True:
                 # update the sensors data
+                # TODO: these two functions could be combined
                 adc_list = self.controller.ADC_Get_All_Channel()
                 io_list = self.controller.ADC_IO_GetAllInputLevel(make_str_list=False)
 
                 # normal behave includes all edge encounter solution
                 # if encounters edge,must deal with it first
-                self.normal_behave(adc_list, io_list, edge_baseline=1650, edge_multiplier=0.6)
+                self.normal_behave(adc_list, io_list, edge_baseline=1650, edge_speed_multiplier=0.6)
 
                 # TODO: no, i forget to update the sensor data here
                 # if no edge is encountered then check if there are anything surrounding
@@ -431,7 +439,7 @@ class BattleBot:
                 # if no edge is encountered and nothing surrounding, then just keep moving up
                 self.controller.move_cmd(normal_spead, normal_spead)
 
-                # loop delay,this is to prevent sending to many cmds to driver causing jam
+                # loop delay,this is to prevent sending too many cmds to driver causing jam
                 delay_ms(interval)
 
         except KeyboardInterrupt:
