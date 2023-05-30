@@ -179,10 +179,6 @@ class BattleBot:
         :param offset_angle: positive for wise, negative for counter-wise
         :return:
         """
-        current_angle = self.controller.atti_all[2]
-        target_angle = calculate_relative_angle(current_angle=current_angle, offset_angle=offset_angle)
-        direction = determine_direction(current_angle=current_angle, target_angle=target_angle)
-        print(f'current_angle: {current_angle},target_angle: {target_angle}')
 
         def control(left: int, right: int) -> None:
             self.controller.move_cmd(left, right)
@@ -190,12 +186,17 @@ class BattleBot:
         def evaluate() -> float:
             return self.controller.atti_all[2]
 
+        current_angle = evaluate()
+        target_angle = calculate_relative_angle(current_angle=current_angle, offset_angle=offset_angle)
+
+        print(f'current_angle: {current_angle},target_angle: {target_angle}')
+
         PD_control(controller_func=control,
                    evaluator_func=evaluate,
                    error_func=compute_error,
                    target=target_angle,
                    Kp=20, Kd=300,
-                   cs_limit=500, target_tolerance=10, direction=direction)
+                   cs_limit=500, target_tolerance=10)
 
     def action_T(self, turn_type: int = randint(0, 1), turn_speed: int = 5000, turn_time: int = 130,
                  multiplier: float = 0):
