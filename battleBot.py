@@ -291,11 +291,17 @@ class BattleBot:
         pass
 
     def on_ally_box(self, speed: int = 5000, multiplier: float = 0):
+        """
+        the action that will be executed on the event when encountering ally box
+        :param speed: the desired speed
+        :param multiplier: the desired speed multiplier
+        :return:
+        """
         self.action_T(turn_speed=speed, multiplier=multiplier)
 
     def check_surround(self, adc_list: list[int], baseline=2000):
         """
-
+        checks sensors to get surrounding objects
         :param adc_list:
         :param baseline:
         :return:
@@ -318,6 +324,13 @@ class BattleBot:
             self.on_thing_surrounding(3)
 
     def util_edge(self, using_gray: bool = True, using_edge_sensor: bool = False, edge_a: int = 1800):
+        """
+        a conditioned delay function ,will delay util the condition is satisfied
+        :param using_gray: use the gray the judge if the condition is satisfied
+        :param using_edge_sensor: use the edge sensors to judge if the condition is satisfied
+        :param edge_a: edge sensors judge baseline
+        :return:
+        """
         if using_gray:
             io_list = self.controller.ADC_IO_GetAllInputLevel(make_str_list=False)
             while int(io_list[6]) + int(io_list[7]) > 1:
@@ -328,6 +341,13 @@ class BattleBot:
                 adc_list = self.controller.ADC_Get_All_Channel()
 
     def on_enemy_box(self, speed: int = 8000, multiplier: float = 0):
+        """
+        the action that will be executed on the event when encountering enemy box
+        :param speed:
+        :param multiplier:
+        :return:
+        """
+
         if multiplier:
             speed = int(multiplier * speed)
         self.controller.move_cmd(speed, speed)
@@ -337,6 +357,12 @@ class BattleBot:
         self.controller.move_cmd(0, 0)
 
     def on_enemy_car(self, speed: int = 8000, multiplier: float = 0):
+        """
+        the action that will be executed on the event when encountering enemy car
+        :param speed:
+        :param multiplier:
+        :return:
+        """
         if multiplier:
             speed = int(multiplier * speed)
         self.controller.move_cmd(speed, speed)
@@ -401,6 +427,12 @@ class BattleBot:
             print('exiting')
 
     def wait_start(self, baseline: int = 1800, with_turn: bool = False):
+        """
+        hold still util the start signal is received
+        :param baseline:
+        :param with_turn:
+        :return:
+        """
         while True:
             print('holding')
             delay_ms(150)
