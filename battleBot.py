@@ -339,13 +339,13 @@ class BattleBot:
         :return:
         """
         if using_gray:
-            io_list = self.controller.ADC_IO_GetAllInputLevel(make_str_list=False)
+            io_list = self.controller.io_all_channels(make_str_list=False)
             while int(io_list[6]) + int(io_list[7]) > 1:
-                io_list = self.controller.ADC_IO_GetAllInputLevel(make_str_list=False)
+                io_list = self.controller.io_all_channels(make_str_list=False)
         elif using_edge_sensor:
-            adc_list = self.controller.ADC_Get_All_Channel()
+            adc_list = self.controller.adc_all_channels()
             while adc_list[1] < edge_a or adc_list[2] < edge_a:
-                adc_list = self.controller.ADC_Get_All_Channel()
+                adc_list = self.controller.adc_all_channels()
 
     def on_enemy_box(self, speed: int = 8000, multiplier: float = 0):
         """
@@ -424,8 +424,8 @@ class BattleBot:
             while True:
                 # update the sensors data
                 # TODO: these two functions could be combined
-                adc_list = self.controller.ADC_Get_All_Channel()
-                io_list = self.controller.ADC_IO_GetAllInputLevel(make_str_list=False)
+                adc_list = self.controller.adc_all_channels
+                io_list = self.controller.io_all_channels
 
                 # normal behave includes all edge encounter solution
                 # if encounters edge,must deal with it first
@@ -457,7 +457,7 @@ class BattleBot:
         while True:
             print('holding')
             delay_ms(150)
-            temp_list = self.controller.ADC_Get_All_Channel()
+            temp_list = self.controller.adc_all_channels()
             if temp_list[8] > baseline and temp_list[7] > baseline:
                 print('dashing')
                 self.controller.move_cmd(-30000, -30000)
