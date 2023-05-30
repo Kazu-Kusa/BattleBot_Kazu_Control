@@ -4,9 +4,39 @@ from time import perf_counter_ns
 
 
 def PD_control(controller_func: Callable[[int, int], None],
-               evaluator_func: Callable[[float, float], float],
-               Kp: float = 80, Kd: float = 16):
+               evaluator_func: Callable[[], float],
+               error_func: Callable[[float, float], float],
+               target: float,
+               Kp: float = 80, Kd: float = 16,
+               cs_limit: float = 2000, target_tolerance: float = 15,
+               invert_direction: bool = False):
     """"""
+    left_sign = 1
+    right_sign = -1
+    if invert_direction:
+        left_sign = -1
+        right_sign = 1
+    last_state = evaluator_func()
+    last_time = perf_counter_ns()
+    current_error = error_func(last_state, target)
+
+    if current_error < target_tolerance and Kp * current_error < cs_limit:
+        # control strength is small and current state is near the target
+        return
+
+    while True:
+        current_state = evaluator_func()
+        current_time = perf_counter_ns()
+
+        current_error = error_func(current_state, target)
+
+        d_target = (current_state - last_state) / (current_time - last_time)
+
+        control_strength = int(Kp * current_error + Kd * d_target)
+
+        controller_func(left_sign * control_strength, right_sign * control_strength)
+
+        last_time = current_time
 
 
 class PIDController:
@@ -27,7 +57,7 @@ class PIDController:
             total_error (float): 偏差的累积和
             last_error (float): 上一时刻的偏差
             last_time (float): 上一次更新时间，以秒为单位
-            tolerance (float): 容许误差门限值（单位与 Error 值相同）
+            cs_limit (float): 容许误差门限值（单位与 Error 值相同）
         """
         self.Kp = Kp
         self.Ki = Ki
