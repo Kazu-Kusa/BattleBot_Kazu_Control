@@ -49,7 +49,8 @@ def PD_control(controller_func: Callable[[int, int], None],
             break
         controller_func(left_sign * control_strength, right_sign * control_strength)
 
-        last_time = current_time
+        last_state = current_state  # 更新前一个状态
+        last_time = current_time  # 更新前一个时间
 
 
 class PIDController:
