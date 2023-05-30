@@ -195,8 +195,7 @@ class BattleBot:
                    error_func=compute_error,
                    target=target_angle,
                    Kp=20, Kd=300,
-                   cs_limit=500, target_tolerance=10, direction=direction,
-                   logging=False)
+                   cs_limit=500, target_tolerance=10, direction=direction)
 
     def action_T(self, turn_type: int = randint(0, 1), turn_speed: int = 5000, turn_time: int = 130,
                  multiplier: float = 0):
