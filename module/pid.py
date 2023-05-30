@@ -3,6 +3,7 @@ from typing import Callable
 from time import perf_counter_ns
 
 
+# TODO: both PD and PID  are haven't react properly on direction change
 def PD_control(controller_func: Callable[[int, int], None],
                evaluator_func: Callable[[], float],
                error_func: Callable[[float, float, int], float],
