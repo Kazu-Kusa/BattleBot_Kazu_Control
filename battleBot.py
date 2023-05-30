@@ -7,7 +7,8 @@ from repo.uptechStar.module.timer import delay_ms
 import cv2
 from apriltag import Detector, DetectorOptions
 from repo.uptechStar.module.screen import Screen
-from module.algrithm_tools import compute_error
+from module.algrithm_tools import compute_error, determine_direction, calculate_relative_angle
+from module.pid import PD_control
 
 
 class BattleBot:
@@ -171,6 +172,29 @@ class BattleBot:
             self.controller.move_cmd(-turn_speed, turn_speed)
         delay_ms(turn_time)
         self.controller.move_cmd(0, 0)
+
+    def action_T_PD(self, offset_angle: float = 90):
+        """
+
+        :param offset_angle: positive for wise, negative for counter-wise
+        :return:
+        """
+        current_angle = self.controller.atti_all[2]
+        target_angle = calculate_relative_angle(current_angle=current_angle, offset_angle=offset_angle)
+        direction = determine_direction(current_angle=current_angle, target_angle=target_angle)
+
+        def control(left, right):
+            self.controller.move_cmd(left, right)
+
+        def evaluate():
+            return self.controller.atti_all[2]
+
+        PD_control(controller_func=control,
+                   evaluator_func=evaluate,
+                   error_func=compute_error,
+                   target=target_angle,
+                   Kp=20, Kd=16,
+                   cs_limit=2000, target_tolerance=15, direction=direction)
 
     def action_T(self, turn_type: int = randint(0, 1), turn_speed: int = 5000, turn_time: int = 130,
                  multiplier: float = 0):
