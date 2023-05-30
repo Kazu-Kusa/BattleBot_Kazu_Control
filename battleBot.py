@@ -15,6 +15,11 @@ class BattleBot:
     tag_detector = Detector(DetectorOptions(families='tag36h11')).detect
 
     def __init__(self, config_path: str = './config.json', team_color: str = 'blue'):
+        """
+
+        :param config_path: the path to the config,but it hasn't been put into use
+        :param team_color:
+        """
         self.load_config(config_path=config_path)
 
         self._tag_id = -1
@@ -27,6 +32,14 @@ class BattleBot:
         self.apriltag_detect_start()
 
     def _set_tags(self, team_color: str = 'blue'):
+        """
+        set the ally/enemy tag according the team color
+
+        blue: ally: 1 ; enemy: 2
+        yellow: ally: 2 ; enemy: 1
+        :param team_color: blue or yellow
+        :return:
+        """
         if team_color == 'blue':
             self._enemy_tag = 2
             self._ally_tag = 1
@@ -35,6 +48,10 @@ class BattleBot:
             self._ally_tag = 2
 
     def apriltag_detect_start(self):
+        """
+        start the tag-detection thread and set it to daemon
+        :return:
+        """
         apriltag_detect = threading.Thread(target=self.apriltag_detect_thread)
         apriltag_detect.daemon = True
         apriltag_detect.start()
@@ -42,10 +59,19 @@ class BattleBot:
     # region properties
     @property
     def tag_id(self):
+        """
+
+        :return:  current tag id
+        """
         return self._tag_id
 
     @tag_id.setter
     def tag_id(self, new_tag_id: int):
+        """
+        setter for  current tag id
+        :param new_tag_id:
+        :return:
+        """
         self._tag_id = new_tag_id
 
     @property
@@ -54,6 +80,11 @@ class BattleBot:
 
     @tag_monitor_switch.setter
     def tag_monitor_switch(self, switch: bool):
+        """
+        setter for the switch
+        :param switch:
+        :return:
+        """
         self._tag_monitor_switch = switch
 
     @property
@@ -115,12 +146,14 @@ class BattleBot:
                   turn_type: int = randint(0, 1)):
         """
         function that execute the action of  backwards and turns
-        :param back_speed:
-        :param back_time:
-        :param turn_speed:
-        :param turn_time:
-        :param b_multiplier:
-        :param t_multiplier:
+        open loop,actualized by delaying functions
+        :param back_speed: the desired back speed,absolute value
+        :param back_time:the desired duration of fall backing motion
+        :param turn_speed:the desired turn speed,absolute value
+        :param turn_time:the desired duration of turning motion
+        :param b_multiplier: the multiplier that will be applied to the back_speed
+        :param t_multiplier:the multiplier that will be applied to the turn_speed
+        if no multiplier is provided ,then the actual speed will be same as the entered params
         :param turn_type: 0 for left,1 for right,default random
         :return:
         """
