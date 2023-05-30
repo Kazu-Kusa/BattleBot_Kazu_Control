@@ -44,7 +44,9 @@ def PD_control(controller_func: Callable[[int, int], None],
         d_target = (current_state - last_state) / (current_time - last_time)
 
         control_strength = int(Kp * current_error + Kd * d_target)
-
+        if current_error < target_tolerance and control_strength < cs_limit:
+            controller_func(0, 0)
+            break
         controller_func(left_sign * control_strength, right_sign * control_strength)
 
         last_time = current_time
