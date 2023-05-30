@@ -1,16 +1,18 @@
-def compute_error(current_angle: float, target_angle: float, direction=1) -> float:
+def compute_error(current_angle: float, target_angle: float) -> float:
     """
-    计算当前角度与目标角度之间的角度偏差。
+    计算当前角度与目标角度之间的相对角度。取劣弧，顺时针为正
     :param current_angle: 当前角度，单位：度数。取值范围 [-180, 180]
     :param target_angle: 目标角度，单位：度数。取值范围 [-180, 180]
-    :param direction: 方向，1 表示顺时针，-1 表示逆时针。
-    :return: 当前角度到目标角度的角度差，单位：度数，取值范围：[-180, 180]
+    :return: 当前角度到目标角度的相对角度，单位：度数，取值范围：[-180, 180]
     """
     angle_diff = (target_angle - current_angle) % 360
+
     if angle_diff > 180:
         angle_diff -= 360
+    elif angle_diff <= -180:
+        angle_diff += 360
 
-    return angle_diff * direction
+    return angle_diff
 
 
 def calculate_relative_angle(current_angle: float, offset_angle: float) -> float:
