@@ -53,6 +53,60 @@ def PD_control(controller_func: Callable[[int, int], None],
         last_time = current_time  # 更新前一个时间
 
 
+def PID_control(controller_func: Callable[[int, int], None],
+                evaluator_func: Callable[[], float],
+                error_func: Callable[[float, float, int], float],
+                target: float,
+                Kp: float = 80, Kd: float = 16, Ki: float = 2,
+                cs_limit: float = 2000, target_tolerance: float = 15,
+                direction: int = 1):
+    """
+    PID controller designed to control the action-T using MPU-6500
+
+    :param controller_func:
+    :param evaluator_func:
+    :param error_func:
+    :param target:
+    :param Kp:
+    :param Kd:
+    :param Ki:
+    :param cs_limit:
+    :param target_tolerance:
+    :param direction:
+    :return:
+    """
+
+    left_sign = direction
+    right_sign = -direction
+
+    last_state = evaluator_func()
+    last_time = perf_counter_ns()
+    current_error = error_func(last_state, target, direction)
+
+    if current_error < target_tolerance and Kp * current_error < cs_limit:
+        # control strength is small and current state is near the target
+        return
+    i_error = 0
+    while True:
+        current_state = evaluator_func()
+        current_time = perf_counter_ns()
+
+        current_error = error_func(current_state, target, direction)
+        delta_time = current_time - last_time
+
+        d_target = (current_state - last_state) / delta_time
+        i_error += current_error * delta_time
+
+        control_strength = int(Kp * current_error + Kd * d_target + Ki * i_error)
+        if current_error < target_tolerance and control_strength < cs_limit:
+            controller_func(0, 0)
+            break
+        controller_func(left_sign * control_strength, right_sign * control_strength)
+
+        last_state = current_state
+        last_time = current_time
+
+
 class PIDController:
     """
     它包含一个 update 函数，接收所期望的目标值（setpoint）和测量的当前值（measured_value）。
