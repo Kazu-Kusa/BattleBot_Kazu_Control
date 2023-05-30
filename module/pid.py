@@ -24,9 +24,6 @@ def PD_control(controller_func: Callable[[int, int], None],
     :return:
     """
 
-    left_sign = direction
-    right_sign = -direction
-
     last_state = evaluator_func()
     last_time = perf_counter_ns()
     current_error = error_func(last_state, target, direction)
@@ -47,7 +44,7 @@ def PD_control(controller_func: Callable[[int, int], None],
         if current_error < target_tolerance and control_strength < cs_limit:
             controller_func(0, 0)
             break
-        controller_func(left_sign * control_strength, right_sign * control_strength)
+        controller_func(direction * control_strength, -direction * control_strength)
 
         last_state = current_state  # 更新前一个状态
         last_time = current_time  # 更新前一个时间
@@ -76,9 +73,6 @@ def PID_control(controller_func: Callable[[int, int], None],
     :return:
     """
 
-    left_sign = direction
-    right_sign = -direction
-
     last_state = evaluator_func()
     last_time = perf_counter_ns()
     current_error = error_func(last_state, target, direction)
@@ -101,7 +95,7 @@ def PID_control(controller_func: Callable[[int, int], None],
         if current_error < target_tolerance and control_strength < cs_limit:
             controller_func(0, 0)
             break
-        controller_func(left_sign * control_strength, right_sign * control_strength)
+        controller_func(direction * control_strength, -direction * control_strength)
 
         last_state = current_state
         last_time = current_time
