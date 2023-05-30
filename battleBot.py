@@ -339,9 +339,9 @@ class BattleBot:
         :return:
         """
         if using_gray:
-            io_list = self.controller.io_all_channels(make_str_list=False)
+            io_list = self.controller.io_all_channels
             while int(io_list[6]) + int(io_list[7]) > 1:
-                io_list = self.controller.io_all_channels(make_str_list=False)
+                io_list = self.controller.io_all_channels
         elif using_edge_sensor:
             adc_list = self.controller.adc_all_channels
             while adc_list[1] < edge_a or adc_list[2] < edge_a:
