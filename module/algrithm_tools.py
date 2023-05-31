@@ -1,5 +1,22 @@
 import random
 
+import numpy as np
+
+
+class MovingAverage:
+    def __init__(self, size):
+        self.queue = np.zeros(size)  # 定义队列
+        self.current_size = 0  # 记录有效元素个数
+
+    def next(self, val):
+        if self.current_size < len(self.queue):
+            self.current_size += 1
+
+        self.queue[:-1] = self.queue[1:]  # 将队列往前移动
+        self.queue[-1] = val  # 将最新的值添加到队列中
+
+        return self.queue.sum() / self.current_size  # 计算滑动窗口范围内的平均值
+
 
 def compute_relative_error(current_angle: float, target_angle: float) -> list[float]:
     """
