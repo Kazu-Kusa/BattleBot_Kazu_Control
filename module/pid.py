@@ -1,9 +1,16 @@
 import time
 from typing import Callable
 from time import perf_counter_ns
-from ..repo.uptechStar.module.timer import delay_ms
 
-from algrithm_tools import MovingAverage
+from .algrithm_tools import MovingAverage
+
+
+def delay_ms(milliseconds: int):
+    start = perf_counter_ns()
+    while True:
+        elapsed = (perf_counter_ns() - start) // 1000000
+        if elapsed > milliseconds:
+            break
 
 
 # TODO: both PD and PID  are haven't react properly on direction change
@@ -63,7 +70,7 @@ def PID_control(controller_func: Callable[[int, int], None],
                 target: float,
                 Kp: float = 80, Kd: float = 16, Ki: float = 2,
                 cs_limit: float = 2000, target_tolerance: float = 15,
-                smooth_window_size: int = 4):
+                smooth_window_size: int = 4, delay: int = 1):
     """
     PID controller designed to control the action-T using MPU-6500
 
@@ -107,6 +114,7 @@ def PID_control(controller_func: Callable[[int, int], None],
 
         last_state = current_state_MA
         last_time = current_time
+        delay_ms(delay)
 
 
 class PIDController:
