@@ -1,18 +1,42 @@
-def compute_error(current_angle: float, target_angle: float) -> float:
-    """
-    计算当前角度与目标角度之间的相对角度。取劣弧，顺时针为正
-    :param current_angle: 当前角度，单位：度数。取值范围 [-180, 180]
-    :param target_angle: 目标角度，单位：度数。取值范围 [-180, 180]
-    :return: 当前角度到目标角度的相对角度，单位：度数，取值范围：[-180, 180]
-    """
-    angle_diff = (target_angle - current_angle) % 360
+import random
 
-    if angle_diff > 180:
-        angle_diff -= 360
-    elif angle_diff <= -180:
-        angle_diff += 360
 
-    return angle_diff
+def compute_relative_error(current_angle: float, target_angle: float) -> list[float]:
+    """
+        计算当前角度与目标角度之间相对角度误差
+        :param current_angle: 当前角度，取值范围[-180, 180]
+        :param target_angle: 目标角度，取值范围[-180, 180]
+        :return: 返回一个列表，第一位是需要顺时针旋转的角度值，第二位是需要逆时针旋转的角度值
+        """
+    ab_dst = abs(current_angle - target_angle)  # 绝对角度差
+    if current_angle > target_angle:
+        return [360 - ab_dst, -ab_dst]
+    else:
+        return [ab_dst, ab_dst - 360]
+
+
+def compute_inferior_arc(current_angle: float, target_angle: float) -> float:
+    """
+    计算当前角度到目标角度的顺时针方向和逆时针方向之间的较小夹角
+    顺时针转动是+
+    你是正转动是-
+    :param current_angle: 当前角度，取值范围[-180, 180]
+    :param target_angle: 目标角度，取值范围[-180, 180]
+    :return: 返回值代表着沿着箭头前进从当前角度到目标角度最短的路径经过的弧度
+    """
+    ab_dst = abs(current_angle - target_angle)  # 找出两个角度差值的绝对值
+    if ab_dst > 180:
+        # 绝对角度差是优弧
+        if current_angle > target_angle:
+            return 360 - ab_dst  # 需要顺时针转动劣弧的距离
+        else:
+            return ab_dst - 360  # 需要逆时针转动劣弧的距离
+    else:
+        # 绝对角度差是劣弧
+        if current_angle > target_angle:
+            return -ab_dst  # 需要逆时针转动劣弧的距离
+        else:
+            return ab_dst  # 需要顺时针转动劣弧的距离
 
 
 def calculate_relative_angle(current_angle: float, offset_angle: float) -> float:
