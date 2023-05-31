@@ -1,6 +1,9 @@
 import time
 from typing import Callable
 from time import perf_counter_ns
+from ..repo.uptechStar.module.timer import delay_ms
+
+from algrithm_tools import MovingAverage
 
 
 # TODO: both PD and PID  are haven't react properly on direction change
@@ -9,9 +12,11 @@ def PD_control(controller_func: Callable[[int, int], None],
                error_func: Callable[[float, float], float],
                target: float,
                Kp: float = 80, Kd: float = 16,
-               cs_limit: float = 2000, target_tolerance: float = 15):
+               cs_limit: float = 2000, target_tolerance: float = 15,
+               smooth_window_size: int = 4):
     """
     PD controller designed to control the action-T using MPU-6500
+    :param smooth_window_size:
     :param controller_func:
     :param evaluator_func:
     :param error_func:
@@ -31,22 +36,24 @@ def PD_control(controller_func: Callable[[int, int], None],
         # control strength is small and current state is near the target
         return
 
+    slide_window = MovingAverage(smooth_window_size)
+
     while True:
-        current_state = evaluator_func()
+
+        current_state_MA = slide_window.next(evaluator_func())
         current_time = perf_counter_ns()
 
-        current_error = error_func(current_state, target)
+        current_error = error_func(current_state_MA, target)
 
-        d_target = (current_state - last_state) / (current_time - last_time)
+        d_target = (current_state_MA - last_state) / (current_time - last_time)
 
         control_strength = int(Kp * current_error + Kd * d_target)
-
         if abs(current_error) < target_tolerance and control_strength < cs_limit:
             controller_func(0, 0)
             break
         controller_func(control_strength, -control_strength)
 
-        last_state = current_state  # 更新前一个状态
+        last_state = current_state_MA  # 更新前一个状态
         last_time = current_time  # 更新前一个时间
 
 
