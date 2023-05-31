@@ -62,7 +62,8 @@ def PID_control(controller_func: Callable[[int, int], None],
                 error_func: Callable[[float, float], float],
                 target: float,
                 Kp: float = 80, Kd: float = 16, Ki: float = 2,
-                cs_limit: float = 2000, target_tolerance: float = 15):
+                cs_limit: float = 2000, target_tolerance: float = 15,
+                smooth_window_size: int = 4):
     """
     PID controller designed to control the action-T using MPU-6500
 
@@ -85,15 +86,17 @@ def PID_control(controller_func: Callable[[int, int], None],
     if current_error < target_tolerance and Kp * current_error < cs_limit:
         # control strength is small and current state is near the target
         return
+    slide_window = MovingAverage(smooth_window_size)
     i_error = 0
     while True:
-        current_state = evaluator_func()
+        current_state_MA = slide_window.next(evaluator_func())
+
         current_time = perf_counter_ns()
 
-        current_error = error_func(current_state, target)
+        current_error = error_func(current_state_MA, target)
         delta_time = current_time - last_time
 
-        d_target = (current_state - last_state) / delta_time
+        d_target = (current_state_MA - last_state) / delta_time
         i_error += current_error * delta_time
 
         control_strength = int(Kp * current_error + Kd * d_target + Ki * i_error)
@@ -102,7 +105,7 @@ def PID_control(controller_func: Callable[[int, int], None],
             break
         controller_func(control_strength, -control_strength)
 
-        last_state = current_state
+        last_state = current_state_MA
         last_time = current_time
 
 
