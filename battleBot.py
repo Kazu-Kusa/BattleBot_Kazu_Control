@@ -182,6 +182,7 @@ class BattleBot:
 
         def control(left: int, right: int) -> None:
             self.controller.move_cmd(left, right)
+            return
 
         def evaluate() -> float:
             return self.controller.atti_all[2]
@@ -195,8 +196,9 @@ class BattleBot:
                     evaluator_func=evaluate,
                     error_func=compute_inferior_arc,
                     target=target_angle,
-                    Kp=20, Kd=300, Ki=2,
-                    cs_limit=500, target_tolerance=10)
+                    Kp=7, Kd=600, Ki=6e-09,
+                    cs_limit=1000, target_tolerance=20,
+                    delay=1, smooth_window_size=4)
 
     def action_T_PD(self, offset_angle: float = 90):
         """
@@ -220,8 +222,8 @@ class BattleBot:
                    evaluator_func=evaluate,
                    error_func=compute_inferior_arc,
                    target=target_angle,
-                   Kp=20, Kd=300,
-                   cs_limit=500, target_tolerance=10)
+                   Kp=3, Kd=500,
+                   cs_limit=1500, target_tolerance=13)
 
     def action_T(self, turn_type: int = randint(0, 1), turn_speed: int = 5000, turn_time: int = 130,
                  multiplier: float = 0):
@@ -529,7 +531,7 @@ class BattleBot:
 
             if self.controller.adc_all_channels[7] > 1600:
                 print('rotates')
-                self.action_T_PD(80)
+                self.action_T_PID(80)
 
 
 if __name__ == '__main__':
