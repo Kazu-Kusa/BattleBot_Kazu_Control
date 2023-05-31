@@ -7,7 +7,7 @@ from repo.uptechStar.module.timer import delay_ms
 import cv2
 from apriltag import Detector, DetectorOptions
 from repo.uptechStar.module.screen import Screen
-from module.algrithm_tools import compute_error, determine_direction, calculate_relative_angle
+from module.algrithm_tools import compute_inferior_arc, calculate_relative_angle
 from module.pid import PD_control, PID_control
 
 
@@ -193,7 +193,7 @@ class BattleBot:
 
         PID_control(controller_func=control,
                     evaluator_func=evaluate,
-                    error_func=compute_error,
+                    error_func=compute_inferior_arc,
                     target=target_angle,
                     Kp=20, Kd=300, Ki=2,
                     cs_limit=500, target_tolerance=10)
@@ -218,7 +218,7 @@ class BattleBot:
 
         PD_control(controller_func=control,
                    evaluator_func=evaluate,
-                   error_func=compute_error,
+                   error_func=compute_inferior_arc,
                    target=target_angle,
                    Kp=20, Kd=300,
                    cs_limit=500, target_tolerance=10)
