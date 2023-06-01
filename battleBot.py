@@ -198,7 +198,7 @@ class BattleBot:
                     target=target_angle,
                     Kp=7, Kd=600, Ki=6e-09,
                     cs_limit=1000, target_tolerance=20,
-                    delay=1, smooth_window_size=4)
+                    smooth_window_size=4)
 
     def action_T_PD(self, offset_angle: float = 90):
         """
@@ -538,4 +538,5 @@ if __name__ == '__main__':
     bot = BattleBot()
     bot.controller.move_cmd(0, 0)
     # breakpoint()
-    bot.Battle(interval=2, normal_spead=3500)
+    # bot.Battle(interval=2, normal_spead=3500)
+    bot.test_run()
