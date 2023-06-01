@@ -7,8 +7,8 @@ from repo.uptechStar.module.timer import delay_ms
 import cv2
 from apriltag import Detector, DetectorOptions
 from repo.uptechStar.module.screen import Screen
-from module.algrithm_tools import compute_inferior_arc, calculate_relative_angle
-from module.pid import PD_control, PID_control
+from repo.uptechStar.module.algrithm_tools import compute_inferior_arc, calculate_relative_angle
+from repo.uptechStar.module.pid import PD_control, PID_control
 
 
 class BattleBot:
