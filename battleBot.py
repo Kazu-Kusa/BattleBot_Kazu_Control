@@ -173,32 +173,38 @@ class BattleBot:
         delay_ms(turn_time)
         self.controller.move_cmd(0, 0)
 
-    def action_T_PID(self, offset_angle: float = 90):
+    def action_T_PID(self, offset_angle: float = 90, step: int = 2):
         """
 
+        :param step:
         :param offset_angle: positive for wise, negative for counter-wise
         :return:
         """
 
         def control(left: int, right: int) -> None:
             self.controller.move_cmd(left, right)
-            return
+            # print(left)
 
         def evaluate() -> float:
-            return self.controller.atti_all[2]
+            temp = self.controller.atti_all[2]
 
-        current_angle = evaluate()
-        target_angle = calculate_relative_angle(current_angle=current_angle, offset_angle=offset_angle)
+            return temp
 
-        print(f'current_angle: {current_angle},target_angle: {target_angle}')
+        step_len = offset_angle / step
+        for _ in range(step):
+            current_angle = evaluate()
+            target_angle = calculate_relative_angle(current_angle=current_angle, offset_angle=step_len)
 
-        PID_control(controller_func=control,
-                    evaluator_func=evaluate,
-                    error_func=compute_inferior_arc,
-                    target=target_angle,
-                    Kp=7, Kd=600, Ki=6e-09,
-                    cs_limit=1000, target_tolerance=20,
-                    smooth_window_size=4)
+            print(f'current_angle: {current_angle},target_angle: {target_angle}')
+
+            PID_control(controller_func=control,
+                        evaluator_func=evaluate,
+                        error_func=compute_inferior_arc,
+                        target=target_angle,
+                        Kp=14, Kd=16e08, Ki=5e-09,
+                        cs_limit=4000, target_tolerance=40,
+                        smooth_window_size=3, end_pause=False, rip_round=6)
+        self.controller.move_cmd(0, 0)
 
     def action_T_PD(self, offset_angle: float = 90):
         """
@@ -514,14 +520,18 @@ class BattleBot:
             temp_list = self.controller.adc_all_channels
             if temp_list[8] > baseline and temp_list[7] > baseline:
                 print('dashing')
-                self.controller.move_cmd(-30000, -30000)
-                delay_ms(800)
-                self.controller.move_cmd(0, 0)
-                if with_turn:
-                    self.action_T(turn_speed=7000, turn_time=210)
+                self.action_D(with_turn=True)
                 break
 
-    def test_run(self):
+    def action_D(self, dash_speed: int = -20000, dash_time: int = 0.6,
+                 with_turn: bool = False):
+        self.controller.move_cmd(dash_speed, dash_speed)
+        delay_ms(dash_time)
+        self.controller.move_cmd(0, 0)
+        if with_turn:
+            self.action_T(turn_speed=7000, turn_time=210)
+
+    def test_run(self, offset_angle=80):
         print('test')
         self.controller.move_cmd(2000, 2000)
         delay_ms(300)
@@ -531,12 +541,12 @@ class BattleBot:
 
             if self.controller.adc_all_channels[7] > 1600:
                 print('rotates')
-                self.action_T_PID(80)
+                self.action_T_PID(offset_angle)
 
 
 if __name__ == '__main__':
     bot = BattleBot()
     bot.controller.move_cmd(0, 0)
     # breakpoint()
-    # bot.Battle(interval=2, normal_spead=3500)
-    bot.test_run()
+    bot.Battle(interval=3, normal_spead=3200)
+    # bot.test_run()
