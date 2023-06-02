@@ -251,10 +251,12 @@ class BattleBot:
         delay_ms(turn_time)
 
     def normal_behave(self, adc_list: list[int], io_list: list[int], edge_baseline: int = 1680,
-                      edge_speed_multiplier: float = 0) -> bool:
+                      edge_speed_multiplier: float = 0, backing_time: int = 180, rotate_time: int = 130) -> bool:
         """
         handles the normal edge case using both adc_list and io_list.
         but well do not do anything if no edge case
+        :param backing_time:
+        :param rotate_time:
         :param edge_speed_multiplier:
         :param adc_list:the list of adc devices returns
         :param io_list:the list of io devices returns
@@ -282,8 +284,6 @@ class BattleBot:
             high_spead = int(high_spead * edge_speed_multiplier)
 
         # fixed action duration
-        backing_time = 180
-        rotate_time = 130
 
         if l_gray + r_gray <= 1:
             # at least one of the gray scaler is hanging over air
