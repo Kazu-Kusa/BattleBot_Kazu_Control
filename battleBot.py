@@ -276,7 +276,7 @@ class BattleBot:
 
         # use the sum of their returns to get the high_speed
         # the closer to the edge ,the slower the wheels rotates
-        high_spead = edge_rl_sensor + edge_fl_sensor + edge_fr_sensor + edge_rr_sensor
+        high_spead = 4 * min(edge_rl_sensor, edge_fl_sensor, edge_fr_sensor, edge_rr_sensor)
         if edge_speed_multiplier:
             # multiplier to adjust the high_speed
             high_spead = int(high_spead * edge_speed_multiplier)
