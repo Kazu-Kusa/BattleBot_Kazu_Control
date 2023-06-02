@@ -173,6 +173,8 @@ class BattleBot:
                 if watcher_func():
                     self.controller.move_cmd(0, 0)
                     break
+        else:
+            delay_ms(back_time)
 
         if t_multiplier:
             turn_speed = int(turn_speed * t_multiplier)
@@ -299,7 +301,7 @@ class BattleBot:
             # at least one of the gray scaler is hanging over air
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=rotate_time,
-                           t_multiplier=0.6, turn_type=2)
+                           t_multiplier=0.6)
             return True
         elif edge_fl_sensor < edge_baseline:
             """
@@ -530,16 +532,16 @@ class BattleBot:
             temp_list = self.controller.adc_all_channels
             if temp_list[8] > baseline and temp_list[7] > baseline:
                 print('dashing')
-                self.action_D(with_turn=True)
+                self.action_D(with_turn=True, dash_time=600)
                 break
 
-    def action_D(self, dash_speed: int = -20000, dash_time: int = 600,
+    def action_D(self, dash_speed: int = -20000, dash_time: int = 500,
                  with_turn: bool = False):
         self.controller.move_cmd(dash_speed, dash_speed)
         delay_ms(dash_time)
         self.controller.move_cmd(0, 0)
         if with_turn:
-            self.action_T(turn_speed=7000, turn_time=210)
+            self.action_T(turn_speed=7000, turn_time=140)
 
     def test_run(self, offset_angle=80):
         print('test')
@@ -558,5 +560,5 @@ if __name__ == '__main__':
     bot = BattleBot()
     bot.controller.move_cmd(0, 0)
     # breakpoint()
-    bot.Battle(interval=10, normal_spead=2900)
+    bot.Battle(interval=3, normal_spead=2900)
     # bot.test_run()
