@@ -523,7 +523,7 @@ class BattleBot:
                 self.action_D(with_turn=True)
                 break
 
-    def action_D(self, dash_speed: int = -20000, dash_time: int = 0.6,
+    def action_D(self, dash_speed: int = -20000, dash_time: int = 600,
                  with_turn: bool = False):
         self.controller.move_cmd(dash_speed, dash_speed)
         delay_ms(dash_time)
@@ -548,5 +548,5 @@ if __name__ == '__main__':
     bot = BattleBot()
     bot.controller.move_cmd(0, 0)
     # breakpoint()
-    bot.Battle(interval=3, normal_spead=3200)
+    bot.Battle(interval=10, normal_spead=2900)
     # bot.test_run()
