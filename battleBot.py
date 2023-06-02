@@ -1,6 +1,8 @@
 from random import randint
 import threading
 import time
+from typing import Callable
+from time import perf_counter_ns
 from repo.uptechStar.module.up_controller import UpController
 from repo.uptechStar.module.timer import delay_ms
 # from typing import Optional, Union
@@ -145,7 +147,8 @@ class BattleBot:
     def action_BT(self, back_speed: int = 5000, back_time: int = 120,
                   turn_speed: int = 6000, turn_time: int = 120,
                   b_multiplier: float = 0, t_multiplier: float = 0,
-                  turn_type: int = randint(0, 1)):
+                  turn_type: int = randint(0, 1), watch_behind: bool = False,
+                  watcher_func: Callable[[], bool] = None):
         """
         function that execute the action of  backwards and turns
         open loop,actualized by delaying functions
@@ -157,12 +160,19 @@ class BattleBot:
         :param t_multiplier:the multiplier that will be applied to the turn_speed
         if no multiplier is provided ,then the actual speed will be same as the entered params
         :param turn_type: 0 for left,1 for right,default random
+        :param watch_behind:if backing when use watcher
+        :param watcher_func:watcher function returning boolean value,when true,stops the robot
         :return:
         """
         if b_multiplier:
             back_speed = int(back_speed * b_multiplier)
         self.controller.move_cmd(-back_speed, -back_speed)
-        delay_ms(back_time)
+        if watch_behind:
+            end = perf_counter_ns() + back_time * 1000000
+            while perf_counter_ns() < end:
+                if watcher_func():
+                    self.controller.move_cmd(0, 0)
+                    break
 
         if t_multiplier:
             turn_speed = int(turn_speed * t_multiplier)
@@ -289,7 +299,7 @@ class BattleBot:
             # at least one of the gray scaler is hanging over air
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=rotate_time,
-                           t_multiplier=0.6)
+                           t_multiplier=0.6, turn_type=2)
             return True
         elif edge_fl_sensor < edge_baseline:
             """
