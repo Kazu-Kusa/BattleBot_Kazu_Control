@@ -35,30 +35,17 @@ class BattleBot:
 
         self.apriltag_detect_start()
 
-    def _set_tags(self, team_color: str = 'blue'):
+    # region utilities
+    def load_config(self, config_path: str):
         """
-        set the ally/enemy tag according the team color
-
-        blue: ally: 1 ; enemy: 2
-        yellow: ally: 2 ; enemy: 1
-        :param team_color: blue or yellow
+        load configuration form json
+        :param config_path:
         :return:
         """
-        if team_color == 'blue':
-            self._enemy_tag = 2
-            self._ally_tag = 1
-        elif team_color == 'yellow':
-            self._enemy_tag = 1
-            self._ally_tag = 2
 
-    def apriltag_detect_start(self):
-        """
-        start the tag-detection thread and set it to daemon
-        :return:
-        """
-        apriltag_detect = threading.Thread(target=self.apriltag_detect_thread)
-        apriltag_detect.daemon = True
-        apriltag_detect.start()
+        pass
+
+    # endregion
 
     # region properties
     @property
@@ -101,6 +88,33 @@ class BattleBot:
 
     # endregion
 
+    # region tag detection
+    def _set_tags(self, team_color: str = 'blue'):
+        """
+        set the ally/enemy tag according the team color
+
+        blue: ally: 1 ; enemy: 2
+        yellow: ally: 2 ; enemy: 1
+        :param team_color: blue or yellow
+        :return:
+        """
+        if team_color == 'blue':
+            self._enemy_tag = 2
+            self._ally_tag = 1
+        elif team_color == 'yellow':
+            self._enemy_tag = 1
+            self._ally_tag = 2
+
+    def apriltag_detect_start(self):
+        """
+        start the tag-detection thread and set it to daemon
+        :return:
+        """
+        apriltag_detect = threading.Thread(target=self.apriltag_detect_thread,
+                                           name="apriltag_detect_detect")
+        apriltag_detect.daemon = True
+        apriltag_detect.start()
+
     def apriltag_detect_thread(self, single_tag_mode: bool = True, print_tag_id: bool = False,
                                check_interval: int = 50):
         """
@@ -142,8 +156,12 @@ class BattleBot:
                         start_time = time.time()
                 delay_ms(check_interval)
             else:
+                # TODO: This delay may not be correct,since it could cause wrongly activate enemy box action
                 delay_ms(1500)
 
+    # endregion
+
+    # region basic actions
     def action_BT(self, back_speed: int = 5000, back_time: int = 120,
                   turn_speed: int = 6000, turn_time: int = 120,
                   b_multiplier: float = 0, t_multiplier: float = 0,
@@ -262,6 +280,112 @@ class BattleBot:
             self.controller.move_cmd(-turn_speed, turn_speed)
         delay_ms(turn_time)
 
+    def action_D(self, dash_speed: int = -13000, dash_time: int = 500,
+                 with_turn: bool = False):
+        self.controller.move_cmd(dash_speed, dash_speed)
+        delay_ms(dash_time)
+        self.controller.move_cmd(0, 0)
+        if with_turn:
+            self.action_T(turn_speed=7000, turn_time=140)
+
+    # endregion
+
+    # region special actions
+    def wait_start(self, baseline: int = 1800, with_turn: bool = False):
+        """
+        hold still util the start signal is received
+        :param baseline:
+        :param with_turn:
+        :return:
+        """
+        while True:
+            print('holding')
+            delay_ms(150)
+            temp_list = self.controller.adc_all_channels
+            if temp_list[8] > baseline and temp_list[7] > baseline:
+                print('dashing')
+                self.action_D(with_turn=True, dash_time=600)
+                break
+
+    # endregion
+
+    # region events
+    def util_edge(self, using_gray: bool = True, using_edge_sensor: bool = False, edge_a: int = 1800):
+        """
+        a conditioned delay function ,will delay util the condition is satisfied
+        :param using_gray: use the gray the judge if the condition is satisfied
+        :param using_edge_sensor: use the edge sensors to judge if the condition is satisfied
+        :param edge_a: edge sensors judge baseline
+        :return:
+        """
+        if using_gray:
+            io_list = self.controller.io_all_channels
+            while int(io_list[6]) + int(io_list[7]) > 1:
+                io_list = self.controller.io_all_channels
+        elif using_edge_sensor:
+            adc_list = self.controller.adc_all_channels
+            while adc_list[1] < edge_a or adc_list[2] < edge_a:
+                adc_list = self.controller.adc_all_channels
+
+    def on_ally_box(self, speed: int = 5000, multiplier: float = 0):
+        """
+        the action that will be executed on the event when encountering ally box
+        :param speed: the desired speed
+        :param multiplier: the desired speed multiplier
+        :return:
+        """
+        self.action_T(turn_speed=speed, multiplier=multiplier)
+
+    def on_enemy_box(self, speed: int = 8000, multiplier: float = 0):
+        """
+        the action that will be executed on the event when encountering enemy box
+        :param speed:
+        :param multiplier:
+        :return:
+        """
+
+        if multiplier:
+            speed = int(multiplier * speed)
+        self.controller.move_cmd(speed, speed)
+        self.util_edge()
+        self.controller.move_cmd(-speed, -speed)
+        delay_ms(160)
+        self.controller.move_cmd(0, 0)
+
+    def on_enemy_car(self, speed: int = 8000, multiplier: float = 0):
+        """
+        the action that will be executed on the event when encountering enemy car
+        :param speed:
+        :param multiplier:
+        :return:
+        """
+        if multiplier:
+            speed = int(multiplier * speed)
+        self.controller.move_cmd(speed, speed)
+        self.util_edge()
+        if multiplier:
+            speed = int(multiplier * speed)
+        self.controller.move_cmd(-speed, -speed)
+        delay_ms(160)
+        self.controller.move_cmd(0, 0)
+
+    def on_thing_surrounding(self, position_type: int = 0, rotate_time: int = 60, rotate_speed: int = 5000):
+        """
+        0 for left
+        1 for right
+        2 for behind
+        :param rotate_speed:
+        :param rotate_time:
+        :param position_type:
+        :return:
+        """
+        if position_type == 2:
+            self.action_T(turn_speed=rotate_speed, turn_time=rotate_time, multiplier=2)
+        else:
+            self.action_T(turn_type=position_type, turn_speed=rotate_speed, turn_time=rotate_time)
+
+    # endregion
+
     def normal_behave(self, adc_list: list[int], io_list: list[int], edge_baseline: int = 1680,
                       edge_speed_multiplier: float = 0, backing_time: int = 180, rotate_time: int = 130) -> bool:
         """
@@ -360,24 +484,6 @@ class BattleBot:
         else:
             return False
 
-    def load_config(self, config_path: str):
-        """
-        load configuration form json
-        :param config_path:
-        :return:
-        """
-
-        pass
-
-    def on_ally_box(self, speed: int = 5000, multiplier: float = 0):
-        """
-        the action that will be executed on the event when encountering ally box
-        :param speed: the desired speed
-        :param multiplier: the desired speed multiplier
-        :return:
-        """
-        self.action_T(turn_speed=speed, multiplier=multiplier)
-
     def check_surround(self, adc_list: list[int], baseline=2000):
         """
         checks sensors to get surrounding objects
@@ -401,71 +507,6 @@ class BattleBot:
             self.on_thing_surrounding(2)
         elif adc_list[5] > baseline:
             self.on_thing_surrounding(3)
-
-    def util_edge(self, using_gray: bool = True, using_edge_sensor: bool = False, edge_a: int = 1800):
-        """
-        a conditioned delay function ,will delay util the condition is satisfied
-        :param using_gray: use the gray the judge if the condition is satisfied
-        :param using_edge_sensor: use the edge sensors to judge if the condition is satisfied
-        :param edge_a: edge sensors judge baseline
-        :return:
-        """
-        if using_gray:
-            io_list = self.controller.io_all_channels
-            while int(io_list[6]) + int(io_list[7]) > 1:
-                io_list = self.controller.io_all_channels
-        elif using_edge_sensor:
-            adc_list = self.controller.adc_all_channels
-            while adc_list[1] < edge_a or adc_list[2] < edge_a:
-                adc_list = self.controller.adc_all_channels
-
-    def on_enemy_box(self, speed: int = 8000, multiplier: float = 0):
-        """
-        the action that will be executed on the event when encountering enemy box
-        :param speed:
-        :param multiplier:
-        :return:
-        """
-
-        if multiplier:
-            speed = int(multiplier * speed)
-        self.controller.move_cmd(speed, speed)
-        self.util_edge()
-        self.controller.move_cmd(-speed, -speed)
-        delay_ms(160)
-        self.controller.move_cmd(0, 0)
-
-    def on_enemy_car(self, speed: int = 8000, multiplier: float = 0):
-        """
-        the action that will be executed on the event when encountering enemy car
-        :param speed:
-        :param multiplier:
-        :return:
-        """
-        if multiplier:
-            speed = int(multiplier * speed)
-        self.controller.move_cmd(speed, speed)
-        self.util_edge()
-        if multiplier:
-            speed = int(multiplier * speed)
-        self.controller.move_cmd(-speed, -speed)
-        delay_ms(160)
-        self.controller.move_cmd(0, 0)
-
-    def on_thing_surrounding(self, position_type: int = 0, rotate_time: int = 60, rotate_speed: int = 5000):
-        """
-        0 for left
-        1 for right
-        2 for behind
-        :param rotate_speed:
-        :param rotate_time:
-        :param position_type:
-        :return:
-        """
-        if position_type == 2:
-            self.action_T(turn_speed=rotate_speed, turn_time=rotate_time, multiplier=2)
-        else:
-            self.action_T(turn_type=position_type, turn_speed=rotate_speed, turn_time=rotate_time)
 
     def Battle(self, interval: int = 10, normal_spead: int = 3000):
         """
@@ -518,30 +559,6 @@ class BattleBot:
             # forced stop
             self.controller.move_cmd(0, 0)
             print('exiting')
-
-    def wait_start(self, baseline: int = 1800, with_turn: bool = False):
-        """
-        hold still util the start signal is received
-        :param baseline:
-        :param with_turn:
-        :return:
-        """
-        while True:
-            print('holding')
-            delay_ms(150)
-            temp_list = self.controller.adc_all_channels
-            if temp_list[8] > baseline and temp_list[7] > baseline:
-                print('dashing')
-                self.action_D(with_turn=True, dash_time=600)
-                break
-
-    def action_D(self, dash_speed: int = -13000, dash_time: int = 500,
-                 with_turn: bool = False):
-        self.controller.move_cmd(dash_speed, dash_speed)
-        delay_ms(dash_time)
-        self.controller.move_cmd(0, 0)
-        if with_turn:
-            self.action_T(turn_speed=7000, turn_time=140)
 
     def test_run(self, offset_angle=80):
         print('test')
