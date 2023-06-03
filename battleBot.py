@@ -532,9 +532,9 @@ class BattleBot:
 
                 # normal behave includes all edge encounter solution
                 # if encounters edge,must deal with it first
-                self.normal_behave(adc_list, io_list, edge_baseline=1650, edge_speed_multiplier=0.6)
+                if self.normal_behave(adc_list, io_list, edge_baseline=1650, edge_speed_multiplier=0.6):
+                    adc_list = self.controller.adc_all_channels
 
-                # TODO: no, i forget to update the sensor data here
                 # if no edge is encountered then check if there are anything surrounding
                 # will check surrounding and will act according the case to deal with it
                 self.check_surround(adc_list)
