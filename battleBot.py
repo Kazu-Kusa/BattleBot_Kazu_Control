@@ -291,21 +291,25 @@ class BattleBot:
     # endregion
 
     # region special actions
-    def wait_start(self, baseline: int = 1800, with_turn: bool = False):
+    def wait_start(self, baseline: int = 1800, check_interval: int = 50,
+                   with_turn: bool = False, dash_time: int = 600) -> None:
         """
         hold still util the start signal is received
+        :param check_interval:
+        :param dash_time:
         :param baseline:
         :param with_turn:
         :return:
         """
         while True:
-            print('holding')
-            delay_ms(150)
+            print('\r##HALT##')
+            delay_ms(check_interval)
+            # TODO: shall we make this change be a local function that passed into here as param?
             temp_list = self.controller.adc_all_channels
             if temp_list[8] > baseline and temp_list[7] > baseline:
-                print('dashing')
-                self.action_D(with_turn=True, dash_time=600)
-                break
+                print('!!DASH-TIME!!')
+                self.action_D(with_turn=with_turn, dash_time=dash_time)
+                return
 
     # endregion
 
