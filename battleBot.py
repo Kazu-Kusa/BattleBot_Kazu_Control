@@ -569,5 +569,5 @@ if __name__ == '__main__':
     bot = BattleBot()
     bot.controller.move_cmd(0, 0)
     # breakpoint()
-    bot.Battle(interval=3, normal_spead=2900)
+    bot.Battle(interval=3, normal_spead=3500)
     # bot.test_run()
