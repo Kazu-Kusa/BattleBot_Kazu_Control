@@ -301,6 +301,7 @@ class BattleBot:
         :param with_turn:
         :return:
         """
+        self.screen.ADC_Led_SetColor(0, self.screen.COLOR_BROWN)
         while True:
             print('\r##HALT##')
             delay_ms(check_interval)
@@ -488,36 +489,37 @@ class BattleBot:
         else:
             return False
 
-    def check_surround(self, adc_list: list[int], baseline=2000):
+    def check_surround(self, adc_list: list[int], baseline: int = 2000, basic_speed: int = 6000):
         """
         checks sensors to get surrounding objects
+        :param basic_speed:
         :param adc_list:
         :param baseline:
         :return:
         """
-        self.screen.ADC_Led_SetColor(0, self.screen.COLOR_CYAN)
-        timestep = 120
-        speed = 6000
-
+        self.screen.ADC_Led_SetColor(0, self.screen.COLOR_RED)
         if self.tag_id == self.ally_tag and adc_list[4] > baseline:
-            self.on_ally_box(speed, 0.3)
+            self.on_ally_box(basic_speed, 0.3)
         elif self.tag_id == self.enemy_tag and adc_list[4] > baseline:
-            self.on_enemy_box(speed, 0.4)
+            self.on_enemy_box(basic_speed, 0.4)
         elif adc_list[4] > baseline:
-            self.on_enemy_car(speed, 0.5)
+            self.on_enemy_car(basic_speed, 0.5)
         elif adc_list[8] > baseline:
             self.on_thing_surrounding(1)
         elif adc_list[7] > baseline:
             self.on_thing_surrounding(2)
         elif adc_list[5] > baseline:
             self.on_thing_surrounding(3)
+        self.screen.ADC_Led_SetColor(0, self.screen.COLOR_GREEN)
 
     def Battle(self, interval: int = 10, normal_spead: int = 3000):
         """
-        the main function of the BattleBot
+        the main function
+        :param interval:
+        :param normal_spead:
         :return:
         """
-        print('battle starts')
+        print('>>>>BATTLE STARTS<<<<')
 
         try:
             # wait for the battle starts
@@ -535,16 +537,18 @@ class BattleBot:
                 # TODO: no, i forget to update the sensor data here
                 # if no edge is encountered then check if there are anything surrounding
                 # will check surrounding and will act according the case to deal with it
-                self.check_surround(adc_list, )
+                self.check_surround(adc_list)
 
                 # if no edge is encountered and nothing surrounding, then just keep moving up
                 self.controller.move_cmd(normal_spead, normal_spead)
 
                 # loop delay,this is to prevent sending too many cmds to driver causing jam
+                self.screen.ADC_Led_SetColor(0, self.screen.COLOR_YELLOW)
                 delay_ms(interval)
 
         except KeyboardInterrupt:
             # forced stop
+            self.screen.ADC_Led_SetColor(0, self.screen.COLOR_WHITE)
             self.controller.move_cmd(0, 0)
             print('exiting')
 
