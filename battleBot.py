@@ -518,23 +518,7 @@ class BattleBot:
         :return:
         """
         print('battle starts')
-        """
-        rr 0
-        fr 1
-        fl 2
-        rl 3
-        l2 8
-        r2 7
-        fr 6
-        fb 4
-        rb 5
-        [edge_rr, edge_fr, edge_fl, edge_rl, fb,rb,fr,r2,l2]
-        {0:edge_rr,1:edge_fr,2:edge_fl, 3:edge_rl, 4:fb,5:rb,6:fr,7:r2,8:l2}
-        
-        {0:r_gray,1:l_gray}
-        l_gray io 1
-        r_gray io 0
-        """
+
         try:
             # wait for the battle starts
             self.wait_start(baseline=1800, with_turn=False)

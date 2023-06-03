@@ -21,7 +21,9 @@
   冷调试
 
 # MPU6500功能简介
-MPU-6500是一款六轴运动处理传感器，在大小为3.0×3.0×0.9mm的芯片上，通过QFN 封装（无引线方形封装），集成了 3 轴 MEMS 陀螺仪，3 轴 MEMS加速度计，以及一个数字运动处理器 DMP（ Digital Motion Processor）。还可以通过辅助I2C端口与多个非惯性数字传感器（例如压力传感器、磁力计）进行连接。
+
+MPU-6500是一款六轴运动处理传感器，在大小为3.0×3.0×0.9mm的芯片上，通过QFN 封装（无引线方形封装），集成了 3 轴 MEMS 陀螺仪，3 轴
+MEMS加速度计，以及一个数字运动处理器 DMP（ Digital Motion Processor）。还可以通过辅助I2C端口与多个非惯性数字传感器（例如压力传感器、磁力计）进行连接。
 ![image](https://user-images.githubusercontent.com/88489697/213609141-13c99d10-06c6-4a6a-a45a-e8c5e3e89ee5.png)
 
 <details>
@@ -29,6 +31,7 @@ MPU-6500是一款六轴运动处理传感器，在大小为3.0×3.0×0.9mm的芯
 <pre><code>
 
 ## 1.陀螺仪功能
+
 MPU-6500中的三轴MEMS陀螺仪具有广泛的特性：
 <details>
 <summary>功能详情</summary>
@@ -41,9 +44,8 @@ MPU-6500中的三轴MEMS陀螺仪具有广泛的特性：
 </code></pre>
 </details>
 
-
-
 ## 2.加速度计功能
+
 MPU-6500中的三轴MEMS加速度计具有广泛的功能：
 <details>
 <summary>功能详情</summary>
@@ -58,6 +60,7 @@ MPU-6500中的三轴MEMS加速度计具有广泛的功能：
 </details>
 
 ## 3.附加功能
+
 MPU-6500包括下列附加功能：
 <details>
 <summary>功能详情</summary>
@@ -79,11 +82,8 @@ MPU-6500包括下列附加功能：
 </code></pre>
 </details>
 
-
-
-
-
 ## 4.运动处理
+
 <details>
 <summary>功能详情</summary>
 <pre><code>
@@ -92,11 +92,34 @@ MPU-6500包括下列附加功能：
 - 低功率计步器功能允许主机处理器在DMP保持步数计数的同时进入睡眠状态。
 </code></pre>
 </details>
-
 </code></pre>
 </details>
 
 ### MPU6500默认配置
+
 - 角速度量程±2000°/s
 - 加速度量程±8G
 - 采样率1kHz
+
+### 传感器配置
+
+```python
+"""
+rr 0
+fr 1
+fl 2
+rl 3
+l2 8
+r2 7
+fr 6
+fb 4
+rb 5
+[edge_rr, edge_fr, edge_fl, edge_rl, fb,rb,fr,r2,l2]
+{0:edge_rr,1:edge_fr,2:edge_fl, 3:edge_rl, 4:fb,5:rb,6:fr,7:r2,8:l2}
+
+{0:r_gray,1:l_gray}
+l_gray io 1
+r_gray io 0
+"""
+```
+
