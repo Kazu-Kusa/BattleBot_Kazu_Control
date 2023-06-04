@@ -246,7 +246,7 @@ class BattleBot(Bot):
         delay_ms(160)
         self.controller.move_cmd(0, 0)
 
-    def on_thing_surrounding(self, position_type: int = 0, rotate_time: int = 60, rotate_speed: int = 5000):
+    def on_thing_surrounding(self, position_type: int = 0, rotate_time: int = 160, rotate_speed: int = 6000):
         """
         0 for left
         1 for right
@@ -257,7 +257,7 @@ class BattleBot(Bot):
         :return:
         """
         if position_type == 2:
-            self.action_T(turn_speed=rotate_speed, turn_time=rotate_time, multiplier=2)
+            self.action_T(turn_speed=rotate_speed, turn_time=rotate_time, multiplier=1.8)
         else:
             self.action_T(turn_type=position_type, turn_speed=rotate_speed, turn_time=rotate_time)
 
