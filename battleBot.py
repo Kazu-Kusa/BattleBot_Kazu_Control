@@ -3,7 +3,7 @@ from typing import Callable
 from time import perf_counter_ns
 
 from bot import Bot
-from repo.uptechStar.module.timer import delay_ms
+from repo.uptechStar.module.timer import delay_ms, get_end_time_ms
 from repo.uptechStar.module.algrithm_tools import compute_inferior_arc, calculate_relative_angle
 from repo.uptechStar.module.pid import PD_control, PID_control
 
@@ -183,6 +183,29 @@ class BattleBot(Bot):
                 print('!!DASH-TIME!!')
                 self.action_D(with_turn=with_turn, dash_time=dash_time)
                 return
+
+    def checking_stage_direction(self, detector: Callable[[], bool], with_dash: bool = False,
+                                 spinning_type=randint(0, 1), spinning_speed: int = 2500, max_duration: int = 3000):
+        """
+        checking the stage direction and make the dash movement accordingly
+        :param detector:
+        :param with_dash:
+        :param spinning_type:
+        :param spinning_speed:
+        :param max_duration:
+        :return:
+        """
+
+        end_time = get_end_time_ms(max_duration)
+        if spinning_type:
+            spinning_speed = -spinning_speed
+        self.controller.move_cmd(spinning_speed)
+        while perf_counter_ns() < end_time:
+            if detector():
+                self.controller.move_cmd(0, 0)
+                if with_dash:
+                    # TODO: debug params,dont forget toa changewith_dash:bool=Falsewith_dash:bool=False
+                    self.action_D(dash_time=700, with_turn=False, dash_speed=6000)
 
     # endregion
 
