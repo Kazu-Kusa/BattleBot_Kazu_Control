@@ -1,3 +1,4 @@
+import warnings
 from random import randint
 from typing import Callable
 from time import perf_counter_ns
@@ -164,7 +165,7 @@ class BattleBot(Bot):
 
     # region special actions
     def wait_start(self, baseline: int = 1800, check_interval: int = 50,
-                   with_turn: bool = False, dash_time: int = 600) -> None:
+                   with_turn: bool = False, dash_time: int = 600, dash_speed: int = 8000) -> None:
         """
         hold still util the start signal is received
         :param check_interval:
@@ -181,7 +182,7 @@ class BattleBot(Bot):
             temp_list = self.controller.adc_all_channels
             if temp_list[8] > baseline and temp_list[7] > baseline:
                 print('!!DASH-TIME!!')
-                self.action_D(with_turn=with_turn, dash_time=dash_time)
+                self.action_D(with_turn=with_turn, dash_time=dash_time, dash_speed=dash_speed)
                 return
 
     def checking_stage_direction(self, detector: Callable[[], bool], with_dash: bool = False,
@@ -195,7 +196,7 @@ class BattleBot(Bot):
         :param max_duration:
         :return:
         """
-
+        warnings.warn('Checking stage direction')
         end_time = get_end_time_ms(max_duration)
         if spinning_type:
             spinning_speed = -spinning_speed
@@ -438,31 +439,49 @@ class BattleBot(Bot):
         """
         print('>>>>BATTLE STARTS<<<<')
 
+        def detector() -> bool:
+            baseline = 1000
+            temp = self.controller.adc_all_channels
+            rb_sensor = temp[5]
+            fb_sensor = temp[4]
+            l2_sensor = temp[8]
+            r2_sensor = temp[7]
+            if l2_sensor < baseline and r2_sensor < baseline and rb_sensor > baseline and fb_sensor > baseline:
+                return True
+            return False
+
         try:
             # wait for the battle starts
-            self.wait_start(baseline=1800, with_turn=False)
+            self.wait_start(baseline=1800, with_turn=False, dash_speed=8000)
             while True:
-                # update the sensors data
-                # TODO: these two functions could be combined
-                adc_list = self.controller.adc_all_channels
-                io_list = self.controller.io_all_channels
-
-                if self.normal_behave(adc_list, io_list, edge_baseline=1650, edge_speed_multiplier=0.6):
-                    # normal behave includes all edge encounter solution
-                    # if encounters edge,must deal with it first
-                    # should update the sensor data too ,since much time passed out
+                on_stage = False
+                if on_stage:
+                    # update the sensors data
+                    # TODO: these two functions could be combined
                     adc_list = self.controller.adc_all_channels
+                    io_list = self.controller.io_all_channels
 
-                if self.check_surround(adc_list):
-                    # if no edge is encountered then check if there are anything surrounding
-                    # will check surrounding and will act according the case to deal with it
-                    # after turning should go to next loop checking the object
-                    continue
-                # if no edge is encountered and nothing surrounding, then just keep moving up
-                self.controller.move_cmd(normal_spead, normal_spead)
-                # loop delay,this is to prevent sending too many cmds to driver causing jam
-                self.screen.ADC_Led_SetColor(0, self.screen.COLOR_YELLOW)
-                delay_ms(interval)
+                    if self.normal_behave(adc_list, io_list, edge_baseline=1650, edge_speed_multiplier=0.6):
+                        # normal behave includes all edge encounter solution
+                        # if encounters edge,must deal with it first
+                        # should update the sensor data too ,since much time passed out
+                        adc_list = self.controller.adc_all_channels
+
+                    if self.check_surround(adc_list):
+                        # if no edge is encountered then check if there are anything surrounding
+                        # will check surrounding and will act according the case to deal with it
+                        # after turning should go to next loop checking the object
+                        continue
+                    # if no edge is encountered and nothing surrounding, then just keep moving up
+                    self.controller.move_cmd(normal_spead, normal_spead)
+                    # loop delay,this is to prevent sending too many cmds to driver causing jam
+                    self.screen.ADC_Led_SetColor(0, self.screen.COLOR_YELLOW)
+                    delay_ms(interval)
+                else:
+
+                    self.checking_stage_direction(detector=detector, with_dash=True)
+
+
 
         except KeyboardInterrupt:
             # forced stop
