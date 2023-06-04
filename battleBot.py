@@ -264,12 +264,12 @@ class BattleBot(Bot):
     # endregion
 
     def normal_behave(self, adc_list: list[int], io_list: list[int], edge_baseline: int = 1680,
-                      edge_speed_multiplier: float = 0, backing_time: int = 180, rotate_time: int = 130) -> bool:
+                      edge_speed_multiplier: float = 0, backing_time: int = 180, turn_time: int = 130) -> bool:
         """
         handles the normal edge case using both adc_list and io_list.
         but well do not do anything if no edge case
         :param backing_time:
-        :param rotate_time:
+        :param turn_time:
         :param edge_speed_multiplier:
         :param adc_list:the list of adc devices returns
         :param io_list:the list of io devices returns
@@ -312,7 +312,7 @@ class BattleBot(Bot):
             # at least one of the gray scaler is hanging over air
 
             self.action_BT(back_speed=high_spead, back_time=backing_time,
-                           turn_speed=high_spead, turn_time=rotate_time,
+                           turn_speed=high_spead, turn_time=turn_time,
                            t_multiplier=1.5,
                            watch_behind=True, watcher_func=watcher)
             return True
@@ -327,7 +327,7 @@ class BattleBot(Bot):
             front-left encounters the edge, turn right,turn type is 1
             """
             self.action_BT(back_speed=high_spead, back_time=backing_time,
-                           turn_speed=high_spead, turn_time=rotate_time,
+                           turn_speed=high_spead, turn_time=turn_time,
                            t_multiplier=1.5, turn_type=1,
                            watch_behind=True, watcher_func=watcher)
             return True
@@ -343,7 +343,7 @@ class BattleBot(Bot):
             front-right encounters the edge, turn left,turn type is 0
             """
             self.action_BT(back_speed=high_spead, back_time=backing_time,
-                           turn_speed=high_spead, turn_time=rotate_time,
+                           turn_speed=high_spead, turn_time=turn_time,
                            t_multiplier=1.5, turn_type=0,
                            watch_behind=True, watcher_func=watcher)
             return True
@@ -358,7 +358,7 @@ class BattleBot(Bot):
 
             rear-left encounters the edge, turn right,turn type is 1
             """
-            self.action_T(turn_type=1)
+            self.action_T(turn_type=1, turn_speed=high_spead, turn_time=turn_time)
             return True
         elif edge_rr_sensor < edge_baseline:
             """
@@ -370,7 +370,7 @@ class BattleBot(Bot):
 
             rear-right encounters the edge, turn left,turn type is 0
             """
-            self.action_T(turn_type=0)
+            self.action_T(turn_type=0, turn_speed=high_spead, turn_time=turn_time)
             return True
         else:
             return False
