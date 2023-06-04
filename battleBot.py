@@ -439,12 +439,24 @@ class BattleBot(Bot):
             high_spead = int(high_spead * edge_speed_multiplier)
 
         # fixed action duration
+        def watcher():
+
+            adc_list = self.controller.adc_all_channels
+            edge_rr_sensor = adc_list[0]
+            edge_rl_sensor = adc_list[3]
+            if edge_rl_sensor < edge_baseline or edge_rr_sensor < edge_baseline:
+                # if at least one of the edge sensor is hanging over air
+                return True
+            else:
+                return False
 
         if l_gray + r_gray <= 1:
             # at least one of the gray scaler is hanging over air
+
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=rotate_time,
-                           t_multiplier=0.6)
+                           t_multiplier=0.6,
+                           watch_behind=True, watcher_func=watcher)
             return True
         elif edge_fl_sensor < edge_baseline:
             """
@@ -458,7 +470,8 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=rotate_time,
-                           t_multiplier=0.6, turn_type=1)
+                           t_multiplier=0.6, turn_type=1,
+                           watch_behind=True, watcher_func=watcher)
             return True
 
         elif edge_fr_sensor < edge_baseline:
@@ -473,7 +486,8 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=rotate_time,
-                           t_multiplier=0.6, turn_type=0)
+                           t_multiplier=0.6, turn_type=0,
+                           watch_behind=True, watcher_func=watcher)
             return True
 
         elif edge_rl_sensor < edge_baseline:
