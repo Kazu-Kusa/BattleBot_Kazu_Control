@@ -156,7 +156,7 @@ class BattleBot(Bot):
         if multiplier:
             speed = multiplier * speed
         speed_list: list[int] = [speed, speed, speed, speed]
-        speed_list[fixed_wheel_id + 1] = 0
+        speed_list[fixed_wheel_id - 1] = 0
         self.controller.set_motors_speed(speed_list=speed_list)
         delay_ms(tf_time)
         self.controller.move_cmd(0)
