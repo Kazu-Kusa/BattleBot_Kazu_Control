@@ -302,6 +302,29 @@ class BattleBot(Bot):
         if with_turn:
             self.action_T(turn_speed=7000, turn_time=140)
 
+    def action_TF(self, fixed_wheel_id: int = 1, speed: int = 8000, tf_time=300, multiplier: float = 0) -> None:
+        """
+        w4[fl]       [fr]w2
+              O-----O
+                 |
+              O-----O
+        w3[rl]       [rr]w1
+
+
+        :param fixed_wheel_id: the id fo the wheel that will be set to fixed in the tail flicking
+        :param speed: the tail flicking speed
+        :param tf_time: the duration of the tail flicking
+        :param multiplier: the multiplier of the tail flicking
+        :return: None
+        """
+        if multiplier:
+            speed = multiplier * speed
+        speed_list: list[int] = [speed, speed, speed, speed]
+        speed_list[fixed_wheel_id + 1] = 0
+        self.controller.set_motors_speed(speed_list=speed_list)
+        delay_ms(tf_time)
+        self.controller.move_cmd(0)
+
     # endregion
 
     # region special actions
@@ -441,10 +464,10 @@ class BattleBot(Bot):
         # fixed action duration
         def watcher():
 
-            adc_list = self.controller.adc_all_channels
-            edge_rr_sensor = adc_list[0]
-            edge_rl_sensor = adc_list[3]
-            if edge_rl_sensor < edge_baseline or edge_rr_sensor < edge_baseline:
+            temp = self.controller.adc_all_channels
+            local_edge_rr_sensor = temp[0]
+            local_edge_rl_sensor = temp[3]
+            if local_edge_rl_sensor < edge_baseline or local_edge_rr_sensor < edge_baseline:
                 # if at least one of the edge sensor is hanging over air
                 return True
             else:
