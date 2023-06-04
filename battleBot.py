@@ -1,3 +1,4 @@
+from abc import ABCMeta, abstractmethod
 from random import randint
 import threading
 import time
@@ -13,10 +14,10 @@ from repo.uptechStar.module.algrithm_tools import compute_inferior_arc, calculat
 from repo.uptechStar.module.pid import PD_control, PID_control
 
 
-class BattleBot:
-    controller = UpController(debug=False, fan_control=False)
-    screen = Screen(init_screen=False)
+class Bot(metaclass=ABCMeta):
     tag_detector = Detector(DetectorOptions(families='tag36h11')).detect
+    screen = Screen(init_screen=False)
+    controller = UpController(debug=False, fan_control=False)
 
     def __init__(self, config_path: str = './config.json', team_color: str = 'blue'):
         """
@@ -35,7 +36,6 @@ class BattleBot:
 
         self.apriltag_detect_start()
 
-    # region utilities
     def load_config(self, config_path: str):
         """
         load configuration form json
@@ -45,50 +45,6 @@ class BattleBot:
 
         pass
 
-    # endregion
-
-    # region properties
-    @property
-    def tag_id(self):
-        """
-
-        :return:  current tag id
-        """
-        return self._tag_id
-
-    @tag_id.setter
-    def tag_id(self, new_tag_id: int):
-        """
-        setter for  current tag id
-        :param new_tag_id:
-        :return:
-        """
-        self._tag_id = new_tag_id
-
-    @property
-    def tag_monitor_switch(self):
-        return self._tag_monitor_switch
-
-    @tag_monitor_switch.setter
-    def tag_monitor_switch(self, switch: bool):
-        """
-        setter for the switch
-        :param switch:
-        :return:
-        """
-        self._tag_monitor_switch = switch
-
-    @property
-    def enemy_tag(self):
-        return self._enemy_tag
-
-    @property
-    def ally_tag(self):
-        return self._ally_tag
-
-    # endregion
-
-    # region tag detection
     def _set_tags(self, team_color: str = 'blue'):
         """
         set the ally/enemy tag according the team color
@@ -158,6 +114,67 @@ class BattleBot:
             else:
                 # TODO: This delay may not be correct,since it could cause wrongly activate enemy box action
                 delay_ms(1500)
+
+    @abstractmethod
+    def Battle(self, interval, normal_spead):
+        """
+        the main function
+        :param interval:
+        :param normal_spead:
+        :return:
+        """
+        pass
+
+    @property
+    def tag_id(self):
+        """
+
+        :return:  current tag id
+        """
+        return self._tag_id
+
+    @tag_id.setter
+    def tag_id(self, new_tag_id: int):
+        """
+        setter for  current tag id
+        :param new_tag_id:
+        :return:
+        """
+        self._tag_id = new_tag_id
+
+    @property
+    def tag_monitor_switch(self):
+        return self._tag_monitor_switch
+
+    @tag_monitor_switch.setter
+    def tag_monitor_switch(self, switch: bool):
+        """
+        setter for the switch
+        :param switch:
+        :return:
+        """
+        self._tag_monitor_switch = switch
+
+    @property
+    def ally_tag(self):
+        return self._ally_tag
+
+    @property
+    def enemy_tag(self):
+        return self._enemy_tag
+
+
+class BattleBot(Bot):
+
+    # region utilities
+
+    # endregion
+
+    # region properties
+
+    # endregion
+
+    # region tag detection
 
     # endregion
 
