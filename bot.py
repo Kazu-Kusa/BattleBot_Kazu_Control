@@ -113,7 +113,7 @@ class Bot(metaclass=ABCMeta):
                 delay_ms(check_interval)
             else:
                 # TODO: This delay may not be correct,since it could cause wrongly activate enemy box action
-                delay_ms(1500)
+                time.sleep(0.6)
 
     # endregion
 
