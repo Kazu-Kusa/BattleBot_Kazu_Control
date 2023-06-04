@@ -201,13 +201,13 @@ class BattleBot(Bot):
         end_time = get_end_time_ms(max_duration)
         if spinning_type:
             spinning_speed = -spinning_speed
-        self.controller.move_cmd(spinning_speed)
+        self.controller.move_cmd(spinning_speed, -spinning_speed)
         while perf_counter_ns() < end_time:
             if detector():
                 self.controller.move_cmd(0, 0)
                 if with_dash:
                     # TODO: debug params,dont forget toa changewith_dash:bool=Falsewith_dash:bool=False
-                    self.action_D(dash_time=700, with_turn=False, dash_speed=6000)
+                    self.action_D(dash_time=700, with_turn=False, dash_speed=-6000)
                 break
 
     # endregion
