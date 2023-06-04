@@ -533,11 +533,11 @@ class BattleBot(Bot):
         elif adc_list[4] > baseline:
             self.on_enemy_car(basic_speed, 0.5)
         elif adc_list[8] > baseline:
-            self.on_thing_surrounding(1)
+            self.on_thing_surrounding(0)
         elif adc_list[7] > baseline:
-            self.on_thing_surrounding(2)
+            self.on_thing_surrounding(1)
         elif adc_list[5] > baseline:
-            self.on_thing_surrounding(3)
+            self.on_thing_surrounding(2)
         self.screen.ADC_Led_SetColor(0, self.screen.COLOR_GREEN)
 
     def Battle(self, interval: int = 10, normal_spead: int = 3000):
