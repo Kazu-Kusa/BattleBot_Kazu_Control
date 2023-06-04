@@ -36,6 +36,7 @@ class Bot(metaclass=ABCMeta):
 
         self.apriltag_detect_start()
 
+    # region utilities
     def load_config(self, config_path: str):
         """
         load configuration form json
@@ -45,6 +46,9 @@ class Bot(metaclass=ABCMeta):
 
         pass
 
+    # endregion
+
+    # region tag detection
     def _set_tags(self, team_color: str = 'blue'):
         """
         set the ally/enemy tag according the team color
@@ -115,16 +119,9 @@ class Bot(metaclass=ABCMeta):
                 # TODO: This delay may not be correct,since it could cause wrongly activate enemy box action
                 delay_ms(1500)
 
-    @abstractmethod
-    def Battle(self, interval, normal_spead):
-        """
-        the main function
-        :param interval:
-        :param normal_spead:
-        :return:
-        """
-        pass
+    # endregion
 
+    # region properties
     @property
     def tag_id(self):
         """
@@ -163,20 +160,20 @@ class Bot(metaclass=ABCMeta):
     def enemy_tag(self):
         return self._enemy_tag
 
+    # endregion
+
+    @abstractmethod
+    def Battle(self, interval, normal_spead):
+        """
+        the main function
+        :param interval:
+        :param normal_spead:
+        :return:
+        """
+        pass
+
 
 class BattleBot(Bot):
-
-    # region utilities
-
-    # endregion
-
-    # region properties
-
-    # endregion
-
-    # region tag detection
-
-    # endregion
 
     # region basic actions
     def action_BT(self, back_speed: int = 5000, back_time: int = 120,
