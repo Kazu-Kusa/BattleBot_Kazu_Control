@@ -207,6 +207,7 @@ class BattleBot(Bot):
                 if with_dash:
                     # TODO: debug params,dont forget toa changewith_dash:bool=Falsewith_dash:bool=False
                     self.action_D(dash_time=700, with_turn=False, dash_speed=6000)
+                break
 
     # endregion
 
