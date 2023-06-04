@@ -453,7 +453,7 @@ class BattleBot(Bot):
 
         try:
             # wait for the battle starts
-            self.wait_start(baseline=1800, with_turn=False, dash_speed=8000)
+            self.wait_start(baseline=1800, with_turn=False, dash_speed=-8000)
             while True:
                 on_stage = False
                 if on_stage:
@@ -479,7 +479,7 @@ class BattleBot(Bot):
                     self.screen.ADC_Led_SetColor(0, self.screen.COLOR_YELLOW)
                     delay_ms(interval)
                 else:
-
+                    delay_ms(interval)
                     self.checking_stage_direction(detector=detector, with_dash=True)
 
 
