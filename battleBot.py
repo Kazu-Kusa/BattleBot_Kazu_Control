@@ -375,28 +375,36 @@ class BattleBot(Bot):
         else:
             return False
 
-    def check_surround(self, adc_list: list[int], baseline: int = 2000, basic_speed: int = 6000):
+    def check_surround(self, adc_list: list[int], baseline: int = 2000, basic_speed: int = 6000) -> bool:
         """
         checks sensors to get surrounding objects
         :param basic_speed:
         :param adc_list:
         :param baseline:
-        :return:
+        :return: if it has encountered anything
         """
         self.screen.ADC_Led_SetColor(0, self.screen.COLOR_RED)
         if self.tag_id == self.ally_tag and adc_list[4] > baseline:
             self.on_ally_box(basic_speed, 0.3)
+            return True
         elif self.tag_id == self.enemy_tag and adc_list[4] > baseline:
             self.on_enemy_box(basic_speed, 0.4)
+            return True
         elif adc_list[4] > baseline:
             self.on_enemy_car(basic_speed, 0.5)
+            return True
         elif adc_list[8] > baseline:
             self.on_thing_surrounding(0)
+            return True
         elif adc_list[7] > baseline:
             self.on_thing_surrounding(1)
+            return True
         elif adc_list[5] > baseline:
             self.on_thing_surrounding(2)
-        self.screen.ADC_Led_SetColor(0, self.screen.COLOR_GREEN)
+            return True
+        else:
+            self.screen.ADC_Led_SetColor(0, self.screen.COLOR_GREEN)
+            return False
 
     def Battle(self, interval: int = 10, normal_spead: int = 3000):
         """
@@ -416,18 +424,19 @@ class BattleBot(Bot):
                 adc_list = self.controller.adc_all_channels
                 io_list = self.controller.io_all_channels
 
-                # normal behave includes all edge encounter solution
-                # if encounters edge,must deal with it first
                 if self.normal_behave(adc_list, io_list, edge_baseline=1650, edge_speed_multiplier=0.6):
+                    # normal behave includes all edge encounter solution
+                    # if encounters edge,must deal with it first
+                    # should update the sensor data too ,since much time passed out
                     adc_list = self.controller.adc_all_channels
 
-                # if no edge is encountered then check if there are anything surrounding
-                # will check surrounding and will act according the case to deal with it
-                self.check_surround(adc_list)
-
+                if self.check_surround(adc_list):
+                    # if no edge is encountered then check if there are anything surrounding
+                    # will check surrounding and will act according the case to deal with it
+                    # after turning should go to next loop checking the object
+                    continue
                 # if no edge is encountered and nothing surrounding, then just keep moving up
                 self.controller.move_cmd(normal_spead, normal_spead)
-
                 # loop delay,this is to prevent sending too many cmds to driver causing jam
                 self.screen.ADC_Led_SetColor(0, self.screen.COLOR_YELLOW)
                 delay_ms(interval)
@@ -455,5 +464,5 @@ if __name__ == '__main__':
     bot = BattleBot()
     bot.controller.move_cmd(0, 0)
     # breakpoint()
-    # bot.Battle(interval=3, normal_spead=3500)
-    bot.test_run()
+    bot.Battle(interval=3, normal_spead=3500)
+    # bot.test_run()
