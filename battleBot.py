@@ -313,7 +313,7 @@ class BattleBot(Bot):
 
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=rotate_time,
-                           t_multiplier=0.6,
+                           t_multiplier=1.5,
                            watch_behind=True, watcher_func=watcher)
             return True
         elif edge_fl_sensor < edge_baseline:
@@ -328,7 +328,7 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=rotate_time,
-                           t_multiplier=0.6, turn_type=1,
+                           t_multiplier=1.5, turn_type=1,
                            watch_behind=True, watcher_func=watcher)
             return True
 
@@ -344,7 +344,7 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=rotate_time,
-                           t_multiplier=0.6, turn_type=0,
+                           t_multiplier=1.5, turn_type=0,
                            watch_behind=True, watcher_func=watcher)
             return True
 
