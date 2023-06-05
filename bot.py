@@ -2,12 +2,12 @@ import threading
 import time
 import warnings
 from abc import ABCMeta, abstractmethod
-
+from time import sleep
 import cv2
 from apriltag import Detector, DetectorOptions
 
 from repo.uptechStar.module.screen import Screen
-from repo.uptechStar.module.timer import delay_ms
+
 from repo.uptechStar.module.up_controller import UpController
 
 
@@ -73,7 +73,7 @@ class Bot(metaclass=ABCMeta):
         apriltag_detect.start()
 
     def apriltag_detect_thread(self, single_tag_mode: bool = True, print_tag_id: bool = False,
-                               check_interval: int = 50):
+                               check_interval: float = 0.1):
         """
         这是一个线程函数，它从摄像头捕获视频帧，处理帧以检测 AprilTags，
         :param check_interval:
@@ -120,10 +120,10 @@ class Bot(metaclass=ABCMeta):
                     if print_tag_id and time.time() - start_time > print_interval:
                         print(f"#DETECTED TAG: [{self.tag_id}]")
                         start_time = time.time()
-                delay_ms(check_interval)
+                sleep(check_interval)
             else:
                 # TODO: This delay may not be correct,since it could cause wrongly activate enemy box action
-                time.sleep(0.6)
+                sleep(0.6)
 
     # endregion
 
