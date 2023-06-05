@@ -23,13 +23,13 @@ class Bot(metaclass=ABCMeta):
         """
         self.load_config(config_path=config_path)
 
-        self._tag_id = -1
-        self._tag_monitor_switch = True
+        self._tag_id: int = -1
+        self._tag_monitor_switch: bool = True
         self._enemy_tag = None
         self._ally_tag = None
 
         self._set_tags(team_color=team_color)
-
+        self._camera_is_on: bool = False
         self.apriltag_detect_start()
 
     # region utilities
@@ -118,6 +118,14 @@ class Bot(metaclass=ABCMeta):
     # endregion
 
     # region properties
+    @property
+    def camera_is_on(self):
+        return self._camera_is_on
+
+    @camera_is_on.setter
+    def camera_is_on(self, new_state: bool):
+        self._camera_is_on = new_state
+
     @property
     def tag_id(self):
         """
