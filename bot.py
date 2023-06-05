@@ -110,16 +110,35 @@ class Bot(metaclass=ABCMeta):
                     warnings.warn('\n##########CAMERA LOST###########\n'
                                   '###ENTERING NO CAMERA MODE###')
                     self.camera_is_on = False
+                    self.tag_id = -1
                     break
                 frame = frame[cup_h:cup_h + weight, cup_w:cup_w + weight]
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # 将帧转换为灰度并存储在 gray 变量中。
                 # 使用 AprilTag 检测器对象（self.tag_detector）在灰度帧中检测 AprilTags。检测到的标记存储在 tags 变量中。
                 tags = self.tag_detector(gray)
-                if tags and single_tag_mode:
-                    self.tag_id = tags[0].tag_id
+                if tags:
+                    if single_tag_mode:
+                        self.tag_id = tags[0].tag_id
+                    else:
+                        # 获取离图像中心最近的 AprilTag
+                        closest_tag = None
+                        closest_dist = float('inf')
+                        for tag in tags:
+                            # 计算当前 AprilTag 的中心点
+                            center = tag.center
+                            # 计算当前 AprilTag 中心点与图像中心的距离
+                            dist = ((center[0] - frame.shape[1] / 2) ** 2 + (
+                                    center[1] - frame.shape[0] / 2) ** 2) ** 0.5
+                            if dist < closest_dist:
+                                closest_dist = dist
+                                closest_tag = tag
+                        self.tag_id = closest_tag if closest_tag else tags[0].tag_id
                     if print_tag_id and time.time() - start_time > print_interval:
                         print(f"#DETECTED TAG: [{self.tag_id}]")
                         start_time = time.time()
+                else:
+                    # if not tags detected,return to default
+                    self.tag_id = -1
                 sleep(check_interval)
             else:
                 # TODO: This delay may not be correct,since it could cause wrongly activate enemy box action
