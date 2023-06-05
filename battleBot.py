@@ -1,5 +1,5 @@
 import warnings
-from random import randint
+from random import randint, random
 from typing import Callable
 from time import perf_counter_ns
 
@@ -286,6 +286,29 @@ class BattleBot(Bot):
             self.action_T(turn_speed=rotate_speed, turn_time=rotate_time, multiplier=1.8)
         else:
             self.action_T(turn_type=position_type, turn_speed=rotate_speed, turn_time=rotate_time)
+
+    def on_attacked(self, position_type: int, evading_speed: int = 8000, evading_time: int = 300):
+        """
+        use action tf to evade attacks
+        :param position_type:
+        :param evading_speed:
+        :param evading_time:
+        :return:
+        """
+        prob = 0.7
+
+        if position_type == 0:
+            if random() < prob:
+                self.action_TF(fixed_wheel_id=4, speed=evading_speed, tf_time=evading_time)
+            else:
+                self.action_TF(fixed_wheel_id=3, speed=-evading_speed, tf_time=evading_time)
+        elif position_type == 1:
+            if random() < prob:
+                self.action_TF(fixed_wheel_id=2, speed=evading_speed, tf_time=evading_time)
+            else:
+                self.action_TF(fixed_wheel_id=1, speed=-evading_speed, tf_time=evading_time)
+        elif position_type == 2:
+            self.action_TF(fixed_wheel_id=randint(1, 4), speed=evading_speed, tf_time=evading_time)
 
     # endregion
 
