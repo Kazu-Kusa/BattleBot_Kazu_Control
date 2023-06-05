@@ -1,5 +1,6 @@
 import threading
 import time
+import warnings
 from abc import ABCMeta, abstractmethod
 
 import cv2
@@ -83,7 +84,11 @@ class Bot(metaclass=ABCMeta):
         print("detect start")
         # 使用 cv2.VideoCapture(0) 创建视频捕获对象，从默认摄像头（通常是笔记本电脑的内置摄像头）捕获视频。
         cap = cv2.VideoCapture(0)
+        if cap is None:
+            warnings.warn('########CAN\'T GET VIDEO########\n')
 
+            return
+        self.camera_is_on = True
         # 使用 cap.set(3, w) 和 cap.set(4, h) 设置帧的宽度和高度为 640x480，帧的 weight 为 320。
         w = 640
         h = 480
@@ -100,7 +105,12 @@ class Bot(metaclass=ABCMeta):
 
             if self.tag_monitor_switch:  # 台上开启 台下关闭 节约性能
                 # 在循环内，从视频捕获对象中捕获帧并将其存储在 frame 变量中。然后将帧裁剪为中心区域的 weight x weight 大小。
-                _, frame = cap.read()
+                ret, frame = cap.read()
+                if not ret:
+                    warnings.warn('\n##########CAMERA LOST###########\n'
+                                  '###ENTERING NO CAMERA MODE###')
+                    self.camera_is_on = False
+                    break
                 frame = frame[cup_h:cup_h + weight, cup_w:cup_w + weight]
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # 将帧转换为灰度并存储在 gray 变量中。
                 # 使用 AprilTag 检测器对象（self.tag_detector）在灰度帧中检测 AprilTags。检测到的标记存储在 tags 变量中。
