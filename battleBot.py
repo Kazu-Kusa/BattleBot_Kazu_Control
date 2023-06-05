@@ -179,6 +179,13 @@ class BattleBot(Bot):
             start_speed += acc
             delay_ms(resolution)
 
+    def action_DS(self, outer_speed: int, inner_speed_multiplier: float, turn_type: int, duration: int):
+        if turn_type:
+            self.controller.move_cmd(outer_speed * inner_speed_multiplier, outer_speed)
+        else:
+            self.controller.move_cmd(outer_speed, outer_speed * inner_speed_multiplier)
+        delay_ms(duration)
+
     # endregion
 
     # region special actions
