@@ -288,29 +288,41 @@ class BattleBot(Bot):
             self.action_T(turn_type=position_type, turn_speed=rotate_speed, turn_time=rotate_time)
 
     def on_attacked(self, position_type: int, counter_back: bool = False,
-
+                    run_away: bool = False,
+                    run_speed: int = 5000, run_time: int = 400,
+                    action_break_func: Callable[[], bool] = None,
                     reacting_speed: int = 8000, reacting_time: int = 300):
         """
         use action tf to evade attacks
+        :param run_time: 
+        :param run_away: 
+        :param run_speed: 
+        :param action_break_func: 
         :param counter_back:
         :param position_type:
         :param reacting_speed:
         :param reacting_time:
         :return:
         """
-
+        # TODO make all actions support action break function
         if position_type == 0:
             if counter_back:
                 self.action_TF(fixed_wheel_id=4, speed=reacting_speed, tf_time=reacting_time)
             else:
                 self.action_TF(fixed_wheel_id=3, speed=-reacting_speed, tf_time=reacting_time)
+                if run_away:
+                    self.action_D(dash_speed=run_speed, dash_time=run_time)
 
         elif position_type == 1:
             if counter_back:
                 self.action_TF(fixed_wheel_id=2, speed=reacting_speed, tf_time=reacting_time)
             else:
                 self.action_TF(fixed_wheel_id=1, speed=-reacting_speed, tf_time=reacting_time)
+                if run_away:
+                    self.action_D(dash_speed=run_speed, dash_time=run_time)
         elif position_type == 2:
+            if counter_back:
+                reacting_time = reacting_time * 1.6
             self.action_TF(fixed_wheel_id=choice([1, 3]), speed=reacting_speed, tf_time=reacting_time)
 
     # endregion
