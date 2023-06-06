@@ -160,7 +160,7 @@ class BattleBot(Bot):
         speed_list[fixed_wheel_id - 1] = 0
         self.controller.set_motors_speed(speed_list=speed_list)
         delay_ms(tf_time)
-        self.controller.move_cmd(0)
+        self.controller.move_cmd(0, 0)
 
     # endregion
 
