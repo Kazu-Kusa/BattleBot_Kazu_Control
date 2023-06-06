@@ -327,8 +327,8 @@ class BattleBot(Bot):
 
     # endregion
 
-    def normal_behave(self, adc_list: list[int], io_list: list[int], edge_baseline: int = 1680,
-                      edge_speed_multiplier: float = 0, backing_time: int = 180, turn_time: int = 130) -> bool:
+    def get_away_from_edge(self, adc_list: list[int], io_list: list[int], edge_baseline: int = 1680,
+                           edge_speed_multiplier: float = 0, backing_time: int = 180, turn_time: int = 130) -> bool:
         """
         handles the normal edge case using both adc_list and io_list.
         but well do not do anything if no edge case
@@ -502,7 +502,7 @@ class BattleBot(Bot):
                     adc_list = self.controller.adc_all_channels
                     io_list = self.controller.io_all_channels
 
-                    if self.normal_behave(adc_list, io_list, edge_baseline=1650, edge_speed_multiplier=0.6):
+                    if self.get_away_from_edge(adc_list, io_list, edge_baseline=1650, edge_speed_multiplier=0.6):
                         # normal behave includes all edge encounter solution
                         # if encounters edge,must deal with it first
                         # should update the sensor data too ,since much time passed out
