@@ -480,7 +480,7 @@ class BattleBot(Bot):
             # wait for the battle starts
             self.wait_start(baseline=1800, with_turn=False, dash_speed=-6000)
             while True:
-                on_stage = False
+                on_stage = True
                 if on_stage:
                     # update the sensors data
                     # TODO: these two functions could be combined
@@ -515,22 +515,34 @@ class BattleBot(Bot):
             self.controller.move_cmd(0, 0)
             print('exiting')
 
-    def test_run(self, offset_angle=80):
+    def test_run(self):
         print('test')
         self.controller.move_cmd(2000, 2000)
         delay_ms(300)
         self.controller.move_cmd(0, 0)
+        baseline = 1900
         while True:
             delay_ms(100)
-
-            if self.controller.adc_all_channels[7] > 1600:
-                print('rotates')
-                self.action_TF()
+            temp = self.controller.adc_all_channels
+            ftr_sensor = temp[1]
+            rb_sensor = temp[5]
+            fb_sensor = temp[4]
+            l2_sensor = temp[8]
+            r2_sensor = temp[7]
+            if l2_sensor > baseline:
+                print('Left_encounter')
+                self.on_attacked(0)
+            elif r2_sensor > baseline:
+                print('right_encounter')
+                self.on_attacked(1)
+            elif rb_sensor > baseline:
+                print('rear_encounter')
+                self.on_attacked(2)
 
 
 if __name__ == '__main__':
     bot = BattleBot()
     bot.controller.move_cmd(0, 0)
     # breakpoint()
-    bot.Battle(interval=3, normal_spead=3500)
-    # bot.test_run()
+    # bot.Battle(interval=3, normal_spead=3500)
+    bot.test_run()
