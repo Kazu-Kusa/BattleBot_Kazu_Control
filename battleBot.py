@@ -352,7 +352,7 @@ class BattleBot(Bot):
     # endregion
 
     def get_away_from_edge(self, adc_list: list[int], io_list: list[int], edge_baseline: int = 1680,
-                           edge_speed_multiplier: float = 0, backing_time: int = 180, turn_time: int = 130) -> bool:
+                           edge_speed_multiplier: float = 0, backing_time: int = 180, turn_time: int = 160) -> bool:
         """
         handles the normal edge case using both adc_list and io_list.
         but well do not do anything if no edge case
@@ -583,5 +583,5 @@ if __name__ == '__main__':
     bot = BattleBot()
     bot.controller.move_cmd(0, 0)
     # breakpoint()
-    # bot.Battle(interval=3, normal_spead=3500)
-    bot.test_run()
+    bot.Battle(interval=3, normal_spead=3500)
+    # bot.test_run()
