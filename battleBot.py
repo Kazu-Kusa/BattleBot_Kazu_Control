@@ -467,12 +467,12 @@ class BattleBot(Bot):
         def detector() -> bool:
             baseline = 1000
             temp = self.controller.adc_all_channels
-            fr_sensor = temp[1]
+            ftr_sensor = temp[1]
             rb_sensor = temp[5]
             fb_sensor = temp[4]
             l2_sensor = temp[8]
             r2_sensor = temp[7]
-            if fr_sensor > baseline and l2_sensor < baseline and r2_sensor < baseline and rb_sensor > baseline and fb_sensor > baseline:
+            if ftr_sensor > baseline and l2_sensor < baseline and r2_sensor < baseline and rb_sensor > baseline and fb_sensor > baseline:
                 return True
             return False
 
