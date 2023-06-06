@@ -455,7 +455,7 @@ class BattleBot(Bot):
 
         try:
             # wait for the battle starts
-            self.wait_start(baseline=1800, with_turn=False, dash_speed=-8000)
+            self.wait_start(baseline=1800, with_turn=False, dash_speed=-6000)
             while True:
                 on_stage = False
                 if on_stage:
