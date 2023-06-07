@@ -348,6 +348,8 @@ class BattleBot(Bot):
         """
         handles the normal edge case using both adc_list and io_list.
         but well do not do anything if no edge case
+        使用 adc_list 和 io_list 处理正常的边缘情况。
+        但是如果没有边缘情况，就不要做任何事情
         :param backing_time:
         :param turn_time:
         :param edge_speed_multiplier:
@@ -357,6 +359,7 @@ class BattleBot(Bot):
         :return: if encounter the edge
         """
         # change the light color to represent current state, state of in normal behave
+        # 改变灯光颜色来表示当前状态，状态表现正常
         self.screen.ADC_Led_SetColor(0, self.screen.COLOR_BLUE)
 
         # read the adc sensors
@@ -371,12 +374,15 @@ class BattleBot(Bot):
 
         # use the sum of their returns to get the high_speed
         # the closer to the edge ,the slower the wheels rotates
+        # 使用他们的回报之和来获得high_speed
+        # 越靠近边缘，车轮旋转越慢
         high_spead = 4 * min(edge_rl_sensor, edge_fl_sensor, edge_fr_sensor, edge_rr_sensor)
         if edge_speed_multiplier:
             # multiplier to adjust the high_speed
+            # 调整high_speed的乘数
             high_spead = int(high_spead * edge_speed_multiplier)
 
-        # fixed action duration
+        # fixed action duration 固定动作时长
         def watcher() -> bool:
 
             temp = self.controller.adc_all_channels
@@ -389,10 +395,11 @@ class BattleBot(Bot):
                 return False
 
         if l_gray + r_gray <= 1:
-            # at least one of the gray scaler is hanging over air
+            # at least one of the gray scaler is hanging over air(至少有一个灰度传感器悬空）
 
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=turn_time,
+                           b_multiplier=0.8,
                            t_multiplier=1.5, hind_watcher_func=watcher)
             return True
         elif edge_fl_sensor < edge_baseline:
@@ -403,10 +410,11 @@ class BattleBot(Bot):
                 O-----O
             rl           rr
             
-            front-left encounters the edge, turn right,turn type is 1
+            front-left encounters the edge, turn right,turn type is 1前左相遇边缘，右转，转弯类型为1
             """
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=turn_time,
+                           b_multiplier=1.2,
                            t_multiplier=1.5, turn_type=1,
                            hind_watcher_func=watcher)
             return True
@@ -419,10 +427,11 @@ class BattleBot(Bot):
                 O-----O
             rl           rr
             
-            front-right encounters the edge, turn left,turn type is 0
+            front-right encounters the edge, turn left,turn type is 0前右相遇边缘，左转，转弯类型为0
             """
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=turn_time,
+                           b_multiplier=1.2,
                            t_multiplier=1.5, turn_type=0,
                            hind_watcher_func=watcher)
             return True
@@ -435,9 +444,9 @@ class BattleBot(Bot):
                 O-----O
             [rl]         rr
 
-            rear-left encounters the edge, turn right,turn type is 1
+            rear-left encounters the edge, turn right,turn type is 1左后遇到边缘，右转，转弯类型为1
             """
-            self.action_T(turn_type=1, turn_speed=high_spead, turn_time=turn_time)
+            self.action_T(turn_type=1, turn_speed=high_spead,turn_time=turn_time)
             return True
         elif edge_rr_sensor < edge_baseline:
             """
@@ -447,7 +456,7 @@ class BattleBot(Bot):
                 O-----O
             rl          [rr]
 
-            rear-right encounters the edge, turn left,turn type is 0
+            rear-right encounters the edge, turn left,turn type is 0右后方遇到边缘，左转，转弯类型为0
             """
             self.action_T(turn_type=0, turn_speed=high_spead, turn_time=turn_time)
             return True
@@ -497,20 +506,24 @@ class BattleBot(Bot):
         def detector() -> bool:
             baseline = 1000
             temp = self.controller.adc_all_channels
-            ftr_sensor = temp[1]
+            ftr_sensor = temp[6]
             rb_sensor = temp[5]
             fb_sensor = temp[4]
             l2_sensor = temp[8]
             r2_sensor = temp[7]
+
             if ftr_sensor > baseline and l2_sensor < baseline and r2_sensor < baseline and rb_sensor > baseline and fb_sensor > baseline:
+
+
                 return True
+
             return False
 
         try:
             # wait for the battle starts
             self.wait_start(baseline=1800, with_turn=False, dash_speed=-6000)
             while True:
-                on_stage = True
+                on_stage = False
                 if on_stage:
                     # update the sensors data
                     # TODO: these two functions could be combined
