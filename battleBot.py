@@ -399,8 +399,8 @@ class BattleBot(Bot):
 
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=turn_time,
-                           b_multiplier=0.8,
-                           t_multiplier=1.5, hind_watcher_func=watcher)
+                           b_multiplier=0.6,
+                           t_multiplier=1.8, hind_watcher_func=watcher)
             return True
         elif edge_fl_sensor < edge_baseline:
             """
@@ -414,8 +414,8 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=turn_time,
-                           b_multiplier=1.2,
-                           t_multiplier=1.5, turn_type=1,
+                           b_multiplier=0.9,
+                           t_multiplier=1.6, turn_type=1,
                            hind_watcher_func=watcher)
             return True
 
@@ -431,8 +431,8 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=turn_time,
-                           b_multiplier=1.2,
-                           t_multiplier=1.5, turn_type=0,
+                           b_multiplier=0.9,
+                           t_multiplier=1.6, turn_type=0,
                            hind_watcher_func=watcher)
             return True
 
@@ -446,7 +446,7 @@ class BattleBot(Bot):
 
             rear-left encounters the edge, turn right,turn type is 1左后遇到边缘，右转，转弯类型为1
             """
-            self.action_T(turn_type=1, turn_speed=high_spead,turn_time=turn_time)
+            self.action_T(turn_type=1, turn_speed=high_spead,turn_time=turn_time,multiplier=1.2)
             return True
         elif edge_rr_sensor < edge_baseline:
             """
@@ -458,7 +458,7 @@ class BattleBot(Bot):
 
             rear-right encounters the edge, turn left,turn type is 0右后方遇到边缘，左转，转弯类型为0
             """
-            self.action_T(turn_type=0, turn_speed=high_spead, turn_time=turn_time)
+            self.action_T(turn_type=0, turn_speed=high_spead, turn_time=turn_time,multiplier=1.2)
             return True
         else:
             return False
@@ -523,7 +523,7 @@ class BattleBot(Bot):
             # wait for the battle starts
             self.wait_start(baseline=1800, with_turn=False, dash_speed=-6000)
             while True:
-                on_stage = False
+                on_stage = True
                 if on_stage:
                     # update the sensors data
                     # TODO: these two functions could be combined
@@ -587,5 +587,5 @@ if __name__ == '__main__':
     bot = BattleBot()
     bot.controller.move_cmd(0, 0)
     # breakpoint()
-    bot.Battle(interval=3, normal_spead=3500)
+    bot.Battle(interval=2, normal_spead=4000)
     # bot.test_run()
