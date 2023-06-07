@@ -124,7 +124,9 @@ class BattleBot(Bot):
             self.controller.move_cmd(turn_speed, -turn_speed)
         else:
             self.controller.move_cmd(-turn_speed, turn_speed)
+
         delay_ms(turn_time, breaker_func=breaker_func, break_action_func=break_action_func)
+        # TODO: here may trigger some kind of bug
         self.controller.move_cmd(0, 0)
 
     def action_D(self, dash_speed: int = -13000, dash_time: int = 500,
@@ -217,18 +219,17 @@ class BattleBot(Bot):
         :param max_duration:
         :return:
         """
+        if with_dash:
+            def dash() -> None:
+
+                self.action_D(dash_speed=-6000, dash_time=500, with_turn=True)
+        else:
+            dash = (lambda: None)
+
         warnings.warn('Checking stage direction')
-        end_time = get_end_time_ms(max_duration)
-        if spinning_type:
-            spinning_speed = -spinning_speed
-        self.controller.move_cmd(spinning_speed, -spinning_speed)
-        while perf_counter_ns() < end_time:
-            if detector():
-                self.controller.move_cmd(0, 0)
-                if with_dash:
-                    # TODO: debug params,dont forget toa changewith_dash:bool=Falsewith_dash:bool=False
-                    self.action_D(dash_time=700, with_turn=False, dash_speed=-6000)
-                break
+
+        self.action_T(turn_speed=spinning_speed, turn_time=max_duration,
+                      turn_type=spinning_type, breaker_func=detector, break_action_func=dash)
 
     # endregion
 
