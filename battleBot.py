@@ -15,8 +15,8 @@ class BattleBot(Bot):
     def action_BT(self, back_speed: int = 5000, back_time: int = 120,
                   turn_speed: int = 6000, turn_time: int = 120,
                   b_multiplier: float = 0, t_multiplier: float = 0,
-                  turn_type: int = randint(0, 1), watch_behind: bool = False,
-                  watcher_func: Callable[[], bool] = None):
+                  turn_type: int = randint(0, 1),
+                  hind_watcher_func: Callable[[], bool] = None):
         """
         function that execute the action of  backwards and turns
         open loop,actualized by delaying functions
@@ -28,21 +28,13 @@ class BattleBot(Bot):
         :param t_multiplier:the multiplier that will be applied to the turn_speed
         if no multiplier is provided ,then the actual speed will be same as the entered params
         :param turn_type: 0 for left,1 for right,default random
-        :param watch_behind:if backing when use watcher
-        :param watcher_func:watcher function returning boolean value,when true,stops the robot
+        :param hind_watcher_func:watcher function returning boolean value,when true,stops the robot
         :return:
         """
         if b_multiplier:
             back_speed = int(back_speed * b_multiplier)
         self.controller.move_cmd(-back_speed, -back_speed)
-        if watch_behind:
-            end = perf_counter_ns() + back_time * 1000000
-            while perf_counter_ns() < end:
-                if watcher_func():
-                    self.controller.move_cmd(0, 0)
-                    break
-        else:
-            delay_ms(back_time)
+        delay_ms(back_time, breaker_func=hind_watcher_func)
 
         if t_multiplier:
             turn_speed = int(turn_speed * t_multiplier)
@@ -385,7 +377,7 @@ class BattleBot(Bot):
             high_spead = int(high_spead * edge_speed_multiplier)
 
         # fixed action duration
-        def watcher():
+        def watcher() -> bool:
 
             temp = self.controller.adc_all_channels
             local_edge_rr_sensor = temp[0]
@@ -401,8 +393,7 @@ class BattleBot(Bot):
 
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=turn_time,
-                           t_multiplier=1.5,
-                           watch_behind=True, watcher_func=watcher)
+                           t_multiplier=1.5, hind_watcher_func=watcher)
             return True
         elif edge_fl_sensor < edge_baseline:
             """
@@ -417,7 +408,7 @@ class BattleBot(Bot):
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=turn_time,
                            t_multiplier=1.5, turn_type=1,
-                           watch_behind=True, watcher_func=watcher)
+                           hind_watcher_func=watcher)
             return True
 
         elif edge_fr_sensor < edge_baseline:
@@ -433,7 +424,7 @@ class BattleBot(Bot):
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=turn_time,
                            t_multiplier=1.5, turn_type=0,
-                           watch_behind=True, watcher_func=watcher)
+                           hind_watcher_func=watcher)
             return True
 
         elif edge_rl_sensor < edge_baseline:
