@@ -208,10 +208,11 @@ class BattleBot(Bot):
                 self.action_D(with_turn=with_turn, dash_time=dash_time, dash_speed=dash_speed)
                 return
 
-    def checking_stage_direction(self, detector: Callable[[], bool], with_dash: bool = False,
-                                 spinning_type=randint(0, 1), spinning_speed: int = 2500, max_duration: int = 3000):
+    def scan_surround(self, detector: Callable[[], bool], with_dash: bool = False, with_turn: bool = False,
+                      spinning_type=randint(0, 1), spinning_speed: int = 2500, max_duration: int = 3000):
         """
         checking the stage direction and make the dash movement accordingly
+        :param with_turn:
         :param detector:
         :param with_dash:
         :param spinning_type:
@@ -222,7 +223,7 @@ class BattleBot(Bot):
         if with_dash:
             def dash() -> None:
 
-                self.action_D(dash_speed=-6000, dash_time=500, with_turn=True)
+                self.action_D(dash_speed=-6000, dash_time=500, with_turn=with_turn)
         else:
             dash = (lambda: None)
 
@@ -540,7 +541,26 @@ class BattleBot(Bot):
                     delay_ms(interval)
                 else:
                     delay_ms(interval)
-                    self.checking_stage_direction(detector=detector, with_dash=True, spinning_speed=1300)
+                    in_conner = True
+                    if in_conner:
+                        def conner_break() -> bool:
+                            temp = self.controller.adc_all_channels
+                            rb_sensor = temp[5]
+                            fb_sensor = temp[4]
+                            l2_sensor = temp[8]
+                            r2_sensor = temp[7]
+                            base_line = 2000
+                            delta_front_rear = abs(rb_sensor - fb_sensor)
+                            ab_delta_right_left = abs(l2_sensor - r2_sensor)
+                            if delta_front_rear + ab_delta_right_left > base_line:
+                                return True
+                            else:
+                                return False
+
+                        self.scan_surround(detector=conner_break, with_dash=False, spinning_speed=2000)
+                    else:
+
+                        self.scan_surround(detector=detector, with_dash=True, spinning_speed=1300)
                     delay_ms(5000)
 
 
