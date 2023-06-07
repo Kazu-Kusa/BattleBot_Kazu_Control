@@ -3,8 +3,6 @@ import time
 import warnings
 from abc import ABCMeta, abstractmethod
 from time import sleep
-import cv2
-from apriltag import Detector, DetectorOptions
 
 from repo.uptechStar.module.screen import Screen
 
@@ -12,11 +10,10 @@ from repo.uptechStar.module.up_controller import UpController
 
 
 class Bot(metaclass=ABCMeta):
-    tag_detector = Detector(DetectorOptions(families='tag36h11')).detect
     screen = Screen(init_screen=False)
     controller = UpController(debug=False, fan_control=False)
 
-    def __init__(self, config_path: str = './config.json', team_color: str = 'blue'):
+    def __init__(self, config_path: str = './config.json', team_color: str = 'blue', use_cam: bool = True):
         """
 
         :param config_path: the path to the config,but it hasn't been put into use
@@ -31,7 +28,8 @@ class Bot(metaclass=ABCMeta):
 
         self._set_tags(team_color=team_color)
         self._camera_is_on: bool = False
-        self.apriltag_detect_start()
+        if use_cam:
+            self.apriltag_detect_start()
 
     # region utilities
     def load_config(self, config_path: str):
@@ -81,6 +79,9 @@ class Bot(metaclass=ABCMeta):
         :param print_tag_id: if print tag id on check
         :return:
         """
+        import cv2
+        from apriltag import Detector, DetectorOptions
+        tag_detector = Detector(DetectorOptions(families='tag36h11')).detect
         print("detect start")
         # 使用 cv2.VideoCapture(0) 创建视频捕获对象，从默认摄像头（通常是笔记本电脑的内置摄像头）捕获视频。
         cap = cv2.VideoCapture(0)
@@ -115,7 +116,7 @@ class Bot(metaclass=ABCMeta):
                 frame = frame[cup_h:cup_h + weight, cup_w:cup_w + weight]
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # 将帧转换为灰度并存储在 gray 变量中。
                 # 使用 AprilTag 检测器对象（self.tag_detector）在灰度帧中检测 AprilTags。检测到的标记存储在 tags 变量中。
-                tags = self.tag_detector(gray)
+                tags = tag_detector(gray)
                 if tags:
                     if single_tag_mode:
                         self.tag_id = tags[0].tag_id
