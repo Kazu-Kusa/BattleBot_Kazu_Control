@@ -104,9 +104,13 @@ class BattleBot(Bot):
                    cs_limit=1500, target_tolerance=13)
 
     def action_T(self, turn_type: int = randint(0, 1), turn_speed: int = 5000, turn_time: int = 130,
-                 multiplier: float = 0):
+                 multiplier: float = 0,
+                 breaker_func: Callable[[], bool] = None,
+                 break_action_func: Callable[[], None] = None):
         """
 
+        :param break_action_func:
+        :param breaker_func:
         :param turn_type: <- turn_type == 0  or turn_type == 1 ->
         :param turn_speed:
         :param turn_time:
@@ -120,7 +124,7 @@ class BattleBot(Bot):
             self.controller.move_cmd(turn_speed, -turn_speed)
         else:
             self.controller.move_cmd(-turn_speed, turn_speed)
-        delay_ms(turn_time)
+        delay_ms(turn_time, breaker_func=breaker_func, break_action_func=break_action_func)
         self.controller.move_cmd(0, 0)
 
     def action_D(self, dash_speed: int = -13000, dash_time: int = 500,
