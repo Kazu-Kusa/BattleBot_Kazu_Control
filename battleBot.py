@@ -229,7 +229,7 @@ class BattleBot(Bot):
     # endregion
 
     # region events
-    def util_edge(self, using_gray: bool = True, using_edge_sensor: bool = False, edge_a: int = 1800):
+    def util_edge(self, using_gray: bool = True, using_edge_sensor: bool = True, edge_a: int = 1800):
         """
         a conditioned delay function ,will delay util the condition is satisfied
         :param using_gray: use the gray the judge if the condition is satisfied
@@ -237,14 +237,31 @@ class BattleBot(Bot):
         :param edge_a: edge sensors judge baseline
         :return:
         """
-        if using_gray:
+
+        def gray_check():
             io_list = self.controller.io_all_channels
             while int(io_list[6]) + int(io_list[7]) > 1:
                 io_list = self.controller.io_all_channels
-        elif using_edge_sensor:
+
+        def edge_sensor_check():
             adc_list = self.controller.adc_all_channels
             while adc_list[1] < edge_a or adc_list[2] < edge_a:
                 adc_list = self.controller.adc_all_channels
+
+        def mixed_check():
+            io_list = self.controller.io_all_channels
+            adc_list = self.controller.adc_all_channels
+            while adc_list[1] < edge_a or adc_list[2] < edge_a and int(io_list[6]) + int(io_list[7]) > 1:
+                adc_list = self.controller.adc_all_channels
+                io_list = self.controller.io_all_channels
+
+        if using_gray and using_edge_sensor:
+            mixed_check()
+
+        elif using_edge_sensor:
+            edge_sensor_check()
+        elif using_gray:
+            gray_check()
 
     def on_ally_box(self, speed: int = 5000, multiplier: float = 0):
         """
