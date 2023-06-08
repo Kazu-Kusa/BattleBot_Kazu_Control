@@ -36,14 +36,8 @@ class BattleBot(Bot):
         self.controller.move_cmd(-back_speed, -back_speed)
         delay_ms(back_time, breaker_func=hind_watcher_func)
 
-        if t_multiplier:
-            turn_speed = int(turn_speed * t_multiplier)
-        if turn_type:
-            self.controller.move_cmd(turn_speed, -turn_speed)
-        else:
-            self.controller.move_cmd(-turn_speed, turn_speed)
-        delay_ms(turn_time)
-        self.controller.move_cmd(0, 0)
+        self.action_T(turn_type=turn_type, turn_speed=turn_speed, turn_time=turn_time,
+                      multiplier=t_multiplier)
 
     def action_T_PID(self, offset_angle: float = 90, step: int = 2):
         """
@@ -104,9 +98,13 @@ class BattleBot(Bot):
                    cs_limit=1500, target_tolerance=13)
 
     def action_T(self, turn_type: int = randint(0, 1), turn_speed: int = 5000, turn_time: int = 130,
-                 multiplier: float = 0):
+                 multiplier: float = 0,
+                 breaker_func: Callable[[], bool] = None,
+                 break_action_func: Callable[[], None] = None):
         """
 
+        :param break_action_func:
+        :param breaker_func:
         :param turn_type: <- turn_type == 0  or turn_type == 1 ->
         :param turn_speed:
         :param turn_time:
@@ -120,7 +118,9 @@ class BattleBot(Bot):
             self.controller.move_cmd(turn_speed, -turn_speed)
         else:
             self.controller.move_cmd(-turn_speed, turn_speed)
-        delay_ms(turn_time)
+
+        delay_ms(turn_time, breaker_func=breaker_func, break_action_func=break_action_func)
+        # TODO: here may trigger some kind of bug
         self.controller.move_cmd(0, 0)
 
     def action_D(self, dash_speed: int = -13000, dash_time: int = 500,
@@ -202,10 +202,11 @@ class BattleBot(Bot):
                 self.action_D(with_turn=with_turn, dash_time=dash_time, dash_speed=dash_speed)
                 return
 
-    def checking_stage_direction(self, detector: Callable[[], bool], with_dash: bool = False,
-                                 spinning_type=randint(0, 1), spinning_speed: int = 2500, max_duration: int = 3000):
+    def scan_surround(self, detector: Callable[[], bool], with_dash: bool = False, with_turn: bool = False,
+                      spinning_type=randint(0, 1), spinning_speed: int = 2500, max_duration: int = 3000):
         """
         checking the stage direction and make the dash movement accordingly
+        :param with_turn:
         :param detector:
         :param with_dash:
         :param spinning_type:
@@ -213,18 +214,17 @@ class BattleBot(Bot):
         :param max_duration:
         :return:
         """
+        if with_dash:
+            def dash() -> None:
+
+                self.action_D(dash_speed=-6000, dash_time=500, with_turn=with_turn)
+        else:
+            dash = (lambda: None)
+
         warnings.warn('Checking stage direction')
-        end_time = get_end_time_ms(max_duration)
-        if spinning_type:
-            spinning_speed = -spinning_speed
-        self.controller.move_cmd(spinning_speed, -spinning_speed)
-        while perf_counter_ns() < end_time:
-            if detector():
-                self.controller.move_cmd(0, 0)
-                if with_dash:
-                    # TODO: debug params,dont forget toa changewith_dash:bool=Falsewith_dash:bool=False
-                    self.action_D(dash_time=700, with_turn=False, dash_speed=-6000)
-                break
+
+        self.action_T(turn_speed=spinning_speed, turn_time=max_duration,
+                      turn_type=spinning_type, breaker_func=detector, break_action_func=dash)
 
     # endregion
 
@@ -548,7 +548,26 @@ class BattleBot(Bot):
                     delay_ms(interval)
                 else:
                     delay_ms(interval)
-                    self.checking_stage_direction(detector=detector, with_dash=True, spinning_speed=1300)
+                    in_conner = True
+                    if in_conner:
+                        def conner_break() -> bool:
+                            temp = self.controller.adc_all_channels
+                            rb_sensor = temp[5]
+                            fb_sensor = temp[4]
+                            l2_sensor = temp[8]
+                            r2_sensor = temp[7]
+                            base_line = 2000
+                            delta_front_rear = abs(rb_sensor - fb_sensor)
+                            ab_delta_right_left = abs(l2_sensor - r2_sensor)
+                            if delta_front_rear + ab_delta_right_left > base_line:
+                                return True
+                            else:
+                                return False
+
+                        self.scan_surround(detector=conner_break, with_dash=False, spinning_speed=2000)
+                    else:
+
+                        self.scan_surround(detector=detector, with_dash=True, spinning_speed=1300)
                     delay_ms(5000)
 
 
