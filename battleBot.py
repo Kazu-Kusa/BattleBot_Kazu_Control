@@ -253,6 +253,7 @@ class BattleBot(Bot):
         :param multiplier: the desired speed multiplier
         :return:
         """
+        self.screen.ADC_Led_SetColor(0, self.screen.COLOR_GREEN)
         self.action_T(turn_speed=speed, multiplier=multiplier)
 
     def on_enemy_box(self, speed: int = 8000, multiplier: float = 0):
@@ -262,7 +263,7 @@ class BattleBot(Bot):
         :param multiplier:
         :return:
         """
-
+        self.screen.ADC_Led_SetColor(0, self.screen.COLOR_RED)
         if multiplier:
             speed = int(multiplier * speed)
         self.controller.move_cmd(speed, speed)
@@ -278,6 +279,7 @@ class BattleBot(Bot):
         :param multiplier:
         :return:
         """
+        self.screen.ADC_Led_SetColor(0, self.screen.COLOR_RED)
         if multiplier:
             speed = int(multiplier * speed)
         self.controller.move_cmd(speed, speed)
@@ -462,7 +464,7 @@ class BattleBot(Bot):
         :param baseline:
         :return: if it has encountered anything
         """
-        self.screen.ADC_Led_SetColor(0, self.screen.COLOR_RED)
+
         if self.tag_id == self.ally_tag and adc_list[4] > baseline:
             self.on_ally_box(basic_speed, 0.3)
             return True
@@ -482,7 +484,6 @@ class BattleBot(Bot):
             self.on_thing_surrounding(2)
             return True
         else:
-            self.screen.ADC_Led_SetColor(0, self.screen.COLOR_GREEN)
             return False
 
     def Battle(self, interval: int = 10, normal_spead: int = 3000):
@@ -593,5 +594,5 @@ if __name__ == '__main__':
     bot = BattleBot()
     bot.controller.move_cmd(0, 0)
     # breakpoint()
-    bot.Battle(interval=3, normal_spead=3500)
+    bot.Battle(interval=1, normal_spead=3980)
     # bot.test_run()
