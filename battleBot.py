@@ -36,14 +36,8 @@ class BattleBot(Bot):
         self.controller.move_cmd(-back_speed, -back_speed)
         delay_ms(back_time, breaker_func=hind_watcher_func)
 
-        if t_multiplier:
-            turn_speed = int(turn_speed * t_multiplier)
-        if turn_type:
-            self.controller.move_cmd(turn_speed, -turn_speed)
-        else:
-            self.controller.move_cmd(-turn_speed, turn_speed)
-        delay_ms(turn_time)
-        self.controller.move_cmd(0, 0)
+        self.action_T(turn_type=turn_type, turn_speed=turn_speed, turn_time=turn_time,
+                      multiplier=t_multiplier)
 
     def action_T_PID(self, offset_angle: float = 90, step: int = 2):
         """
