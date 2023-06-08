@@ -229,9 +229,11 @@ class BattleBot(Bot):
     # endregion
 
     # region events
-    def util_edge(self, using_gray: bool = True, using_edge_sensor: bool = True, edge_a: int = 1800):
+    def util_edge(self, using_gray: bool = True, using_edge_sensor: bool = True, edge_a: int = 1800,
+                  breaker_func: Callable[[], bool] = lambda: None):
         """
         a conditioned delay function ,will delay util the condition is satisfied
+        :param breaker_func:
         :param using_gray: use the gray the judge if the condition is satisfied
         :param using_edge_sensor: use the edge sensors to judge if the condition is satisfied
         :param edge_a: edge sensors judge baseline
@@ -242,11 +244,15 @@ class BattleBot(Bot):
             io_list = self.controller.io_all_channels
             while int(io_list[6]) + int(io_list[7]) > 1:
                 io_list = self.controller.io_all_channels
+                if breaker_func():
+                    return
 
         def edge_sensor_check():
             adc_list = self.controller.adc_all_channels
             while adc_list[1] < edge_a or adc_list[2] < edge_a:
                 adc_list = self.controller.adc_all_channels
+                if breaker_func():
+                    return
 
         def mixed_check():
             io_list = self.controller.io_all_channels
@@ -254,10 +260,11 @@ class BattleBot(Bot):
             while adc_list[1] < edge_a or adc_list[2] < edge_a and int(io_list[6]) + int(io_list[7]) > 1:
                 adc_list = self.controller.adc_all_channels
                 io_list = self.controller.io_all_channels
+                if breaker_func():
+                    return
 
         if using_gray and using_edge_sensor:
             mixed_check()
-
         elif using_edge_sensor:
             edge_sensor_check()
         elif using_gray:
@@ -280,11 +287,18 @@ class BattleBot(Bot):
         :param multiplier:
         :return:
         """
+
+        def check_tag() -> bool:
+            if self.tag_id == self.ally_tag:
+                return True
+            else:
+                return False
+
         self.screen.ADC_Led_SetColor(0, self.screen.COLOR_RED)
         if multiplier:
             speed = int(multiplier * speed)
         self.controller.move_cmd(speed, speed)
-        self.util_edge()
+        self.util_edge(breaker_func=check_tag)
         self.controller.move_cmd(-speed, -speed)
         delay_ms(160)
         self.controller.move_cmd(0, 0)
@@ -296,11 +310,18 @@ class BattleBot(Bot):
         :param multiplier:
         :return:
         """
+
+        def check_tag() -> bool:
+            if self.tag_id == self.ally_tag:
+                return True
+            else:
+                return False
+
         self.screen.ADC_Led_SetColor(0, self.screen.COLOR_RED)
         if multiplier:
             speed = int(multiplier * speed)
         self.controller.move_cmd(speed, speed)
-        self.util_edge()
+        self.util_edge(breaker_func=check_tag)
         if multiplier:
             speed = int(multiplier * speed)
         self.controller.move_cmd(-speed, -speed)
