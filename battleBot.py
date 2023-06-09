@@ -1,10 +1,8 @@
 import warnings
 from random import randint, choice
 from typing import Callable
-from time import perf_counter_ns
-
 from bot import Bot
-from repo.uptechStar.module.timer import delay_ms, get_end_time_ms
+from repo.uptechStar.module.timer import delay_ms
 from repo.uptechStar.module.algrithm_tools import compute_inferior_arc, calculate_relative_angle
 from repo.uptechStar.module.pid import PD_control, PID_control
 
@@ -19,6 +17,44 @@ def is_tilted(roll: float, pitch: float, threshold=45):
     :return: True代表倾倒，False代表未倾倒
     """
     return abs(roll) > threshold or abs(pitch) > threshold
+
+
+def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline: int = 2200) -> int:
+    rb_sensor = ad_list[5]
+    fb_sensor = ad_list[4]
+    l3_sensor = ad_list[8]
+    r3_sensor = ad_list[7]
+
+    """
+    fl           fr
+        O-----O
+           |
+        O-----O
+    rl           rr
+    """
+    total = sum([rb_sensor, fb_sensor, l3_sensor, r3_sensor])
+    if total > baseline:
+        # off stage
+
+        fl_sum = fb_sensor + l3_sensor
+        if fl_sum > conner_baseline:
+            return 2
+        fr_sum = fb_sensor + r3_sensor
+        if fr_sum > conner_baseline:
+            return 2
+
+        rl_sum = rb_sensor + l3_sensor
+
+        if rl_sum > conner_baseline:
+            return 2
+        rr_sum = rb_sensor + r3_sensor
+        if rr_sum > conner_baseline:
+            return 2
+
+        return 1
+    else:
+        # on stage
+        return 0
 
 
 class BattleBot(Bot):
@@ -230,13 +266,9 @@ class BattleBot(Bot):
         """
         if with_dash:
             def dash() -> None:
-
-                self.action_D(dash_speed=-6000, dash_time=500, with_turn=with_turn)
+                self.action_D(dash_speed=-8000, dash_time=450, with_turn=with_turn)
         else:
             dash = (lambda: None)
-
-        warnings.warn('Checking stage direction')
-
         self.action_T(turn_speed=spinning_speed, turn_time=max_duration,
                       turn_type=spinning_type, breaker_func=detector, break_action_func=dash)
 
@@ -706,63 +738,70 @@ class BattleBot(Bot):
             ftr_sensor = temp[6]
             rb_sensor = temp[5]
             fb_sensor = temp[4]
-            l2_sensor = temp[8]
-            r2_sensor = temp[7]
-            if ftr_sensor > baseline and l2_sensor < baseline and r2_sensor < baseline and rb_sensor > baseline and fb_sensor > baseline:
+            l3_sensor = temp[8]
+            r3_sensor = temp[7]
+            if ftr_sensor > baseline and l3_sensor < baseline and r3_sensor < baseline and rb_sensor > baseline and fb_sensor > baseline:
                 return True
             return False
 
+        def conner_break() -> bool:
+            temp = self.controller.adc_all_channels
+            rb_sensor = temp[5]
+            fb_sensor = temp[4]
+            l3_sensor = temp[8]
+            r3_sensor = temp[7]
+            base_line = 2000
+            delta_front_rear = abs(rb_sensor - fb_sensor)
+            ab_delta_right_left = abs(l3_sensor - r3_sensor)
+            if delta_front_rear + ab_delta_right_left > base_line:
+                return True
+            else:
+                return False
+
+        def on_stage() -> None:
+            warnings.warn('on_stage')
+            if not self.tag_monitor_switch:
+                self.tag_monitor_switch = True
+            adc_list = self.controller.adc_all_channels
+            io_list = self.controller.io_all_channels
+
+            if self.get_away_from_edge(adc_list, io_list, edge_baseline=1750, edge_speed_multiplier=0.9):
+                # normal behave includes all edge encounter solution
+                # if encounters edge,must deal with it first
+                # should update the sensor data too ,since much time passed out
+                adc_list = self.controller.adc_all_channels
+
+            if self.check_surround(adc_list):
+                # if no edge is encountered then check if there are anything surrounding
+                # will check surrounding and will act according the case to deal with it
+                # after turning should go to next loop checking the object
+                return
+                # if no edge is encountered and nothing surrounding, then just keep moving up
+            self.controller.move_cmd(normal_spead, normal_spead)
+            # loop delay,this is to prevent sending too many cmds to driver causing jam
+            self.screen.ADC_Led_SetColor(1, self.screen.COLOR_YELLOW)
+
+        def in_conner() -> None:
+            warnings.warn('in_conner')
+            if self.tag_monitor_switch:
+                self.tag_monitor_switch = False
+            self.scan_surround(detector=conner_break, with_dash=True, spinning_speed=2000, )
+
+        def to_stage() -> None:
+            warnings.warn('by_stage')
+            if self.tag_monitor_switch:
+                self.tag_monitor_switch = False
+            self.scan_surround(detector=detector, with_dash=True, spinning_speed=1300)
+
+        methods_table = {0: on_stage, 1: to_stage, 2: in_conner}
         try:
             # wait for the battle starts
             self.wait_start(baseline=1800, with_turn=False, dash_speed=-6000)
             while True:
-                on_stage = True
-                if on_stage:
-                    # update the sensors data
-                    # TODO: these two functions could be combined
-                    adc_list = self.controller.adc_all_channels
-                    io_list = self.controller.io_all_channels
-
-                    if self.get_away_from_edge(adc_list, io_list, edge_baseline=1650, edge_speed_multiplier=0.6):
-                        # normal behave includes all edge encounter solution
-                        # if encounters edge,must deal with it first
-                        # should update the sensor data too ,since much time passed out
-                        adc_list = self.controller.adc_all_channels
-
-                    if self.check_surround(adc_list):
-                        # if no edge is encountered then check if there are anything surrounding
-                        # will check surrounding and will act according the case to deal with it
-                        # after turning should go to next loop checking the object
-                        continue
-                    # if no edge is encountered and nothing surrounding, then just keep moving up
-                    self.controller.move_cmd(normal_spead, normal_spead)
-                    # loop delay,this is to prevent sending too many cmds to driver causing jam
-                    self.screen.ADC_Led_SetColor(1, self.screen.COLOR_YELLOW)
-                    delay_ms(interval)
-                else:
-                    delay_ms(interval)
-                    in_conner = True
-                    if in_conner:
-                        def conner_break() -> bool:
-                            temp = self.controller.adc_all_channels
-                            rb_sensor = temp[5]
-                            fb_sensor = temp[4]
-                            l2_sensor = temp[8]
-                            r2_sensor = temp[7]
-                            base_line = 2000
-                            delta_front_rear = abs(rb_sensor - fb_sensor)
-                            ab_delta_right_left = abs(l2_sensor - r2_sensor)
-                            if delta_front_rear + ab_delta_right_left > base_line:
-                                return True
-                            else:
-                                return False
-
-                        self.scan_surround(detector=conner_break, with_dash=False, spinning_speed=2000)
-                    else:
-
-                        self.scan_surround(detector=detector, with_dash=True, spinning_speed=1300)
-                    delay_ms(5000)
-
+                method: Callable[[], None] = methods_table.get(
+                    check_surrounding_fence(self.controller.adc_all_channels, baseline=3550, conner_baseline=2600))
+                method()
+                delay_ms(interval)
 
         except KeyboardInterrupt:
             # forced stop
@@ -782,12 +821,12 @@ class BattleBot(Bot):
             ftr_sensor = temp[1]
             rb_sensor = temp[5]
             fb_sensor = temp[4]
-            l2_sensor = temp[8]
-            r2_sensor = temp[7]
-            if l2_sensor > baseline:
+            l3_sensor = temp[8]
+            r3_sensor = temp[7]
+            if l3_sensor > baseline:
                 print('Left_encounter')
                 self.on_attacked(0)
-            elif r2_sensor > baseline:
+            elif r3_sensor > baseline:
                 print('right_encounter')
                 self.on_attacked(1)
             elif rb_sensor > baseline:
@@ -797,4 +836,4 @@ class BattleBot(Bot):
 
 if __name__ == '__main__':
     bot = BattleBot()
-    bot.Battle(interval=2, normal_spead=4000)
+    bot.Battle(interval=1, normal_spead=3500)

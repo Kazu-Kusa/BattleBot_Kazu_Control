@@ -184,6 +184,7 @@ class Bot(metaclass=ABCMeta):
         :param switch:
         :return:
         """
+        self._tag_id = -1
         self._tag_monitor_switch = switch
 
     @property
