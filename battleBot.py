@@ -172,9 +172,9 @@ class BattleBot(Bot):
         self.controller.move_cmd(0, 0)
 
     def action_D(self, dash_speed: int = -13000, dash_time: int = 500,
-                 with_turn: bool = False,multiplier:float=0):
+                 with_turn: bool = False, multiplier: float = 0):
         if multiplier:
-            dash_speed=int(dash_speed*multiplier)
+            dash_speed = int(dash_speed * multiplier)
         self.controller.move_cmd(dash_speed, dash_speed)
         delay_ms(dash_time)
         self.controller.move_cmd(0, 0)
@@ -476,6 +476,7 @@ class BattleBot(Bot):
 
         def do_nothing():
             return False
+
         def do_fl():
             """
             [fl]         fr
@@ -492,6 +493,7 @@ class BattleBot(Bot):
                            t_multiplier=1.6, turn_type=1,
                            hind_watcher_func=watcher)
             return True
+
         def do_fr():
             """
                        fl          [fr]
@@ -508,6 +510,7 @@ class BattleBot(Bot):
                            t_multiplier=1.6, turn_type=0,
                            hind_watcher_func=watcher)
             return True
+
         def do_rl():
             """
                         fl           fr
@@ -520,6 +523,7 @@ class BattleBot(Bot):
                         """
             self.action_T(turn_type=1, turn_speed=high_spead, turn_time=turn_time, multiplier=1.2)
             return True
+
         def do_rr():
             """
             fl           fr
@@ -532,6 +536,7 @@ class BattleBot(Bot):
             """
             self.action_T(turn_type=0, turn_speed=high_spead, turn_time=turn_time, multiplier=1.2)
             return True
+
         def do_l_gary():
             """
              fl   [l]  r   fr
@@ -547,6 +552,7 @@ class BattleBot(Bot):
                            t_multiplier=1.6, turn_type=1,
                            hind_watcher_func=watcher)
             return True
+
         def do_r_gary():
             """
              fl   l  [r]   fr
@@ -562,6 +568,23 @@ class BattleBot(Bot):
                            t_multiplier=1.6, turn_type=0,
                            hind_watcher_func=watcher)
             return True
+
+        def do_r_gray_l_gray():
+            """
+             fl   l  [r]   fr
+                 O-----O
+                    |
+                 O-----O
+            rl            rr
+            :return:
+            """
+            self.action_BT(back_speed=high_spead, back_time=high_speed_time,
+                           turn_speed=high_spead, turn_time=turn_time,
+                           b_multiplier=0.9,
+                           t_multiplier=1.6, turn_type=2,
+                           hind_watcher_func=watcher)
+            return True
+
         def do_fl_rl():
             """
              [fl]   l   r   fr
@@ -571,7 +594,7 @@ class BattleBot(Bot):
             [rl]            rr
             :return:
             """
-            self.action_T(turn_type=1,turn_speed=high_spead,multiplier=0.9,turn_time=turn_time)
+            self.action_T(turn_type=1, turn_speed=high_spead, multiplier=0.9, turn_time=turn_time)
             return True
 
         def do_fr_rr():
@@ -585,6 +608,7 @@ class BattleBot(Bot):
             """
             self.action_T(turn_type=0, turn_speed=high_spead, multiplier=0.9, turn_time=turn_time)
             return True
+
         def do_rl_rr():
             """
              fl   l   r   fr
@@ -594,8 +618,9 @@ class BattleBot(Bot):
             [rl]          [rr]
             :return:
             """
-            self.action_D(dash_speed=high_spead,dash_time=high_speed_time,multiplier=1)
+            self.action_D(dash_speed=high_spead, dash_time=high_speed_time, multiplier=1)
             return True
+
         def do_fl_rl_rr():
             """
             [fl]   l   r   fr
@@ -605,9 +630,10 @@ class BattleBot(Bot):
             [rl]          [rr]
             :return:
             """
-            self.action_BT(back_speed=-high_spead,b_multiplier=0.9,back_time=high_speed_time,
-                           turn_type=1,turn_time=turn_time,t_multiplier=1.6)
+            self.action_BT(back_speed=-high_spead, b_multiplier=0.9, back_time=high_speed_time,
+                           turn_type=1, turn_time=turn_time, t_multiplier=1.6)
             return True
+
         def do_fr_rl_rr():
             """
              fl   l   r   [fr]
@@ -617,9 +643,10 @@ class BattleBot(Bot):
             [rl]          [rr]
             :return:
             """
-            self.action_BT(back_speed=-high_spead,b_multiplier=0.9,back_time=high_speed_time,
-                           turn_type=0,turn_time=turn_time,t_multiplier=1.6)
+            self.action_BT(back_speed=-high_spead, b_multiplier=0.9, back_time=high_speed_time,
+                           turn_type=0, turn_time=turn_time, t_multiplier=1.6)
             return True
+
         def do_fl_l_gray():
             """
              [fl] [l]   r   fr
@@ -629,10 +656,11 @@ class BattleBot(Bot):
               rl          rr
             :return:
             """
-            self.action_BT(back_speed=high_spead,back_time=high_speed_time,b_multiplier=0.9,
-                           turn_type=1,turn_time=turn_time,t_multiplier=1.6,
+            self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=0.9,
+                           turn_type=1, turn_time=turn_time, t_multiplier=1.6,
                            hind_watcher_func=watcher)
             return True
+
         def do_fl_l_gray_rl():
             """
              [fl] [l]   r   fr
@@ -642,8 +670,9 @@ class BattleBot(Bot):
              [rl]          rr
             :return:右转
             """
-            self.action_T(turn_type=1,turn_time=turn_time,turn_speed=high_spead)
+            self.action_T(turn_type=1, turn_time=turn_time, turn_speed=high_spead)
             return True
+
         def do_fl_l_gray_r_gray():
             """
              [fl] [l]  [r]  fr
@@ -653,45 +682,45 @@ class BattleBot(Bot):
               rl          rr
             :return:后退右转
             """
-            self.action_BT(back_speed=high_spead,back_time=high_speed_time,b_multiplier=0.9,
-                           turn_type=1,turn_time=turn_time,t_multiplier=1.6,
+            self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=0.9,
+                           turn_type=1, turn_time=turn_time, t_multiplier=1.6,
                            hind_watcher_func=watcher)
             return True
-        sensor_data=[edge_fl_sensor>edge_baseline,edge_fr_sensor>edge_baseline,
-                     edge_rl_sensor>edge_baseline,edge_rr_sensor>edge_baseline,
-                     l_gray,r_gray]
 
-        method_table={[True,True,True,True,1,1]:do_nothing,
-                      [False,True,True,True,1,1]:do_fl,
-                      [True,False,True,True,1,1]:do_fr,
-                      [True,True,False,True,1,1]:do_rl,
-                      [True,True,True,False,1,1]:do_rr,
+        sensor_data = [edge_fl_sensor > edge_baseline, edge_fr_sensor > edge_baseline,
+                       edge_rl_sensor > edge_baseline, edge_rr_sensor > edge_baseline,
+                       l_gray, r_gray]
 
-                      [True,True,True,True,0,1]:do_l_gary,
-                      [True,True,True,True,1,0]:do_r_gary,#fl and fr 不会出现,
+        method_table = {[True, True, True, True, 1, 1]: do_nothing,
 
-                      [False,True,False,True,1,1]:do_fl_rl,#fl and rr 暂未出现,
+                        [False, True, True, True, 1, 1]: do_fl,
+                        [True, False, True, True, 1, 1]: do_fr,
+                        [True, True, False, True, 1, 1]: do_rl,
+                        [True, True, True, False, 1, 1]: do_rr,
 
-                      [True,False,True,False,1,1]:do_fr_rr,#fr and rl 暂未出现，fl and fr 不会出现
+                        [True, True, True, True, 0, 1]: do_l_gary,
+                        [True, True, True, True, 1, 0]: do_r_gary,  # fl and fr 不会出现,
+                        [True, True, True, True, 0, 0]: do_r_gray_l_gray,
 
-                      [True,True,False,False,1,1]:do_rl_rr,
+                        [False, True, False, True, 1, 1]: do_fl_rl,  # fl and rr 暂未出现,
 
-                      [False,True,False,False,1,1]:do_fl_rl_rr,
-                      [False, True, False, False, 0, 1]: do_fl_rl_rr,
-                      [True,False,False,False,1,1]:do_fr_rl_rr,#fr and fr 不会出现
-                      [True, False, False, False, 1, 0]: do_fr_rl_rr,
+                        [True, False, True, False, 1, 1]: do_fr_rr,  # fr and rl 暂未出现，fl and fr 不会出现
 
-                      [False,True,True,True,0,1]:do_fl_l_gray,
-                      [False,True,False,True,0,1]:do_fl_l_gray_rl,
+                        [True, True, False, False, 1, 1]: do_rl_rr,
 
-                      [False,True,True,True,0,0]:do_fl_l_gray_r_gray,
-                      [True,True,True,True,1,1]:1}
+                        [False, True, False, False, 1, 1]: do_fl_rl_rr,
+                        [False, True, False, False, 0, 1]: do_fl_rl_rr,
+                        [True, False, False, False, 1, 1]: do_fr_rl_rr,  # fr and fr 不会出现
+                        [True, False, False, False, 1, 0]: do_fr_rl_rr,
 
-        method=method_table.get(sensor_data)
+                        [False, True, True, True, 0, 1]: do_fl_l_gray,
+                        [False, True, False, True, 0, 1]: do_fl_l_gray_rl,
+
+                        [False, True, True, True, 0, 0]: do_fl_l_gray_r_gray,
+                        [True, True, True, True, 1, 1]: 1}
+
+        method = method_table.get(sensor_data)
         return method()
-
-
-
 
     def check_surround(self, adc_list: list[int], baseline: int = 2000, basic_speed: int = 6000) -> bool:
         """
