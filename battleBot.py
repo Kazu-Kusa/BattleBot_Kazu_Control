@@ -9,7 +9,7 @@ from repo.uptechStar.module.algrithm_tools import compute_inferior_arc, calculat
 from repo.uptechStar.module.pid import PD_control, PID_control
 
 
-def is_tilted(roll:, pitch, threshold=45):
+def is_tilted(roll: float, pitch: float, threshold=45):
     """
     判断当前姿态是否倾倒
 
@@ -19,6 +19,7 @@ def is_tilted(roll:, pitch, threshold=45):
     :return: True代表倾倒，False代表未倾倒
     """
     return abs(roll) > threshold or abs(pitch) > threshold
+
 
 class BattleBot(Bot):
 
@@ -491,7 +492,7 @@ class BattleBot(Bot):
 
             rear-left encounters the edge, turn right,turn type is 1
             """
-            self.action_T(turn_type=1, turn_speed=high_spead,turn_time=turn_time,multiplier=1.2)
+            self.action_T(turn_type=1, turn_speed=high_spead, turn_time=turn_time, multiplier=1.2)
             return True
         elif edge_rr_sensor < edge_baseline:
             """
@@ -503,7 +504,7 @@ class BattleBot(Bot):
 
             rear-right encounters the edge, turn left,turn type is 0
             """
-            self.action_T(turn_type=0, turn_speed=high_spead, turn_time=turn_time,multiplier=1.2)
+            self.action_T(turn_type=0, turn_speed=high_spead, turn_time=turn_time, multiplier=1.2)
             return True
         else:
             return False
@@ -645,4 +646,3 @@ class BattleBot(Bot):
 if __name__ == '__main__':
     bot = BattleBot()
     bot.Battle(interval=2, normal_spead=4000)
-
