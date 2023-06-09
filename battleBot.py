@@ -252,10 +252,15 @@ class BattleBot(Bot):
                 self.action_D(with_turn=with_turn, dash_time=dash_time, dash_speed=dash_speed)
                 return
 
-    def scan_surround(self, detector: Callable[[], bool], with_dash: bool = False, with_turn: bool = False,
+    def scan_surround(self, detector: Callable[[], bool],
+                      with_dash: bool = False,
+                      dash_speed: int = -8000, dash_time: int = 450,
+                      with_turn: bool = False,
                       spinning_type=randint(0, 1), spinning_speed: int = 2500, max_duration: int = 3000):
         """
         checking the stage direction and make the dash movement accordingly
+        :param dash_speed:
+        :param dash_time:
         :param with_turn:
         :param detector:
         :param with_dash:
@@ -266,7 +271,7 @@ class BattleBot(Bot):
         """
         if with_dash:
             def dash() -> None:
-                self.action_D(dash_speed=-8000, dash_time=450, with_turn=with_turn)
+                self.action_D(dash_speed=dash_speed, dash_time=dash_time, with_turn=with_turn)
         else:
             dash = (lambda: None)
         self.action_T(turn_speed=spinning_speed, turn_time=max_duration,
