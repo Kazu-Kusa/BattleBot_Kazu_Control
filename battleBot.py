@@ -20,38 +20,42 @@ def is_tilted(roll: float, pitch: float, threshold=45):
 
 
 def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline: int = 2200) -> int:
-    rb_sensor = ad_list[5]
-    fb_sensor = ad_list[4]
-    l3_sensor = ad_list[8]
-    r3_sensor = ad_list[7]
-
     """
     fl           fr
         O-----O
            |
         O-----O
     rl           rr
+
+    0: on stage
+    1: by stage
+    2: in conner should fallback
+    3: in conner should push forward
+    :param ad_list:
+    :param baseline:
+    :param conner_baseline:
+    :return:
     """
+    rb_sensor = ad_list[5]
+    fb_sensor = ad_list[4]
+    l3_sensor = ad_list[8]
+    r3_sensor = ad_list[7]
+
     total = sum([rb_sensor, fb_sensor, l3_sensor, r3_sensor])
     if total > baseline:
         # off stage
 
         fl_sum = fb_sensor + l3_sensor
-        if fl_sum > conner_baseline:
-            return 2
         fr_sum = fb_sensor + r3_sensor
-        if fr_sum > conner_baseline:
-            return 2
-
         rl_sum = rb_sensor + l3_sensor
-
-        if rl_sum > conner_baseline:
-            return 2
         rr_sum = rb_sensor + r3_sensor
-        if rr_sum > conner_baseline:
-            return 2
-
-        return 1
+        result_dict = {
+            (fl_sum, conner_baseline): 2,
+            (fr_sum, conner_baseline): 2,
+            (rl_sum, conner_baseline): 3,
+            (rr_sum, conner_baseline): 3,
+        }
+        return result_dict.get((max(fl_sum, fr_sum, rl_sum, rr_sum), conner_baseline), 0)
     else:
         # on stage
         return 0
