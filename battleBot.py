@@ -777,7 +777,7 @@ class BattleBot(Bot):
         """
         print('>>>>BATTLE STARTS<<<<')
 
-        def detector() -> bool:
+        def stage_detector() -> bool:
             baseline = 1000
             temp = self.controller.adc_all_channels
             ftr_sensor = temp[6]
@@ -826,19 +826,45 @@ class BattleBot(Bot):
             # loop delay,this is to prevent sending too many cmds to driver causing jam
             self.screen.ADC_Led_SetColor(1, self.screen.COLOR_YELLOW)
 
-        def in_conner() -> None:
-            warnings.warn('in_conner')
+        def front_to_conner() -> None:
+            warnings.warn('in_conner,front_to_conner')
             if self.tag_monitor_switch:
                 self.tag_monitor_switch = False
-            self.scan_surround(detector=conner_break, with_dash=True, spinning_speed=2000)
+            self.scan_surround(detector=conner_break, with_dash=True,
+                               dash_speed=-5000, dash_time=450, spinning_speed=2000)
+
+        def rear_to_conner() -> None:
+            warnings.warn('in_conner,rear_to_conner')
+            if self.tag_monitor_switch:
+                self.tag_monitor_switch = False
+            self.scan_surround(detector=conner_break, with_dash=True,
+                               dash_speed=5000, dash_time=450, spinning_speed=2000)
 
         def to_stage() -> None:
             warnings.warn('by_stage')
             if self.tag_monitor_switch:
                 self.tag_monitor_switch = False
-            self.scan_surround(detector=detector, with_dash=True, spinning_speed=1300)
 
-        methods_table = {0: on_stage, 1: to_stage, 2: in_conner}
+            def watcher(edge_baseline=1750) -> bool:
+
+                temp = self.controller.adc_all_channels
+                local_edge_rr_sensor = temp[0]
+                local_edge_rl_sensor = temp[3]
+                if local_edge_rl_sensor < edge_baseline or local_edge_rr_sensor < edge_baseline:
+                    # if at least one of the edge sensor is hanging over air
+                    return True
+                else:
+                    return False
+
+            def halt():
+                self.controller.move_cmd(0, 0)
+
+            # TODO: after the breaker activation the action should be cut down immediately,
+            #  and deliver the controller to the breaker action
+            self.scan_surround(detector=stage_detector, with_dash=True,
+                               breaker_func=watcher, breaker_action_func=halt, spinning_speed=1300)
+
+        methods_table = {0: on_stage, 1: to_stage, 2: front_to_conner, 3: rear_to_conner}
         try:
             # wait for the battle starts
             self.wait_start(baseline=1800, with_turn=False, dash_speed=-6000)
