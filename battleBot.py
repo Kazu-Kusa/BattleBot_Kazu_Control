@@ -258,10 +258,13 @@ class BattleBot(Bot):
     def scan_surround(self, detector: Callable[[], bool],
                       with_dash: bool = False,
                       dash_speed: int = -8000, dash_time: int = 450,
+                      breaker_func: Callable[[], bool] = None, breaker_action_func: Callable[[], None] = None,
                       with_turn: bool = False,
                       spinning_type=randint(0, 1), spinning_speed: int = 2500, max_duration: int = 3000):
         """
         checking the stage direction and make the dash movement accordingly
+        :param breaker_action_func:
+        :param breaker_func:
         :param dash_speed:
         :param dash_time:
         :param with_turn:
@@ -274,7 +277,8 @@ class BattleBot(Bot):
         """
         if with_dash:
             def dash() -> None:
-                self.action_D(dash_speed=dash_speed, dash_time=dash_time, with_turn=with_turn)
+                self.action_D(dash_speed=dash_speed, dash_time=dash_time, with_turn=with_turn,
+                              breaker_func=breaker_func, break_action_func=breaker_action_func)
         else:
             dash = (lambda: None)
         self.action_T(turn_speed=spinning_speed, turn_time=max_duration,
@@ -732,6 +736,7 @@ class BattleBot(Bot):
     def check_surround(self, adc_list: list[int], baseline: int = 2000, basic_speed: int = 6000) -> bool:
         """
         checks sensors to get surrounding objects
+        :param evade_prob:
         :param basic_speed:
         :param adc_list:
         :param baseline:
@@ -821,7 +826,7 @@ class BattleBot(Bot):
             warnings.warn('in_conner')
             if self.tag_monitor_switch:
                 self.tag_monitor_switch = False
-            self.scan_surround(detector=conner_break, with_dash=True, spinning_speed=2000, )
+            self.scan_surround(detector=conner_break, with_dash=True, spinning_speed=2000)
 
         def to_stage() -> None:
             warnings.warn('by_stage')
