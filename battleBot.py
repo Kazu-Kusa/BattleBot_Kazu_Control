@@ -172,11 +172,14 @@ class BattleBot(Bot):
         self.controller.move_cmd(0, 0)
 
     def action_D(self, dash_speed: int = -13000, dash_time: int = 500,
-                 with_turn: bool = False, multiplier: float = 0):
+                 with_turn: bool = False, multiplier: float = 0,
+                 breaker_func: Callable[[], bool] = None, break_action_func: Callable[[], None] = None):
         if multiplier:
             dash_speed = int(dash_speed * multiplier)
         self.controller.move_cmd(dash_speed, dash_speed)
-        delay_ms(dash_time)
+        if delay_ms(dash_time, breaker_func=breaker_func, break_action_func=break_action_func):
+            # TODO: here may trigger some kind of bug
+            return
         self.controller.move_cmd(0, 0)
         if with_turn:
             self.action_T(turn_speed=7000, turn_time=140)
