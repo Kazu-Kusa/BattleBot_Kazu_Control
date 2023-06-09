@@ -1,5 +1,5 @@
 import warnings
-from random import randint, choice
+from random import randint, choice, random
 from typing import Callable
 from bot import Bot
 from repo.uptechStar.module.timer import delay_ms
@@ -863,10 +863,10 @@ class BattleBot(Bot):
         method = method_table.get(sensor_data, do_nothing)
         return method()
 
-    def check_surround(self, adc_list: list[int], baseline: int = 2000, basic_speed: int = 6000) -> bool:
+    def check_surround(self, adc_list: list[int], baseline: int = 2000, basic_speed: int = 6000,
+                       evade_prob: float = 0.3) -> bool:
         """
         checks sensors to get surrounding objects
-        :param evade_prob:
         :param basic_speed:
         :param adc_list:
         :param baseline:
@@ -883,12 +883,18 @@ class BattleBot(Bot):
             self.on_enemy_car(basic_speed, 0.5)
             return True
         elif adc_list[8] > baseline:
+            if random() < evade_prob:
+                self.on_attacked(0)
             self.on_thing_surrounding(0)
             return True
         elif adc_list[7] > baseline:
+            if random() < evade_prob:
+                self.on_attacked(1)
             self.on_thing_surrounding(1)
             return True
         elif adc_list[5] > baseline:
+            if random() < evade_prob:
+                self.on_attacked(2)
             self.on_thing_surrounding(2)
             return True
         else:
