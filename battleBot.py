@@ -21,6 +21,44 @@ def is_tilted(roll: float, pitch: float, threshold=45):
     return abs(roll) > threshold or abs(pitch) > threshold
 
 
+def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline: int = 2200) -> int:
+    rb_sensor = ad_list[5]
+    fb_sensor = ad_list[4]
+    l3_sensor = ad_list[8]
+    r3_sensor = ad_list[7]
+
+    """
+    fl           fr
+        O-----O
+           |
+        O-----O
+    rl           rr
+    """
+    total = sum([rb_sensor, fb_sensor, l3_sensor, r3_sensor])
+    if total > baseline:
+        # off stage
+
+        fl_sum = fb_sensor + l3_sensor
+        if fl_sum > conner_baseline:
+            return 2
+        fr_sum = fb_sensor + r3_sensor
+        if fr_sum > conner_baseline:
+            return 2
+
+        rl_sum = rb_sensor + l3_sensor
+
+        if rl_sum > conner_baseline:
+            return 2
+        rr_sum = rb_sensor + r3_sensor
+        if rr_sum > conner_baseline:
+            return 2
+
+        return 1
+    else:
+        # on stage
+        return 0
+
+
 class BattleBot(Bot):
 
     # region basic actions
@@ -564,7 +602,7 @@ class BattleBot(Bot):
             # wait for the battle starts
             self.wait_start(baseline=1800, with_turn=False, dash_speed=-6000)
             while True:
-                on_stage = True
+                on_stage = False
                 if on_stage:
                     # update the sensors data
                     # TODO: these two functions could be combined
@@ -589,7 +627,7 @@ class BattleBot(Bot):
                     delay_ms(interval)
                 else:
                     delay_ms(interval)
-                    in_conner = True
+                    in_conner = False
                     if in_conner:
                         def conner_break() -> bool:
                             temp = self.controller.adc_all_channels
