@@ -136,7 +136,9 @@ class BattleBot(Bot):
         self.controller.move_cmd(0, 0)
 
     def action_D(self, dash_speed: int = -13000, dash_time: int = 500,
-                 with_turn: bool = False):
+                 with_turn: bool = False,multiplier:float=0):
+        if multiplier:
+            dash_speed=int(dash_speed*multiplier)
         self.controller.move_cmd(dash_speed, dash_speed)
         delay_ms(dash_time)
         self.controller.move_cmd(0, 0)
@@ -396,11 +398,11 @@ class BattleBot(Bot):
     # endregion
 
     def get_away_from_edge(self, adc_list: list[int], io_list: list[int], edge_baseline: int = 1680,
-                           edge_speed_multiplier: float = 0, backing_time: int = 180, turn_time: int = 160) -> bool:
+                           edge_speed_multiplier: float = 0, high_speed_time: int = 180, turn_time: int = 160) -> bool:
         """
         handles the normal edge case using both adc_list and io_list.
         but well do not do anything if no edge case
-        :param backing_time:
+        :param high_speed_time:
         :param turn_time:
         :param edge_speed_multiplier:
         :param adc_list:the list of adc devices returns
@@ -452,7 +454,7 @@ class BattleBot(Bot):
 
             front-left encounters the edge, turn right,turn type is 1
             """
-            self.action_BT(back_speed=high_spead, back_time=backing_time,
+            self.action_BT(back_speed=high_spead, back_time=high_speed_time,
                            turn_speed=high_spead, turn_time=turn_time,
                            b_multiplier=0.9,
                            t_multiplier=1.6, turn_type=1,
@@ -468,7 +470,7 @@ class BattleBot(Bot):
 
                        front-right encounters the edge, turn left,turn type is 0
                        """
-            self.action_BT(back_speed=high_spead, back_time=backing_time,
+            self.action_BT(back_speed=high_spead, back_time=high_speed_time,
                            turn_speed=high_spead, turn_time=turn_time,
                            b_multiplier=0.9,
                            t_multiplier=1.6, turn_type=0,
@@ -507,7 +509,7 @@ class BattleBot(Bot):
             rl            rr
             :return:
             """
-            self.action_BT(back_speed=high_spead, back_time=backing_time,
+            self.action_BT(back_speed=high_spead, back_time=high_speed_time,
                            turn_speed=high_spead, turn_time=turn_time,
                            b_multiplier=0.9,
                            t_multiplier=1.6, turn_type=1,
@@ -522,7 +524,7 @@ class BattleBot(Bot):
             rl            rr
             :return:
             """
-            self.action_BT(back_speed=high_spead, back_time=backing_time,
+            self.action_BT(back_speed=high_spead, back_time=high_speed_time,
                            turn_speed=high_spead, turn_time=turn_time,
                            b_multiplier=0.9,
                            t_multiplier=1.6, turn_type=0,
@@ -560,7 +562,69 @@ class BattleBot(Bot):
             [rl]          [rr]
             :return:
             """
-            self.action_D(dash_speed=high_spead,dash_time=turn_time)
+            self.action_D(dash_speed=high_spead,dash_time=high_speed_time,multiplier=1)
+            return True
+        def do_fl_rl_rr():
+            """
+            [fl]   l   r   fr
+                 O-----O
+                    |
+                 O-----O
+            [rl]          [rr]
+            :return:
+            """
+            self.action_BT(back_speed=-high_spead,b_multiplier=0.9,back_time=high_speed_time,
+                           turn_type=1,turn_time=turn_time,t_multiplier=1.6)
+            return True
+        def do_fr_rl_rr():
+            """
+             fl   l   r   [fr]
+                 O-----O
+                    |
+                 O-----O
+            [rl]          [rr]
+            :return:
+            """
+            self.action_BT(back_speed=-high_spead,b_multiplier=0.9,back_time=high_speed_time,
+                           turn_type=0,turn_time=turn_time,t_multiplier=1.6)
+            return True
+        def do_fl_l_gray():
+            """
+             [fl] [l]   r   fr
+                  O-----O
+                     |
+                  O-----O
+              rl          rr
+            :return:
+            """
+            self.action_BT(back_speed=high_spead,back_time=high_speed_time,b_multiplier=0.9,
+                           turn_type=1,turn_time=turn_time,t_multiplier=1.6,
+                           hind_watcher_func=watcher)
+            return True
+        def do_fl_l_gray_rl():
+            """
+             [fl] [l]   r   fr
+                  O-----O
+                     |
+                  O-----O
+             [rl]          rr
+            :return:右转
+            """
+            self.action_T(turn_type=1,turn_time=turn_time,turn_speed=high_spead)
+            return True
+        def do_fl_l_gray_r_gray():
+            """
+             [fl] [l]  [r]  fr
+                  O-----O
+                     |
+                  O-----O
+              rl          rr
+            :return:后退右转
+            """
+            self.action_BT(back_speed=high_spead,back_time=high_speed_time,b_multiplier=0.9,
+                           turn_type=1,turn_time=turn_time,t_multiplier=1.6,
+                           hind_watcher_func=watcher)
+            return True
         sensor_data=[edge_fl_sensor>edge_baseline,edge_fr_sensor>edge_baseline,
                      edge_rl_sensor>edge_baseline,edge_rr_sensor>edge_baseline,
                      l_gray,r_gray]
@@ -574,84 +638,27 @@ class BattleBot(Bot):
                       [True,True,True,True,0,1]:do_l_gary,
                       [True,True,True,True,1,0]:do_r_gary,#fl and fr 不会出现,
 
-                      [False,True,False,True,1,1]:do_fl_rl(),#fl and rr 暂未出现,
+                      [False,True,False,True,1,1]:do_fl_rl,#fl and rr 暂未出现,
 
-                      [True,False,True,False,1,1]:do_fr_rr(),#fr and rl 暂未出现，fl and fr 不会出现
+                      [True,False,True,False,1,1]:do_fr_rr,#fr and rl 暂未出现，fl and fr 不会出现
 
-                      [True,True,False,False,1,1]:}
+                      [True,True,False,False,1,1]:do_rl_rr,
+
+                      [False,True,False,False,1,1]:do_fl_rl_rr,
+                      [False, True, False, False, 0, 1]: do_fl_rl_rr,
+                      [True,False,False,False,1,1]:do_fr_rl_rr,#fr and fr 不会出现
+                      [True, False, False, False, 1, 0]: do_fr_rl_rr,
+
+                      [False,True,True,True,0,1]:do_fl_l_gray,
+                      [False,True,False,True,0,1]:do_fl_l_gray_rl,
+
+                      [False,True,True,True,0,0]:do_fl_l_gray_r_gray,
+                      [True,True,True,True,1,1]:1}
 
         method=method_table.get(sensor_data)
         return method()
 
-        if l_gray + r_gray <= 1:
 
-            def both_gray_on_air():
-                # at least one of the gray scaler is hanging over air
-
-                self.action_BT(back_speed=high_spead, back_time=backing_time,
-                               turn_speed=high_spead, turn_time=turn_time,
-                               b_multiplier=0.6,
-                               t_multiplier=1.8, hind_watcher_func=watcher)
-                return True
-        elif edge_fl_sensor < edge_baseline:
-            """
-            [fl]         fr
-                O-----O
-                   |
-                O-----O
-            rl           rr
-            
-            front-left encounters the edge, turn right,turn type is 1
-            """
-            self.action_BT(back_speed=high_spead, back_time=backing_time,
-                           turn_speed=high_spead, turn_time=turn_time,
-                           b_multiplier=0.9,
-                           t_multiplier=1.6, turn_type=1,
-                           hind_watcher_func=watcher)
-            return True
-
-        elif edge_fr_sensor < edge_baseline:
-            """
-            fl          [fr]
-                O-----O
-                   |
-                O-----O
-            rl           rr
-            
-            front-right encounters the edge, turn left,turn type is 0
-            """
-            self.action_BT(back_speed=high_spead, back_time=backing_time,
-                           turn_speed=high_spead, turn_time=turn_time,
-                           b_multiplier=0.9,
-                           t_multiplier=1.6, turn_type=0,
-                           hind_watcher_func=watcher)
-            return True
-
-        elif edge_rl_sensor < edge_baseline:
-            """
-            fl           fr
-                O-----O
-                   |
-                O-----O
-            [rl]         rr
-
-            rear-left encounters the edge, turn right,turn type is 1
-            """
-            self.action_T(turn_type=1, turn_speed=high_spead, turn_time=turn_time, multiplier=1.2)
-            return True
-        elif edge_rr_sensor < edge_baseline:
-            """
-            fl           fr
-                O-----O
-                   |
-                O-----O
-            rl          [rr]
-
-            rear-right encounters the edge, turn left,turn type is 0
-            """
-            self.action_T(turn_type=0, turn_speed=high_spead, turn_time=turn_time, multiplier=1.2)
-            return True
-        else:
 
 
     def check_surround(self, adc_list: list[int], baseline: int = 2000, basic_speed: int = 6000) -> bool:
