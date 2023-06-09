@@ -687,39 +687,38 @@ class BattleBot(Bot):
                            hind_watcher_func=watcher)
             return True
 
-        sensor_data = [edge_fl_sensor > edge_baseline, edge_fr_sensor > edge_baseline,
+        sensor_data = (edge_fl_sensor > edge_baseline, edge_fr_sensor > edge_baseline,
                        edge_rl_sensor > edge_baseline, edge_rr_sensor > edge_baseline,
-                       l_gray, r_gray]
+                       l_gray, r_gray)
 
-        method_table = {[True, True, True, True, 1, 1]: do_nothing,
+        method_table = {(True, True, True, True, 1, 1): do_nothing,
 
-                        [False, True, True, True, 1, 1]: do_fl,
-                        [True, False, True, True, 1, 1]: do_fr,
-                        [True, True, False, True, 1, 1]: do_rl,
-                        [True, True, True, False, 1, 1]: do_rr,
+                        (False, True, True, True, 1, 1): do_fl,
+                        (True, False, True, True, 1, 1): do_fr,
+                        (True, True, False, True, 1, 1): do_rl,
+                        (True, True, True, False, 1, 1): do_rr,
 
-                        [True, True, True, True, 0, 1]: do_l_gary,
-                        [True, True, True, True, 1, 0]: do_r_gary,  # fl and fr 不会出现,
-                        [True, True, True, True, 0, 0]: do_r_gray_l_gray,
+                        (True, True, True, True, 0, 1): do_l_gary,
+                        (True, True, True, True, 1, 0): do_r_gary,  # fl and fr 不会出现,
+                        (True, True, True, True, 0, 0): do_r_gray_l_gray,
 
-                        [False, True, False, True, 1, 1]: do_fl_rl,  # fl and rr 暂未出现,
+                        (False, True, False, True, 1, 1): do_fl_rl,  # fl and rr 暂未出现,
 
-                        [True, False, True, False, 1, 1]: do_fr_rr,  # fr and rl 暂未出现，fl and fr 不会出现
+                        (True, False, True, False, 1, 1): do_fr_rr,  # fr and rl 暂未出现，fl and fr 不会出现
 
-                        [True, True, False, False, 1, 1]: do_rl_rr,
+                        (True, True, False, False, 1, 1): do_rl_rr,
 
-                        [False, True, False, False, 1, 1]: do_fl_rl_rr,
-                        [False, True, False, False, 0, 1]: do_fl_rl_rr,
-                        [True, False, False, False, 1, 1]: do_fr_rl_rr,  # fr and fr 不会出现
-                        [True, False, False, False, 1, 0]: do_fr_rl_rr,
+                        (False, True, False, False, 1, 1): do_fl_rl_rr,
+                        (False, True, False, False, 0, 1): do_fl_rl_rr,
+                        (True, False, False, False, 1, 1): do_fr_rl_rr,  # fr and fr 不会出现
+                        (True, False, False, False, 1, 0): do_fr_rl_rr,
 
-                        [False, True, True, True, 0, 1]: do_fl_l_gray,
-                        [False, True, False, True, 0, 1]: do_fl_l_gray_rl,
+                        (False, True, True, True, 0, 1): do_fl_l_gray,
+                        (False, True, False, True, 0, 1): do_fl_l_gray_rl,
 
-                        [False, True, True, True, 0, 0]: do_fl_l_gray_r_gray,
-                        [True, True, True, True, 1, 1]: 1}
+                        (False, True, True, True, 0, 0): do_fl_l_gray_r_gray}
 
-        method = method_table.get(sensor_data)
+        method = method_table.get(sensor_data, do_nothing)
         return method()
 
     def check_surround(self, adc_list: list[int], baseline: int = 2000, basic_speed: int = 6000) -> bool:
