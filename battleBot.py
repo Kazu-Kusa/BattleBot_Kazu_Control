@@ -433,7 +433,8 @@ class BattleBot(Bot):
 
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=turn_time,
-                           t_multiplier=1.5, hind_watcher_func=watcher)
+                           b_multiplier=0.6,
+                           t_multiplier=1.8, hind_watcher_func=watcher)
             return True
         elif edge_fl_sensor < edge_baseline:
             """
@@ -447,7 +448,8 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=turn_time,
-                           t_multiplier=1.5, turn_type=1,
+                           b_multiplier=0.9,
+                           t_multiplier=1.6, turn_type=1,
                            hind_watcher_func=watcher)
             return True
 
@@ -463,7 +465,8 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=backing_time,
                            turn_speed=high_spead, turn_time=turn_time,
-                           t_multiplier=1.5, turn_type=0,
+                           b_multiplier=0.9,
+                           t_multiplier=1.6, turn_type=0,
                            hind_watcher_func=watcher)
             return True
 
@@ -477,7 +480,7 @@ class BattleBot(Bot):
 
             rear-left encounters the edge, turn right,turn type is 1
             """
-            self.action_T(turn_type=1, turn_speed=high_spead, turn_time=turn_time)
+            self.action_T(turn_type=1, turn_speed=high_spead,turn_time=turn_time,multiplier=1.2)
             return True
         elif edge_rr_sensor < edge_baseline:
             """
@@ -489,7 +492,7 @@ class BattleBot(Bot):
 
             rear-right encounters the edge, turn left,turn type is 0
             """
-            self.action_T(turn_type=0, turn_speed=high_spead, turn_time=turn_time)
+            self.action_T(turn_type=0, turn_speed=high_spead, turn_time=turn_time,multiplier=1.2)
             return True
         else:
             return False
@@ -630,6 +633,5 @@ class BattleBot(Bot):
 
 if __name__ == '__main__':
     bot = BattleBot()
+    bot.Battle(interval=2, normal_spead=4000)
 
-    bot.Battle(interval=1, normal_spead=3980)
-    # bot.test_run()
