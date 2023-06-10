@@ -474,10 +474,6 @@ class BattleBot(Bot):
         edge_fl_sensor = adc_list[2]
         edge_rl_sensor = adc_list[3]
 
-        # read the io sensors
-        l_gray = io_list[6]
-        r_gray = io_list[7]
-
         # the closer to the edge ,the slower the wheels rotates
         high_spead = int(edge_speed_multiplier * min(edge_rl_sensor, edge_fl_sensor, edge_fr_sensor, edge_rr_sensor))
 
@@ -504,6 +500,11 @@ class BattleBot(Bot):
 
         def halt() -> None:
             self.controller.move_cmd(0, 0)
+
+        def stop() -> bool:
+            warnings.warn('>>>>FLOATING<<<<')
+            halt()
+            return True
 
         # region methods
         def do_nothing():
@@ -573,38 +574,6 @@ class BattleBot(Bot):
                           breaker_func=front_watcher, break_action_func=halt)
             return True
 
-        def do_l_gary():
-            """
-             fl   [l]  r   fr
-                 O-----O
-                    |
-                 O-----O
-            rl            rr
-            :return:
-            """
-            self.action_BT(back_speed=high_spead, back_time=high_speed_time,
-                           turn_speed=high_spead, turn_time=turn_time,
-                           b_multiplier=0.9,
-                           t_multiplier=0.9, turn_type=1,
-                           hind_watcher_func=rear_watcher)
-            return True
-
-        def do_r_gary():
-            """
-             fl   l  [r]   fr
-                 O-----O
-                    |
-                 O-----O
-            rl            rr
-            :return:
-            """
-            self.action_BT(back_speed=high_spead, back_time=high_speed_time,
-                           turn_speed=high_spead, turn_time=turn_time,
-                           b_multiplier=0.9,
-                           t_multiplier=0.9, turn_type=0,
-                           hind_watcher_func=rear_watcher)
-            return True
-
         def do_fl_rl():
             """
              [fl]   l   r   fr
@@ -646,18 +615,20 @@ class BattleBot(Bot):
                           breaker_func=front_watcher, break_action_func=halt)
             return True
 
-        def do_fl_rl_rr():
+        def do_fl_fr():
             """
-            [fl]   l   r   fr
+             [fl]   l   r   [fr]
                  O-----O
                     |
                  O-----O
-            [rl]          [rr]
+            rl          rr
             :return:
             """
-            self.action_T(turn_type=1, turn_speed=high_spead, turn_time=turn_time, multiplier=0.3)
-            self.action_D(dash_speed=high_spead, dash_time=high_speed_time, multiplier=1.1,
-                          breaker_func=front_watcher, break_action_func=halt)
+            self.action_BT(back_speed=high_spead, back_time=high_speed_time,
+                           turn_speed=high_spead, turn_time=int(turn_time * 1.3),
+                           b_multiplier=1.1,
+                           t_multiplier=0.7, turn_type=0,
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_fr_rl_rr():
@@ -674,174 +645,48 @@ class BattleBot(Bot):
                           breaker_func=front_watcher, break_action_func=halt)
             return True
 
-        def do_fl_l_gray():
+        def do_fl_rl_rr():
             """
-             [fl] [l]   r   fr
-                  O-----O
-                     |
-                  O-----O
-              rl          rr
+            [fl]   l   r   fr
+                 O-----O
+                    |
+                 O-----O
+            [rl]          [rr]
             :return:
             """
-            self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=0.9,
-                           turn_type=1, turn_time=turn_time, t_multiplier=0.9,
-                           hind_watcher_func=rear_watcher)
+            self.action_T(turn_type=1, turn_speed=high_spead, turn_time=turn_time, multiplier=0.3)
+            self.action_D(dash_speed=high_spead, dash_time=high_speed_time, multiplier=1.1,
+                          breaker_func=front_watcher, break_action_func=halt)
             return True
 
-        def do_fr_r_gray():
+        def do_fl_fr_rr():
             """
-             fl  l  [r]  [fr]
-                  O-----O
-                     |
-                  O-----O
-              rl          rr
+             [fl]   l   r   [fr]
+                 O-----O
+                    |
+                 O-----O
+             rl           [rr]
             :return:
             """
-            self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=0.9,
-                           turn_type=0, turn_time=turn_time, t_multiplier=0.9,
-                           hind_watcher_func=rear_watcher)
+            self.action_T(turn_type=1, turn_speed=high_spead, turn_time=turn_time, multiplier=0.3)
+            self.action_D(dash_speed=high_spead, dash_time=high_speed_time, multiplier=1.1,
+                          breaker_func=rear_watcher, break_action_func=halt,
+                          with_turn=True)
             return True
 
-        def do_fl_l_gray_rl():
+        def do_fl_fr_rl():
             """
-             [fl] [l]   r   fr
-                  O-----O
-                     |
-                  O-----O
-             [rl]          rr
-            :return:右转
+             [fl]   l   r   [fr]
+                 O-----O
+                    |
+                 O-----O
+             [rl]            rr
+            :return:
             """
-            self.action_T(turn_type=1, turn_time=turn_time, turn_speed=high_spead, multiplier=0.2)
-            return True
-
-        def do_fr_r_gray_rr():
-            """
-             fl  l   [r]   [fr]
-                  O-----O
-                     |
-                  O-----O
-             rl          [rr]
-            :return:左转
-            """
-            self.action_T(turn_type=0, turn_time=turn_time, turn_speed=high_spead, multiplier=0.2)
-            return True
-
-        def do_fl_l_gray_rl_rr():
-            """
-             [fl] [l]   r   fr
-                  O-----O
-                     |
-                  O-----O
-             [rl]          [rr]
-            :return:前进右转
-            """
-            self.action_BT(back_speed=-high_spead, back_time=high_speed_time, b_multiplier=1,
-                           turn_speed=high_spead, turn_type=1, turn_time=turn_time)
-            return True
-
-        def do_fr_r_gray_rl_rr():
-            """
-             fl   l   [r]   [fr]
-                  O-----O
-                     |
-                  O-----O
-             [rl]          [rr]
-            :return:前进左转
-            """
-            self.action_BT(back_speed=-high_spead, back_time=high_speed_time, b_multiplier=1,
-                           turn_speed=high_spead, turn_type=0, turn_time=turn_time)
-            return True
-
-        def do_fl_l_gray_r_gray():
-            """
-             [fl] [l]  [r]  fr
-                  O-----O
-                     |
-                  O-----O
-              rl          rr
-            :return:后退右转
-            """
-            self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=0.9,
-                           turn_type=1, turn_time=turn_time, t_multiplier=0.9,
-                           hind_watcher_func=rear_watcher)
-            return True
-
-        def do_fr_l_gray_r_gray():
-            """
-             fl  [l]  [r]  [fr]
-                  O-----O
-                     |
-                  O-----O
-              rl          rr
-            :return:后退左转
-            """
-            self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=0.9,
-                           turn_type=0, turn_time=turn_time, t_multiplier=0.9,
-                           hind_watcher_func=rear_watcher)
-            return True
-
-        def do_fl_l_gray_r_gray_fr():
-            """
-             [fl] [l]  [r]  [fr]
-                  O-----O
-                     |
-                  O-----O
-              rl          rr
-            :return:后退
-            """
-            self.action_D(dash_speed=-high_spead, dash_time=high_speed_time, multiplier=1)
-            return True
-
-        def do_fl_l_gray_r_gray_rl():
-            """
-             [fl] [l]  [r]  fr
-                  O-----O
-                     |
-                  O-----O
-             [rl]          rr
-            :return:右转后退
-            """
-            self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=1,
-                           turn_time=turn_time, turn_speed=high_spead, turn_type=1, t_multiplier=1,
-                           hind_watcher_func=rear_watcher)
-            return True
-
-        def do_fr_l_gray_r_gray_rr():
-            """
-             fl  [l]  [r]  [fr]
-                  O-----O
-                     |
-                  O-----O
-             rl         [rr]
-            :return:左转后退
-            """
-            self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=1,
-                           turn_time=turn_time, turn_speed=high_spead, turn_type=0, t_multiplier=1,
-                           hind_watcher_func=rear_watcher)
-            return True
-
-        def do_fl_l_gray_r_gray_fr_rl():
-            """
-             [fl] [l]  [r]  [fr]
-                  O-----O
-                     |
-                  O-----O
-             [rl]          rr
-            :return:右转
-            """
-            self.action_T(turn_type=1, turn_time=turn_time, turn_speed=high_spead, multiplier=1)
-            return True
-
-        def do_fl_l_gray_r_gray_fr_rr():
-            """
-             [fl] [l]  [r]  [fr]
-                  O-----O
-                     |
-                  O-----O
-              rl          [rr]
-            :return:左转
-            """
-            self.action_T(turn_type=0, turn_time=turn_time, turn_speed=high_spead, multiplier=1)
+            self.action_T(turn_type=0, turn_speed=high_spead, turn_time=turn_time, multiplier=0.3)
+            self.action_D(dash_speed=high_spead, dash_time=high_speed_time, multiplier=1.1,
+                          breaker_func=rear_watcher, break_action_func=halt,
+                          with_turn=True)
             return True
 
         # endregion
@@ -849,58 +694,49 @@ class BattleBot(Bot):
         sensor_data = (edge_fl_sensor > edge_baseline and edge_fl_sensor > min_baseline,
                        edge_fr_sensor > edge_baseline and edge_fr_sensor > min_baseline,
                        edge_rl_sensor > edge_baseline and edge_rl_sensor > min_baseline,
-                       edge_rr_sensor > edge_baseline and edge_rr_sensor > min_baseline,
-                       l_gray, r_gray)
+                       edge_rr_sensor > edge_baseline and edge_rr_sensor > min_baseline)
 
-        method_table = {(True, True, True, True, 1, 1): do_nothing,
-                        # region edge sensor only
-                        (False, True, True, True, 1, 1): do_fl,
-                        (True, False, True, True, 1, 1): do_fr,
-                        (True, True, False, True, 1, 1): do_rl,
-                        (True, True, True, False, 1, 1): do_rr,
-                        # endregion
-
-                        # region gray only
-                        (True, True, True, True, 0, 1): do_l_gary,
-                        (True, True, True, True, 1, 0): do_r_gary,  # fl and fr 不会出现,
+        method_table = {(True, True, True, True): do_nothing,
+                        (False, False, False, False): stop,
+                        # region one edge sensor only
+                        (False, True, True, True): do_fl,
+                        (True, False, True, True): do_fr,
+                        (True, True, False, True): do_rl,
+                        (True, True, True, False): do_rr,
                         # endregion
 
                         # region double edge sensor only
-                        (False, True, False, True, 1, 1): do_fl_rl,  # fl and rr 暂未出现,
+                        (False, True, False, True): do_fl_rl,  # nomal
+                        (True, False, True, False): do_fr_rr,
+                        (True, True, False, False): do_rl_rr,
+                        (False, False, True, True): do_fl_fr,
 
-                        (True, False, True, False, 1, 1): do_fr_rr,  # fr and rl 暂未出现，fl and fr 不会出现
-
-                        (True, True, False, False, 1, 1): do_rl_rr,
-
-                        (False, False, True, True, 1, 1): do_fl_l_gray_r_gray_fr,
+                        # (True, False, False, True): do_rl_rr, #abnormal such case are hard to be classified
+                        # (False, True, True, False): do_rl_rr,
                         # endregion
 
                         # region triple edge sensor
-                        # TODO : beware of the turn direction
-                        (False, True, False, False, 1, 1): do_fl_rl_rr,
-                        (False, True, False, False, 0, 1): do_fl_l_gray_rl_rr,
-                        (True, False, False, False, 1, 1): do_fr_rl_rr,  # fr and fr 不会出现
-                        (True, False, False, False, 1, 0): do_fr_r_gray_rl_rr,
+                        (True, False, False, False): do_fr_rl_rr,  # specified in conner
+                        (False, True, False, False): do_fl_rl_rr,
+                        (False, False, True, False): do_fl_fr_rr,
+                        (False, False, False, True): do_fl_fr_rl,
                         # endregion
-
-                        (False, True, True, True, 0, 1): do_fl_l_gray,
-                        (False, True, False, True, 0, 1): do_fl_l_gray_rl,
-
-                        (True, False, True, False, 1, 0): do_fr_r_gray_rr,
-                        (True, False, True, True, 1, 0): do_fr_r_gray,
-
-                        (False, True, True, True, 0, 0): do_fl_l_gray_r_gray,
-                        (False, False, True, True, 0, 0): do_fl_l_gray_r_gray_fr,
-                        (False, True, False, True, 0, 0): do_fl_l_gray_r_gray_rl,
-                        (False, False, False, True, 0, 0): do_fl_l_gray_r_gray_fr_rl,
-                        (False, False, True, False, 0, 0): do_fl_l_gray_r_gray_fr_rr,
-                        (True, False, True, True, 0, 0): do_fr_l_gray_r_gray,
-                        (True, False, True, False, 0, 0): do_fr_l_gray_r_gray_rr,
-
+                        (1, 1): do_nothing,
+                        (0, 1): do_fl,
+                        (1, 0): do_fr,
+                        (0, 0): do_fl_fr
                         }
 
-        method = method_table.get(sensor_data, do_nothing)
-        return method()
+        method = method_table.get(sensor_data)
+        if method:
+            return method()
+        else:
+            # read the io sensors
+            l_gray = io_list[6]
+            r_gray = io_list[7]
+            gray_sensor_data = (l_gray, r_gray)
+
+            return method_table.get(gray_sensor_data)
 
     def check_surround(self, adc_list: list[int], baseline: int = 2000, basic_speed: int = 6000,
                        evade_prob: float = 0.1) -> bool:
