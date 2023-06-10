@@ -524,14 +524,14 @@ class BattleBot(Bot):
 
         def do_fr():
             """
-                       fl          [fr]
-                           O-----O
-                              |
-                           O-----O
-                       rl           rr
+           fl          [fr]
+               O-----O
+                  |
+               O-----O
+           rl           rr
 
-                       front-right encounters the edge, turn left,turn type is 0
-                       """
+           front-right encounters the edge, turn left,turn type is 0
+            """
             self.action_BT(back_speed=high_spead, back_time=high_speed_time,
                            turn_speed=high_spead, turn_time=turn_time,
                            b_multiplier=1.1,
@@ -541,14 +541,14 @@ class BattleBot(Bot):
 
         def do_rl():
             """
-                        fl           fr
-                            O-----O
-                               |
-                            O-----O
-                        [rl]         rr
+            fl           fr
+                O-----O
+                   |
+                O-----O
+            [rl]         rr
 
-                        rear-left encounters the edge, turn right,turn type is 1
-                        """
+            rear-left encounters the edge, turn right,turn type is 1
+            """
             self.action_T(turn_type=1, turn_speed=high_spead, turn_time=turn_time, multiplier=1.2)
             return True
 
