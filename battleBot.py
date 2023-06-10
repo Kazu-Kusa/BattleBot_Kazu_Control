@@ -1004,8 +1004,10 @@ class BattleBot(Bot):
             # wait for the battle starts
             self.wait_start(baseline=1800, with_turn=False, dash_speed=-6000)
             while True:
-                method: Callable[[], None] = methods_table.get(
-                    check_surrounding_fence(self.controller.adc_all_channels, baseline=3550, conner_baseline=2600))
+                method: Callable[[], None] = methods_table.get(0)
+                # methods_table.get(
+                # check_surrounding_fence(self.controller.adc_all_channels, baseline=3550, conner_baseline=2600))
+                # methods_table.get(1)
                 method()
 
 
@@ -1050,5 +1052,6 @@ class BattleBot(Bot):
 
 if __name__ == '__main__':
     bot = BattleBot(use_cam=False)
-    # bot.Battle(normal_spead=2200)
-    bot.test_check_surround()
+    # bot.Battle(normal_spead=300)
+    # bot.test_check_surround()
+    bot.test_off_stage_components()
