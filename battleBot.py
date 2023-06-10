@@ -491,6 +491,16 @@ class BattleBot(Bot):
             else:
                 return False
 
+        def front_watcher() -> bool:
+            temp = self.controller.adc_all_channels
+            local_edge_fr_sensor = temp[1]
+            local_edge_fl_sensor = temp[2]
+            if local_edge_fl_sensor < edge_baseline or local_edge_fr_sensor < edge_baseline:
+                # if at least one of the edge sensor is hanging over air
+                return True
+            else:
+                return False
+
         # region methods
         def do_nothing():
             return False
