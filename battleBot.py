@@ -896,8 +896,8 @@ class BattleBot(Bot):
 
 
 if __name__ == '__main__':
-    bot = BattleBot(use_cam=False, team_color='blue')
+    bot = BattleBot(use_cam=True, team_color='blue')
     # bot = BattleBot(use_cam=True,team_color='yellow')
 
-    bot.Battle(normal_spead=2300)
+    bot.Battle(normal_spead=2600)
     # bot.test_check_surround()
