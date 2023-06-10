@@ -936,13 +936,13 @@ class BattleBot(Bot):
                 return True
             return False
 
-        def conner_break() -> bool:
+        def conner_break(base_line: int = 1800) -> bool:
             temp = self.controller.adc_all_channels
             rb_sensor = temp[5]
             fb_sensor = temp[4]
             l3_sensor = temp[8]
             r3_sensor = temp[7]
-            base_line = 2000
+
             delta_front_rear = abs(rb_sensor - fb_sensor)
             ab_delta_right_left = abs(l3_sensor - r3_sensor)
             if delta_front_rear + ab_delta_right_left > base_line:
