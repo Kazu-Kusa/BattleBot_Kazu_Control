@@ -2,6 +2,7 @@ import warnings
 from random import randint, choice, random
 from typing import Callable
 from bot import Bot
+from time import perf_counter_ns
 from repo.uptechStar.module.timer import delay_ms
 from repo.uptechStar.module.algrithm_tools import compute_inferior_arc, calculate_relative_angle
 from repo.uptechStar.module.pid import PD_control, PID_control
@@ -293,26 +294,28 @@ class BattleBot(Bot):
 
     # region events
     def util_edge(self, using_gray: bool = True, using_edge_sensor: bool = True, edge_a: int = 1800,
-                  breaker_func: Callable[[], bool] = lambda: None):
+                  breaker_func: Callable[[], bool] = lambda: None, max_duration: int = 5000):
         """
         a conditioned delay function ,will delay util the condition is satisfied
+        :param max_duration:
         :param breaker_func:
         :param using_gray: use the gray the judge if the condition is satisfied
         :param using_edge_sensor: use the edge sensors to judge if the condition is satisfied
         :param edge_a: edge sensors judge baseline
         :return:
         """
+        end = perf_counter_ns() + max_duration * 1000000
 
         def gray_check():
             io_list = self.controller.io_all_channels
-            while int(io_list[6]) + int(io_list[7]) > 1:
+            while int(io_list[6]) + int(io_list[7]) > 1 and perf_counter_ns() < end:
                 io_list = self.controller.io_all_channels
                 if breaker_func():
                     return
 
         def edge_sensor_check():
             adc_list = self.controller.adc_all_channels
-            while adc_list[1] < edge_a or adc_list[2] < edge_a:
+            while adc_list[1] < edge_a or adc_list[2] < edge_a and perf_counter_ns() < end:
                 adc_list = self.controller.adc_all_channels
                 if breaker_func():
                     return
@@ -320,7 +323,8 @@ class BattleBot(Bot):
         def mixed_check():
             io_list = self.controller.io_all_channels
             adc_list = self.controller.adc_all_channels
-            while adc_list[1] < edge_a or adc_list[2] < edge_a and int(io_list[6]) + int(io_list[7]) > 1:
+            while adc_list[1] < edge_a or adc_list[2] < edge_a and int(io_list[6]) + int(
+                    io_list[7]) > 1 and perf_counter_ns() < end:
                 adc_list = self.controller.adc_all_channels
                 io_list = self.controller.io_all_channels
                 if breaker_func():
@@ -905,7 +909,7 @@ class BattleBot(Bot):
         :param normal_spead:
         :return:
         """
-        print('>>>>BATTLE STARTS<<<<')
+        warnings.warn('>>>>BATTLE STARTS<<<<')
 
         def stage_detector_strict(baseline: int = 1000) -> bool:
 
