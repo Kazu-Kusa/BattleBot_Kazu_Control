@@ -480,7 +480,7 @@ class BattleBot(Bot):
         # the closer to the edge ,the slower the wheels rotates
         high_spead = int(edge_speed_multiplier * min(edge_rl_sensor, edge_fl_sensor, edge_fr_sensor, edge_rr_sensor))
 
-        def watcher() -> bool:
+        def rear_watcher() -> bool:
 
             temp = self.controller.adc_all_channels
             local_edge_rr_sensor = temp[0]
@@ -519,7 +519,7 @@ class BattleBot(Bot):
                            turn_speed=high_spead, turn_time=turn_time,
                            b_multiplier=1.1,
                            t_multiplier=0.7, turn_type=1,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_fr():
@@ -536,7 +536,7 @@ class BattleBot(Bot):
                            turn_speed=high_spead, turn_time=turn_time,
                            b_multiplier=1.1,
                            t_multiplier=0.7, turn_type=0,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_rl():
@@ -578,7 +578,7 @@ class BattleBot(Bot):
                            turn_speed=high_spead, turn_time=turn_time,
                            b_multiplier=0.9,
                            t_multiplier=0.9, turn_type=1,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_r_gary():
@@ -594,7 +594,7 @@ class BattleBot(Bot):
                            turn_speed=high_spead, turn_time=turn_time,
                            b_multiplier=0.9,
                            t_multiplier=0.9, turn_type=0,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_fl_rl():
@@ -668,7 +668,7 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=0.9,
                            turn_type=1, turn_time=turn_time, t_multiplier=0.9,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_fr_r_gray():
@@ -682,7 +682,7 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=0.9,
                            turn_type=0, turn_time=turn_time, t_multiplier=0.9,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_fl_l_gray_rl():
@@ -746,7 +746,7 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=0.9,
                            turn_type=1, turn_time=turn_time, t_multiplier=0.9,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_fr_l_gray_r_gray():
@@ -760,7 +760,7 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=0.9,
                            turn_type=0, turn_time=turn_time, t_multiplier=0.9,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_fl_l_gray_r_gray_fr():
@@ -786,7 +786,7 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=1,
                            turn_time=turn_time, turn_speed=high_spead, turn_type=1, t_multiplier=1,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_fr_l_gray_r_gray_rr():
@@ -800,7 +800,7 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=1,
                            turn_time=turn_time, turn_speed=high_spead, turn_type=0, t_multiplier=1,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_fl_l_gray_r_gray_fr_rl():
