@@ -751,10 +751,9 @@ class BattleBot(Bot):
         else:
             return False
 
-    def Battle(self, interval: int = 10, normal_spead: int = 3000):
+    def Battle(self, normal_spead: int):
         """
         the main function
-        :param interval:
         :param normal_spead:
         :return:
         """
@@ -829,8 +828,6 @@ class BattleBot(Bot):
                 method: Callable[[], None] = methods_table.get(
                     check_surrounding_fence(self.controller.adc_all_channels, baseline=3550, conner_baseline=2600))
                 method()
-                delay_ms(interval)
-
         except KeyboardInterrupt:
             # forced stop
             self.screen.ADC_Led_SetColor(0, self.screen.COLOR_WHITE)
@@ -864,4 +861,4 @@ class BattleBot(Bot):
 
 if __name__ == '__main__':
     bot = BattleBot()
-    bot.Battle(interval=1, normal_spead=3500)
+    bot.Battle(normal_spead=3500)

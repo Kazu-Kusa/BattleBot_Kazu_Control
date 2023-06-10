@@ -198,10 +198,9 @@ class Bot(metaclass=ABCMeta):
     # endregion
 
     @abstractmethod
-    def Battle(self, interval, normal_spead):
+    def Battle(self, normal_spead):
         """
         the main function
-        :param interval:
         :param normal_spead:
         :return:
         """
