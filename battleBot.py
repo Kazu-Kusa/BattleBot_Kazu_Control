@@ -258,12 +258,12 @@ class BattleBot(Bot):
         """
         self.screen.ADC_Led_SetColor(0, self.screen.COLOR_BROWN)
         while True:
-            print('\r##HALT##')
+            warnings.warn('\r##HALT##')
             delay_ms(check_interval)
             # TODO: shall we make this change be a local function that passed into here as param?
             temp_list = self.controller.adc_all_channels
             if temp_list[8] > baseline and temp_list[7] > baseline:
-                print('!!DASH-TIME!!')
+                warnings.warn('!!DASH-TIME!!')
                 self.action_D(with_turn=with_turn, dash_time=dash_time, dash_speed=dash_speed)
                 return
 
@@ -278,6 +278,7 @@ class BattleBot(Bot):
                       spinning_type=randint(0, 1), spinning_speed: int = 2500, max_duration: int = 3000):
         """
         checking the stage direction and make the dash movement accordingly
+        :param with_ready:
         :param dash_breaker_action_func:
         :param dash_breaker_func:
         :param dash_speed:
@@ -1019,10 +1020,10 @@ class BattleBot(Bot):
             # forced stop
             self.screen.ADC_Led_SetColor(0, self.screen.COLOR_WHITE)
             self.controller.move_cmd(0, 0)
-            print('exiting')
+            warnings.warn('exiting')
 
     def evade_test_run(self):
-        print('test')
+        warnings.warn('evade test')
         self.controller.move_cmd(2000, 2000)
         delay_ms(300)
         self.controller.move_cmd(0, 0)
