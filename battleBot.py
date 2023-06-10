@@ -863,7 +863,7 @@ class BattleBot(Bot):
         return method()
 
     def check_surround(self, adc_list: list[int], baseline: int = 2000, basic_speed: int = 6000,
-                       evade_prob: float = 0.3) -> bool:
+                       evade_prob: float = 0.1) -> bool:
         """
         checks sensors to get surrounding objects
         :param basic_speed:
