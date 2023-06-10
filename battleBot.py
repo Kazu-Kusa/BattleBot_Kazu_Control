@@ -179,6 +179,7 @@ class BattleBot(Bot):
     def action_D(self, dash_speed: int = -13000, dash_time: int = 500,
                  with_turn: bool = False, multiplier: float = 0,
                  breaker_func: Callable[[], bool] = None, break_action_func: Callable[[], None] = None):
+        # TODO: add ready motion option
         if multiplier:
             dash_speed = int(dash_speed * multiplier)
         self.controller.move_cmd(dash_speed, dash_speed)
@@ -904,6 +905,7 @@ class BattleBot(Bot):
             return False
 
     def Battle(self, normal_spead: int = 3000):
+        # TODO: add increasing speed
         """
         the main function
         :param normal_spead:
