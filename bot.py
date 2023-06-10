@@ -79,10 +79,14 @@ class Bot(metaclass=ABCMeta):
         :param print_tag_id: if print tag id on check
         :return:
         """
-        import cv2
-        from apriltag import Detector, DetectorOptions
+        try:
+            import cv2
+            from apriltag import Detector, DetectorOptions
+        except ImportError:
+            warnings.warn('failed to import vision deps,exit')
+            return
         tag_detector = Detector(DetectorOptions(families='tag36h11')).detect
-        print("detect start")
+        warnings.warn("detect start")
         # 使用 cv2.VideoCapture(0) 创建视频捕获对象，从默认摄像头（通常是笔记本电脑的内置摄像头）捕获视频。
         cap = cv2.VideoCapture(0)
         if cap is None:
