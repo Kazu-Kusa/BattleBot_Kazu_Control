@@ -350,17 +350,11 @@ class BattleBot(Bot):
         :return:
         """
 
-        def check_tag() -> bool:
-            if self.tag_id == self.ally_tag:
-                return True
-            else:
-                return False
-
         self.screen.ADC_Led_SetColor(1, self.screen.COLOR_RED)
         if multiplier:
             speed = int(multiplier * speed)
         self.controller.move_cmd(speed, speed)
-        self.util_edge(breaker_func=check_tag)
+        self.util_edge()
         self.controller.move_cmd(-speed, -speed)
         delay_ms(160)
         self.controller.move_cmd(0, 0)
@@ -373,17 +367,11 @@ class BattleBot(Bot):
         :return:
         """
 
-        def check_tag() -> bool:
-            if self.tag_id == self.ally_tag:
-                return True
-            else:
-                return False
-
         self.screen.ADC_Led_SetColor(1, self.screen.COLOR_RED)
         if multiplier:
             speed = int(multiplier * speed)
         self.controller.move_cmd(speed, speed)
-        self.util_edge(breaker_func=check_tag)
+        self.util_edge()
         if multiplier:
             speed = int(multiplier * speed)
         self.controller.move_cmd(-speed, -speed)
