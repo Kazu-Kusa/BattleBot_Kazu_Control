@@ -448,11 +448,15 @@ class BattleBot(Bot):
 
     # endregion
 
-    def get_away_from_edge(self, adc_list: list[int], io_list: list[int], edge_baseline: int = 1680,
-                           edge_speed_multiplier: float = 0, high_speed_time: int = 180, turn_time: int = 160) -> bool:
+    def get_away_from_edge(self, adc_list: list[int], io_list: list[int],
+                           edge_baseline: int = 1680, min_baseline: int = 1000,
+                           edge_speed_multiplier: float = 0, hall_speed_multiplier: int = 3,
+                           high_speed_time: int = 180, turn_time: int = 160) -> bool:
         """
         handles the normal edge case using both adc_list and io_list.
         but well do not do anything if no edge case
+        :param hall_speed_multiplier:
+        :param min_baseline:
         :param high_speed_time:
         :param turn_time:
         :param edge_speed_multiplier:
@@ -476,7 +480,7 @@ class BattleBot(Bot):
 
         # use the sum of their returns to get the high_speed
         # the closer to the edge ,the slower the wheels rotates
-        high_spead = 3 * min(edge_rl_sensor, edge_fl_sensor, edge_fr_sensor, edge_rr_sensor)
+        high_spead = hall_speed_multiplier * min(edge_rl_sensor, edge_fl_sensor, edge_fr_sensor, edge_rr_sensor)
         if edge_speed_multiplier:
             # multiplier to adjust the high_speed
             high_spead = int(high_spead * edge_speed_multiplier)
@@ -821,8 +825,10 @@ class BattleBot(Bot):
 
         # endregion
 
-        sensor_data = (edge_fl_sensor > edge_baseline, edge_fr_sensor > edge_baseline,
-                       edge_rl_sensor > edge_baseline, edge_rr_sensor > edge_baseline,
+        sensor_data = (edge_fl_sensor > edge_baseline and edge_fl_sensor > min_baseline,
+                       edge_fr_sensor > edge_baseline and edge_fr_sensor > min_baseline,
+                       edge_rl_sensor > edge_baseline and edge_rl_sensor > min_baseline,
+                       edge_rr_sensor > edge_baseline and edge_rr_sensor > min_baseline,
                        l_gray, r_gray)
 
         method_table = {(True, True, True, True, 1, 1): do_nothing,
