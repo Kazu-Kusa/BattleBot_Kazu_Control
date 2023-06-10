@@ -619,7 +619,7 @@ class BattleBot(Bot):
             [rl]          [rr]
             :return:
             """
-            self.action_T(turn_type=1,turn_speed=high_spead,turn_time=turn_time,multiplier=0.3)
+            self.action_T(turn_type=1, turn_speed=high_spead, turn_time=turn_time, multiplier=0.3)
             return True
 
         def do_fr_rl_rr():
@@ -631,7 +631,7 @@ class BattleBot(Bot):
             [rl]          [rr]
             :return:
             """
-            self.action_T(turn_type=0,turn_speed=high_spead,turn_time=turn_time,multiplier=0.3)
+            self.action_T(turn_type=0, turn_speed=high_spead, turn_time=turn_time, multiplier=0.3)
             return True
 
         def do_fl_l_gray():
@@ -671,7 +671,7 @@ class BattleBot(Bot):
              [rl]          rr
             :return:右转
             """
-            self.action_T(turn_type=1, turn_time=turn_time, turn_speed=high_spead,multiplier=0.2)
+            self.action_T(turn_type=1, turn_time=turn_time, turn_speed=high_spead, multiplier=0.2)
             return True
 
         def do_fr_r_gray_rr():
@@ -683,7 +683,7 @@ class BattleBot(Bot):
              rl          [rr]
             :return:左转
             """
-            self.action_T(turn_type=0, turn_time=turn_time, turn_speed=high_spead,multiplier=0.2)
+            self.action_T(turn_type=0, turn_time=turn_time, turn_speed=high_spead, multiplier=0.2)
             return True
 
         def do_fl_l_gray_rl_rr():
@@ -898,10 +898,9 @@ class BattleBot(Bot):
         else:
             return False
 
-    def Battle(self, interval: int = 10, normal_spead: int = 3000):
+    def Battle(self, normal_spead: int = 3000):
         """
         the main function
-        :param interval:
         :param normal_spead:
         :return:
         """
@@ -1002,7 +1001,7 @@ class BattleBot(Bot):
                 method: Callable[[], None] = methods_table.get(
                     check_surrounding_fence(self.controller.adc_all_channels, baseline=3550, conner_baseline=2600))
                 method()
-                delay_ms(interval)
+
 
         except KeyboardInterrupt:
             # forced stop
@@ -1037,4 +1036,4 @@ class BattleBot(Bot):
 
 if __name__ == '__main__':
     bot = BattleBot()
-    bot.Battle(interval=1, normal_spead=2200)
+    bot.Battle(normal_spead=2200)
