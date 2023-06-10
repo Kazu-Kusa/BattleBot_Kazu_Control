@@ -172,8 +172,9 @@ class BattleBot(Bot):
         else:
             self.controller.move_cmd(-turn_speed, turn_speed)
 
-        delay_ms(turn_time, breaker_func=breaker_func, break_action_func=break_action_func)
-        # TODO should check the delay exit type if break or normal timeout
+        if delay_ms(turn_time, breaker_func=breaker_func, break_action_func=break_action_func):
+            return
+
         self.controller.move_cmd(0, 0)
 
     def action_D(self, dash_speed: int = -13000, dash_time: int = 500,
