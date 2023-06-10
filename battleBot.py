@@ -953,7 +953,9 @@ class BattleBot(Bot):
             if self.get_away_from_edge(adc_list, io_list,
                                        edge_baseline=1750,
                                        min_baseline=1150,
-                                       edge_speed_multiplier=3):
+                                       edge_speed_multiplier=3,
+                                       high_speed_time=200,
+                                       turn_time=170):
                 # normal behave includes all edge encounter solution
                 # if encounters edge,must deal with it first
                 # should update the sensor data too ,since much time passed out
