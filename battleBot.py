@@ -619,8 +619,7 @@ class BattleBot(Bot):
             [rl]          [rr]
             :return:
             """
-            self.action_BT(back_speed=-high_spead, b_multiplier=0.9, back_time=high_speed_time,
-                           turn_type=1, turn_time=turn_time, t_multiplier=0.9)
+            self.action_T(turn_type=1,turn_speed=high_spead,turn_time=turn_time,multiplier=0.3)
             return True
 
         def do_fr_rl_rr():
@@ -632,8 +631,7 @@ class BattleBot(Bot):
             [rl]          [rr]
             :return:
             """
-            self.action_BT(back_speed=-high_spead, b_multiplier=0.9, back_time=high_speed_time,
-                           turn_type=0, turn_time=turn_time, t_multiplier=0.9)
+            self.action_T(turn_type=0,turn_speed=high_spead,turn_time=turn_time,multiplier=0.3)
             return True
 
         def do_fl_l_gray():
@@ -673,7 +671,7 @@ class BattleBot(Bot):
              [rl]          rr
             :return:右转
             """
-            self.action_T(turn_type=1, turn_time=turn_time, turn_speed=high_spead)
+            self.action_T(turn_type=1, turn_time=turn_time, turn_speed=high_spead,multiplier=0.2)
             return True
 
         def do_fr_r_gray_rr():
@@ -685,7 +683,7 @@ class BattleBot(Bot):
              rl          [rr]
             :return:左转
             """
-            self.action_T(turn_type=0, turn_time=turn_time, turn_speed=high_spead)
+            self.action_T(turn_type=0, turn_time=turn_time, turn_speed=high_spead,multiplier=0.2)
             return True
 
         def do_fl_l_gray_rl_rr():
