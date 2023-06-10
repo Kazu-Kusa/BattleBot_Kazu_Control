@@ -320,7 +320,7 @@ class BattleBot(Bot):
 
         def edge_sensor_check():
             adc_list = self.controller.adc_all_channels
-            while adc_list[1] < edge_a or adc_list[2] < edge_a and perf_counter_ns() < end:
+            while (adc_list[1] > edge_a or adc_list[2] > edge_a )and perf_counter_ns() < end:
                 adc_list = self.controller.adc_all_channels
                 if breaker_func():
                     return
