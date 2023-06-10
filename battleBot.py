@@ -502,6 +502,9 @@ class BattleBot(Bot):
             else:
                 return False
 
+        def halt() -> None:
+            self.controller.move_cmd(0, 0)
+
         # region methods
         def do_nothing():
             return False
@@ -551,6 +554,8 @@ class BattleBot(Bot):
             rear-left encounters the edge, turn right,turn type is 1
             """
             self.action_T(turn_type=1, turn_speed=high_spead, turn_time=turn_time, multiplier=1.2)
+            self.action_D(dash_speed=high_spead, dash_time=high_speed_time, multiplier=1.1,
+                          breaker_func=front_watcher, break_action_func=halt)
             return True
 
         def do_rr():
@@ -564,6 +569,8 @@ class BattleBot(Bot):
             rear-right encounters the edge, turn left,turn type is 0
             """
             self.action_T(turn_type=0, turn_speed=high_spead, turn_time=turn_time, multiplier=0.9)
+            self.action_D(dash_speed=high_spead, dash_time=high_speed_time, multiplier=1.1,
+                          breaker_func=front_watcher, break_action_func=halt)
             return True
 
         def do_l_gary():
@@ -607,7 +614,9 @@ class BattleBot(Bot):
             [rl]            rr
             :return:
             """
-            self.action_T(turn_type=1, turn_speed=high_spead, multiplier=0.9, turn_time=turn_time)
+            self.action_T(turn_type=1, turn_speed=high_spead, multiplier=1.2, turn_time=turn_time)
+            self.action_D(dash_speed=high_spead, dash_time=high_speed_time, multiplier=1.1,
+                          breaker_func=front_watcher, break_action_func=halt)
             return True
 
         def do_fr_rr():
@@ -619,7 +628,9 @@ class BattleBot(Bot):
              rl           [rr]
             :return:
             """
-            self.action_T(turn_type=0, turn_speed=high_spead, multiplier=0.9, turn_time=turn_time)
+            self.action_T(turn_type=0, turn_speed=high_spead, multiplier=1.2, turn_time=turn_time)
+            self.action_D(dash_speed=high_spead, dash_time=high_speed_time, multiplier=1.1,
+                          breaker_func=front_watcher, break_action_func=halt)
             return True
 
         def do_rl_rr():
@@ -631,7 +642,8 @@ class BattleBot(Bot):
             [rl]          [rr]
             :return:
             """
-            self.action_D(dash_speed=high_spead, dash_time=high_speed_time, multiplier=1)
+            self.action_D(dash_speed=high_spead, dash_time=high_speed_time, multiplier=1.1,
+                          breaker_func=front_watcher, break_action_func=halt)
             return True
 
         def do_fl_rl_rr():
@@ -644,6 +656,8 @@ class BattleBot(Bot):
             :return:
             """
             self.action_T(turn_type=1, turn_speed=high_spead, turn_time=turn_time, multiplier=0.3)
+            self.action_D(dash_speed=high_spead, dash_time=high_speed_time, multiplier=1.1,
+                          breaker_func=front_watcher, break_action_func=halt)
             return True
 
         def do_fr_rl_rr():
@@ -656,6 +670,8 @@ class BattleBot(Bot):
             :return:
             """
             self.action_T(turn_type=0, turn_speed=high_spead, turn_time=turn_time, multiplier=0.3)
+            self.action_D(dash_speed=high_spead, dash_time=high_speed_time, multiplier=1.1,
+                          breaker_func=front_watcher, break_action_func=halt)
             return True
 
         def do_fl_l_gray():
