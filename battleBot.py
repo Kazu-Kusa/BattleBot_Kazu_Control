@@ -242,6 +242,7 @@ class BattleBot(Bot):
                    with_turn: bool = False, dash_time: int = 600, dash_speed: int = 8000) -> None:
         """
         hold still util the start signal is received
+        :param dash_speed:
         :param check_interval:
         :param dash_time:
         :param baseline:
