@@ -173,7 +173,7 @@ class BattleBot(Bot):
             self.controller.move_cmd(-turn_speed, turn_speed)
 
         delay_ms(turn_time, breaker_func=breaker_func, break_action_func=break_action_func)
-        # TODO: here may trigger some kind of bug
+        # TODO should check the delay exit type if break or normal timeout
         self.controller.move_cmd(0, 0)
 
     def action_D(self, dash_speed: int = -13000, dash_time: int = 500,
@@ -266,16 +266,14 @@ class BattleBot(Bot):
                 self.action_D(with_turn=with_turn, dash_time=dash_time, dash_speed=dash_speed)
                 return
 
-    def scan_surround(self, detector: Callable[[], bool],
-                      with_dash: bool = False,
-                      dash_speed: int = -8000, dash_time: int = 450,
-                      breaker_func: Callable[[], bool] = None, breaker_action_func: Callable[[], None] = None,
-                      with_turn: bool = False,
+    def scan_surround(self, detector: Callable[[], bool], with_dash: bool = False, dash_speed: int = -8000,
+                      dash_time: int = 450, dash_breaker_func: Callable[[], bool] = None,
+                      dash_breaker_action_func: Callable[[], None] = None, with_turn: bool = False,
                       spinning_type=randint(0, 1), spinning_speed: int = 2500, max_duration: int = 3000):
         """
         checking the stage direction and make the dash movement accordingly
-        :param breaker_action_func:
-        :param breaker_func:
+        :param dash_breaker_action_func:
+        :param dash_breaker_func:
         :param dash_speed:
         :param dash_time:
         :param with_turn:
@@ -289,7 +287,7 @@ class BattleBot(Bot):
         if with_dash:
             def dash() -> None:
                 self.action_D(dash_speed=dash_speed, dash_time=dash_time, with_turn=with_turn,
-                              breaker_func=breaker_func, break_action_func=breaker_action_func)
+                              breaker_func=dash_breaker_func, break_action_func=dash_breaker_action_func)
         else:
             dash = (lambda: None)
         self.action_T(turn_speed=spinning_speed, turn_time=max_duration,
@@ -996,18 +994,16 @@ class BattleBot(Bot):
 
             # TODO: after the breaker activation the action should be cut down immediately,
             #  and deliver the controller to the breaker action
-            self.scan_surround(detector=stage_detector_strict, with_dash=True,
-                               breaker_func=watcher, breaker_action_func=halt, spinning_speed=1300)
+            self.scan_surround(detector=stage_detector_strict, with_dash=True, dash_breaker_func=watcher,
+                               dash_breaker_action_func=halt, spinning_speed=300, max_duration=6000)
 
         methods_table = {0: on_stage, 1: to_stage, 2: front_to_conner, 3: rear_to_conner}
         try:
             # wait for the battle starts
             self.wait_start(baseline=1800, with_turn=False, dash_speed=-6000)
             while True:
-                method: Callable[[], None] = methods_table.get(0)
-                # methods_table.get(
-                # check_surrounding_fence(self.controller.adc_all_channels, baseline=3550, conner_baseline=2600))
-                # methods_table.get(1)
+                method: Callable[[], None] = methods_table.get(
+                    check_surrounding_fence(self.controller.adc_all_channels, baseline=3550, conner_baseline=2600))
                 method()
 
 
@@ -1082,7 +1078,8 @@ class BattleBot(Bot):
 
 
 if __name__ == '__main__':
-    bot = BattleBot(use_cam=False)
-    # bot.Battle(normal_spead=300)
+    bot = BattleBot(use_cam=False, team_color='blue')
+    # bot = BattleBot(use_cam=True,team_color='yellow')
+
+    bot.Battle(normal_spead=2200)
     # bot.test_check_surround()
-    bot.test_off_stage_components()
