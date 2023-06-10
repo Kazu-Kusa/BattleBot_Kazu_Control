@@ -30,7 +30,7 @@ def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline
 
     0: on stage
     1: by stage
-    2: in conner should fallback
+    2: in conner should need fallback
     3: in conner should push forward
     :param ad_list:
     :param baseline:
@@ -44,7 +44,7 @@ def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline
 
     total = sum([rb_sensor, fb_sensor, l3_sensor, r3_sensor])
     if total > baseline:
-        # off stage
+        # off-stage
 
         fl_sum = fb_sensor + l3_sensor
         fr_sum = fb_sensor + r3_sensor
@@ -179,16 +179,16 @@ class BattleBot(Bot):
 
     def action_D(self, dash_speed: int = -13000, dash_time: int = 500,
                  with_turn: bool = False, multiplier: float = 0,
-                 breaker_func: Callable[[], bool] = None, break_action_func: Callable[[], None] = None,
-                 with_ready: bool = False):
+                 breaker_func: Callable[[], bool] = None,
+                 break_action_func: Callable[[], None] = None,
+                 with_ready: bool = False, ready_time: int = 280):
         if multiplier:
             dash_speed = int(dash_speed * multiplier)
         if with_ready:
             self.controller.move_cmd(-dash_speed, -dash_speed)
-            delay_ms(120)
+            delay_ms(ready_time)
         self.controller.move_cmd(dash_speed, dash_speed)
         if delay_ms(dash_time, breaker_func=breaker_func, break_action_func=break_action_func):
-            # TODO: here may trigger some kind of bug
             return
         self.controller.move_cmd(0, 0)
         if with_turn:
@@ -258,7 +258,7 @@ class BattleBot(Bot):
         """
         self.screen.ADC_Led_SetColor(0, self.screen.COLOR_BROWN)
         while True:
-            warnings.warn('\r##HALT##')
+            print(f'\r##HALT AT {perf_counter_ns()}##', end='')
             delay_ms(check_interval)
             # TODO: shall we make this change be a local function that passed into here as param?
             temp_list = self.controller.adc_all_channels
@@ -269,6 +269,7 @@ class BattleBot(Bot):
 
     def scan_surround(self, detector: Callable[[], bool],
                       with_ready: bool = False,
+                      ready_time: int = 300,
                       with_dash: bool = False,
                       dash_speed: int = -8000,
                       dash_time: int = 450,
@@ -278,6 +279,7 @@ class BattleBot(Bot):
                       spinning_type=randint(0, 1), spinning_speed: int = 2500, max_duration: int = 3000):
         """
         checking the stage direction and make the dash movement accordingly
+        :param ready_time:
         :param with_ready:
         :param dash_breaker_action_func:
         :param dash_breaker_func:
@@ -294,12 +296,14 @@ class BattleBot(Bot):
         if with_dash:
             def dash() -> None:
                 self.action_D(dash_speed=dash_speed, dash_time=dash_time, with_turn=with_turn,
-                              breaker_func=dash_breaker_func, break_action_func=dash_breaker_action_func,
-                              with_ready=with_ready)
+                              breaker_func=dash_breaker_func,
+                              break_action_func=dash_breaker_action_func,
+                              with_ready=with_ready, ready_time=ready_time)
         else:
             dash = (lambda: None)
         self.action_T(turn_speed=spinning_speed, turn_time=max_duration,
-                      turn_type=spinning_type, breaker_func=detector, break_action_func=dash)
+                      turn_type=spinning_type,
+                      breaker_func=detector, break_action_func=dash)
 
     # endregion
 
@@ -348,9 +352,9 @@ class BattleBot(Bot):
         elif using_gray:
             gray_check()
 
-    def on_ally_box(self, speed: int = 5000, multiplier: float = 0):
+    def on_allay_box(self, speed: int = 5000, multiplier: float = 0):
         """
-        the action that will be executed on the event when encountering ally box
+        the action that will be executed on the event when encountering allay box
         :param speed: the desired speed
         :param multiplier: the desired speed multiplier
         :return:
@@ -710,7 +714,7 @@ class BattleBot(Bot):
                         # endregion
 
                         # region double edge sensor only
-                        (False, True, False, True): do_fl_rl,  # nomal
+                        (False, True, False, True): do_fl_rl,  # normal
                         (True, False, True, False): do_fr_rr,
                         (True, True, False, False): do_rl_rr,
                         (False, False, True, True): do_fl_fr,
@@ -754,7 +758,7 @@ class BattleBot(Bot):
         """
 
         if self.tag_id == self.ally_tag and adc_list[4] > baseline:
-            self.on_ally_box(basic_speed, 0.3)
+            self.on_allay_box(basic_speed, 0.3)
             return True
         elif self.tag_id == self.enemy_tag and adc_list[4] > baseline:
             self.on_enemy_box(basic_speed, 0.4)
@@ -781,7 +785,6 @@ class BattleBot(Bot):
             return False
 
     def Battle(self, normal_spead: int = 3000):
-        # TODO: add increasing speed
         """
         the main function
         :param normal_spead:
@@ -871,11 +874,9 @@ class BattleBot(Bot):
             def halt():
                 self.controller.move_cmd(0, 0)
 
-            # TODO: after the breaker activation the action should be cut down immediately,
-            #  and deliver the controller to the breaker action
-            self.scan_surround(detector=stage_detector_strict, with_dash=True, dash_breaker_func=watcher,
-                               dash_breaker_action_func=halt, spinning_speed=300, max_duration=6000,
-                               )
+            self.scan_surround(detector=stage_detector_strict, with_ready=True, ready_time=300, with_dash=True,
+                               dash_breaker_func=watcher,
+                               dash_breaker_action_func=halt, spinning_speed=300, max_duration=6000)
 
         methods_table = {0: on_stage, 1: to_stage, 2: front_to_conner, 3: rear_to_conner}
         try:
@@ -963,5 +964,5 @@ if __name__ == '__main__':
     bot = BattleBot(use_cam=False, team_color='blue')
     # bot = BattleBot(use_cam=True,team_color='yellow')
 
-    bot.Battle(normal_spead=300)
+    bot.Battle(normal_spead=2300)
     # bot.test_check_surround()

@@ -168,7 +168,6 @@ class Bot(metaclass=ABCMeta):
     @property
     def tag_id(self):
         """
-
         :return:  current tag id
         """
         return self._tag_id
