@@ -842,9 +842,9 @@ class BattleBot(Bot):
                         # region triple edge sensor
                         # TODO : beware of the turn direction
                         (False, True, False, False, 1, 1): do_fl_rl_rr,
-                        (False, True, False, False, 0, 1): do_fl_rl_rr,
+                        (False, True, False, False, 0, 1): do_fl_l_gray_rl_rr,
                         (True, False, False, False, 1, 1): do_fr_rl_rr,  # fr and fr 不会出现
-                        (True, False, False, False, 1, 0): do_fr_rl_rr,
+                        (True, False, False, False, 1, 0): do_fr_r_gray_rl_rr,
                         # endregion
 
                         (False, True, True, True, 0, 1): do_fl_l_gray,
