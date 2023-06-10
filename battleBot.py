@@ -411,37 +411,41 @@ class BattleBot(Bot):
 
     def on_attacked(self, position_type: int, counter_back: bool = False,
                     run_away: bool = False,
-                    run_speed: int = 5000, run_time: int = 400,
-                    action_break_func: Callable[[], bool] = None,
-                    reacting_speed: int = 8000, reacting_time: int = 300):
+                    run_speed: int = 5000, run_time: int = 240,
+                    run_away_breaker_func: Callable[[], bool] = None,
+                    run_away_break_action_func: Callable[[], None] = None,
+                    reacting_speed: int = 6400, reacting_time: int = 350):
         """
         use action tf to evade attacks
-        :param run_time: 
+        :param run_away_break_action_func:
+        :param run_away_breaker_func:
+        :param run_time:
         :param run_away: 
-        :param run_speed: 
-        :param action_break_func: 
+        :param run_speed:
         :param counter_back:
         :param position_type:
         :param reacting_speed:
         :param reacting_time:
         :return:
         """
-        # TODO make all actions support action break function
         if position_type == 0:
             if counter_back:
                 self.action_TF(fixed_wheel_id=4, speed=reacting_speed, tf_time=reacting_time)
             else:
                 self.action_TF(fixed_wheel_id=3, speed=-reacting_speed, tf_time=reacting_time)
                 if run_away:
-                    self.action_D(dash_speed=run_speed, dash_time=run_time)
-
+                    self.action_D(dash_speed=run_speed, dash_time=run_time,
+                                  breaker_func=run_away_breaker_func,
+                                  break_action_func=run_away_break_action_func)
         elif position_type == 1:
             if counter_back:
                 self.action_TF(fixed_wheel_id=2, speed=reacting_speed, tf_time=reacting_time)
             else:
                 self.action_TF(fixed_wheel_id=1, speed=-reacting_speed, tf_time=reacting_time)
                 if run_away:
-                    self.action_D(dash_speed=run_speed, dash_time=run_time)
+                    self.action_D(dash_speed=run_speed, dash_time=run_time,
+                                  breaker_func=run_away_breaker_func,
+                                  break_action_func=run_away_break_action_func)
         elif position_type == 2:
             if counter_back:
                 reacting_time = reacting_time * 0.9
