@@ -299,7 +299,7 @@ class BattleBot(Bot):
 
     # region events
     def util_edge(self, using_gray: bool = True, using_edge_sensor: bool = True, edge_a: int = 1800,
-                  breaker_func: Callable[[], bool] = lambda: None, max_duration: int = 5000):
+                  breaker_func: Callable[[], bool] = lambda: None, max_duration: int = 3000):
         """
         a conditioned delay function ,will delay util the condition is satisfied
         :param max_duration:
@@ -313,14 +313,14 @@ class BattleBot(Bot):
 
         def gray_check():
             io_list = self.controller.io_all_channels
-            while int(io_list[6]) + int(io_list[7]) > 1 and perf_counter_ns() < end:
+            while io_list[6] + io_list[7] > 1 and perf_counter_ns() < end:
                 io_list = self.controller.io_all_channels
                 if breaker_func():
                     return
 
         def edge_sensor_check():
             adc_list = self.controller.adc_all_channels
-            while (adc_list[1] > edge_a or adc_list[2] > edge_a )and perf_counter_ns() < end:
+            while (adc_list[1] > edge_a or adc_list[2] > edge_a) and perf_counter_ns() < end:
                 adc_list = self.controller.adc_all_channels
                 if breaker_func():
                     return
@@ -328,8 +328,8 @@ class BattleBot(Bot):
         def mixed_check():
             io_list = self.controller.io_all_channels
             adc_list = self.controller.adc_all_channels
-            while adc_list[1] < edge_a or adc_list[2] < edge_a and int(io_list[6]) + int(
-                    io_list[7]) > 1 and perf_counter_ns() < end:
+            while (adc_list[1] > edge_a or adc_list[2] > edge_a) and io_list[6] + io_list[
+                7] > 1 and perf_counter_ns() < end:
                 adc_list = self.controller.adc_all_channels
                 io_list = self.controller.io_all_channels
                 if breaker_func():
@@ -1039,7 +1039,16 @@ class BattleBot(Bot):
                 print('rear_encounter')
                 self.on_attacked(2)
 
+    def test_check_surround(self):
+        warnings.warn('checking surround')
+
+        while True:
+            if self.controller.adc_all_channels[4] > 2000:
+                self.on_enemy_car(speed=500)
+                delay_ms(3000)
+
 
 if __name__ == '__main__':
-    bot = BattleBot()
-    bot.Battle(normal_spead=2200)
+    bot = BattleBot(use_cam=False)
+    # bot.Battle(normal_spead=2200)
+    bot.test_check_surround()
