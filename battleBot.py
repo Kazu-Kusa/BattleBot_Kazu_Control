@@ -347,7 +347,7 @@ class BattleBot(Bot):
         self.screen.ADC_Led_SetColor(1, self.screen.COLOR_GREEN)
         self.action_T(turn_speed=speed, multiplier=multiplier)
 
-    def on_enemy_box(self, speed: int = 8000, multiplier: float = 0):
+    def on_enemy_box(self, speed: int = 6000, multiplier: float = 0):
         """
         the action that will be executed on the event when encountering enemy box
         :param speed:
@@ -945,7 +945,7 @@ class BattleBot(Bot):
                 # should update the sensor data too ,since much time passed out
                 adc_list = self.controller.adc_all_channels
 
-            if self.check_surround(adc_list):
+            if self.check_surround(adc_list, baseline=1500, basic_speed=6000, evade_prob=0.1):
                 # if no edge is encountered then check if there are anything surrounding
                 # will check surrounding and will act according the case to deal with it
                 # after turning should go to next loop checking the object
@@ -1009,7 +1009,7 @@ class BattleBot(Bot):
             self.controller.move_cmd(0, 0)
             print('exiting')
 
-    def test_run(self):
+    def evade_test_run(self):
         print('test')
         self.controller.move_cmd(2000, 2000)
         delay_ms(300)
