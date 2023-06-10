@@ -906,15 +906,10 @@ class BattleBot(Bot):
         """
         print('>>>>BATTLE STARTS<<<<')
 
-        def stage_detector() -> bool:
-            baseline = 1000
+        def stage_detector_strict(baseline: int = 1000) -> bool:
+
             temp = self.controller.adc_all_channels
-            ftr_sensor = temp[6]
-            rb_sensor = temp[5]
-            fb_sensor = temp[4]
-            l3_sensor = temp[8]
-            r3_sensor = temp[7]
-            if ftr_sensor > baseline and l3_sensor < baseline and r3_sensor < baseline and rb_sensor > baseline and fb_sensor > baseline:
+            if temp[6] > baseline > temp[8] and temp[7] < baseline < temp[5] and temp[4] > baseline:
                 return True
             return False
 
@@ -990,7 +985,7 @@ class BattleBot(Bot):
 
             # TODO: after the breaker activation the action should be cut down immediately,
             #  and deliver the controller to the breaker action
-            self.scan_surround(detector=stage_detector, with_dash=True,
+            self.scan_surround(detector=stage_detector_strict, with_dash=True,
                                breaker_func=watcher, breaker_action_func=halt, spinning_speed=1300)
 
         methods_table = {0: on_stage, 1: to_stage, 2: front_to_conner, 3: rear_to_conner}
