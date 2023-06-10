@@ -449,13 +449,12 @@ class BattleBot(Bot):
     # endregion
 
     def get_away_from_edge(self, adc_list: list[int], io_list: list[int],
-                           edge_baseline: int = 1680, min_baseline: int = 1000,
-                           edge_speed_multiplier: float = 0, hall_speed_multiplier: int = 3,
+                           edge_baseline: int = 1750, min_baseline: int = 1150,
+                           edge_speed_multiplier: float = 3,
                            high_speed_time: int = 180, turn_time: int = 160) -> bool:
         """
         handles the normal edge case using both adc_list and io_list.
         but well do not do anything if no edge case
-        :param hall_speed_multiplier:
         :param min_baseline:
         :param high_speed_time:
         :param turn_time:
@@ -478,14 +477,9 @@ class BattleBot(Bot):
         l_gray = io_list[6]
         r_gray = io_list[7]
 
-        # use the sum of their returns to get the high_speed
         # the closer to the edge ,the slower the wheels rotates
-        high_spead = hall_speed_multiplier * min(edge_rl_sensor, edge_fl_sensor, edge_fr_sensor, edge_rr_sensor)
-        if edge_speed_multiplier:
-            # multiplier to adjust the high_speed
-            high_spead = int(high_spead * edge_speed_multiplier)
+        high_spead = int(edge_speed_multiplier * min(edge_rl_sensor, edge_fl_sensor, edge_fr_sensor, edge_rr_sensor))
 
-        # fixed action duration
         def watcher() -> bool:
 
             temp = self.controller.adc_all_channels
@@ -956,7 +950,10 @@ class BattleBot(Bot):
             adc_list = self.controller.adc_all_channels
             io_list = self.controller.io_all_channels
 
-            if self.get_away_from_edge(adc_list, io_list, edge_baseline=1750, edge_speed_multiplier=0.9):
+            if self.get_away_from_edge(adc_list, io_list,
+                                       edge_baseline=1750,
+                                       min_baseline=1150,
+                                       edge_speed_multiplier=3):
                 # normal behave includes all edge encounter solution
                 # if encounters edge,must deal with it first
                 # should update the sensor data too ,since much time passed out
@@ -1027,6 +1024,7 @@ class BattleBot(Bot):
             self.controller.move_cmd(0, 0)
             print('exiting')
 
+    # region tests
     def evade_test_run(self):
         print('test')
         self.controller.move_cmd(2000, 2000)
@@ -1089,6 +1087,7 @@ class BattleBot(Bot):
             self.screen.LCD_PutString(0, 0, f'stage_dir:{stage_detector_strict()}')
             self.screen.LCD_PutString(0, 18, f'conner check:{conner_break()} ')
             self.screen.LCD_Refresh()
+    # endregion
 
 
 if __name__ == '__main__':
