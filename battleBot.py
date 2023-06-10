@@ -378,7 +378,7 @@ class BattleBot(Bot):
         delay_ms(160)
         self.controller.move_cmd(0, 0)
 
-    def on_thing_surrounding(self, position_type: int = 0, rotate_time: int = 160, rotate_speed: int = 6000):
+    def on_thing_surrounding(self, position_type: int = 0, rotate_time: int = 160, rotate_speed: int = 3800):
         """
         0 for left
         1 for right
@@ -866,6 +866,7 @@ class BattleBot(Bot):
                        evade_prob: float = 0.1) -> bool:
         """
         checks sensors to get surrounding objects
+        :param evade_prob:
         :param basic_speed:
         :param adc_list:
         :param baseline:
