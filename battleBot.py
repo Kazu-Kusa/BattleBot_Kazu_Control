@@ -813,24 +813,35 @@ class BattleBot(Bot):
                        l_gray, r_gray)
 
         method_table = {(True, True, True, True, 1, 1): do_nothing,
+                        # region edge sensor only
                         (False, True, True, True, 1, 1): do_fl,
                         (True, False, True, True, 1, 1): do_fr,
                         (True, True, False, True, 1, 1): do_rl,
                         (True, True, True, False, 1, 1): do_rr,
+                        # endregion
 
+                        # region gray only
                         (True, True, True, True, 0, 1): do_l_gary,
                         (True, True, True, True, 1, 0): do_r_gary,  # fl and fr 不会出现,
+                        # endregion
 
+                        # region double edge sensor only
                         (False, True, False, True, 1, 1): do_fl_rl,  # fl and rr 暂未出现,
 
                         (True, False, True, False, 1, 1): do_fr_rr,  # fr and rl 暂未出现，fl and fr 不会出现
 
                         (True, True, False, False, 1, 1): do_rl_rr,
 
+                        (False, False, True, True, 1, 1): do_fl_l_gray_r_gray_fr,
+                        # endregion
+
+                        # region triple edge sensor
+                        # TODO : beware of the turn direction
                         (False, True, False, False, 1, 1): do_fl_rl_rr,
                         (False, True, False, False, 0, 1): do_fl_rl_rr,
                         (True, False, False, False, 1, 1): do_fr_rl_rr,  # fr and fr 不会出现
                         (True, False, False, False, 1, 0): do_fr_rl_rr,
+                        # endregion
 
                         (False, True, True, True, 0, 1): do_fl_l_gray,
                         (False, True, False, True, 0, 1): do_fl_l_gray_rl,
