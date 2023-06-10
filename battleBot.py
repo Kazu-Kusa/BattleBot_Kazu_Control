@@ -1049,6 +1049,37 @@ class BattleBot(Bot):
                 self.on_enemy_car(speed=500)
                 delay_ms(3000)
 
+    def test_off_stage_components(self):
+        warnings.warn('off_stage_components test')
+
+        def stage_detector_strict(baseline: int = 1000) -> bool:
+
+            temp = self.controller.adc_all_channels
+            if temp[6] > baseline > temp[8] and temp[7] < baseline < temp[5] and temp[4] > baseline:
+                return True
+            return False
+
+        def conner_break() -> bool:
+            temp = self.controller.adc_all_channels
+            rb_sensor = temp[5]
+            fb_sensor = temp[4]
+            l3_sensor = temp[8]
+            r3_sensor = temp[7]
+            base_line = 2000
+            delta_front_rear = abs(rb_sensor - fb_sensor)
+            ab_delta_right_left = abs(l3_sensor - r3_sensor)
+            if delta_front_rear + ab_delta_right_left > base_line:
+                return True
+            else:
+                return False
+
+        self.screen.LCD_SetFontSize(self.screen.FONT_6X10)
+        while True:
+            self.screen.LCD_FillScreen(self.screen.COLOR_BLACK)
+            self.screen.LCD_PutString(0, 0, f'stage_dir:{stage_detector_strict()}')
+            self.screen.LCD_PutString(0, 18, f'conner check:{conner_break()} ')
+            self.screen.LCD_Refresh()
+
 
 if __name__ == '__main__':
     bot = BattleBot(use_cam=False)
