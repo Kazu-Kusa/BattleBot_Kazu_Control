@@ -87,67 +87,72 @@ class Bot(metaclass=ABCMeta):
             return
         tag_detector = Detector(DetectorOptions(families='tag36h11')).detect
         warnings.warn("detect start")
-        # 使用 cv2.VideoCapture(0) 创建视频捕获对象，从默认摄像头（通常是笔记本电脑的内置摄像头）捕获视频。
-        cap = cv2.VideoCapture(0)
-        if cap is None:
-            warnings.warn('########CAN\'T GET VIDEO########\n')
+        try:
+            # 使用 cv2.VideoCapture(0) 创建视频捕获对象，从默认摄像头（通常是笔记本电脑的内置摄像头）捕获视频。
+            cap = cv2.VideoCapture(0)
+            if cap is None:
+                warnings.warn('########CAN\'T GET VIDEO########\n')
 
-            return
-        self.camera_is_on = True
-        # 使用 cap.set(3, w) 和 cap.set(4, h) 设置帧的宽度和高度为 640x480，帧的 weight 为 320。
-        w = 640
-        h = 480
-        weight = 320
-        cap.set(3, w)
-        cap.set(4, h)
+                return
+            self.camera_is_on = True
+            # 使用 cap.set(3, w) 和 cap.set(4, h) 设置帧的宽度和高度为 640x480，帧的 weight 为 320。
+            w = 640
+            h = 480
+            weight = 320
+            cap.set(3, w)
+            cap.set(4, h)
 
-        cup_w = int((w - weight) / 2)
-        cup_h = int((h - weight) / 2) + 50
+            cup_w = int((w - weight) / 2)
+            cup_h = int((h - weight) / 2) + 50
 
-        print_interval: float = 1.2
-        start_time = time.time()
-        while True:
+            print_interval: float = 1.2
+            start_time = time.time()
+            while True:
 
-            if self.tag_monitor_switch:  # 台上开启 台下关闭 节约性能
-                # 在循环内，从视频捕获对象中捕获帧并将其存储在 frame 变量中。然后将帧裁剪为中心区域的 weight x weight 大小。
-                ret, frame = cap.read()
-                if not ret:
-                    warnings.warn('\n##########CAMERA LOST###########\n'
-                                  '###ENTERING NO CAMERA MODE###')
-                    self.camera_is_on = False
-                    self.tag_id = -1
-                    break
-                frame = frame[cup_h:cup_h + weight, cup_w:cup_w + weight]
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # 将帧转换为灰度并存储在 gray 变量中。
-                # 使用 AprilTag 检测器对象（self.tag_detector）在灰度帧中检测 AprilTags。检测到的标记存储在 tags 变量中。
-                tags = tag_detector(gray)
-                if tags:
-                    if single_tag_mode:
-                        self.tag_id = tags[0].tag_id
+                if self.tag_monitor_switch:  # 台上开启 台下关闭 节约性能
+                    # 在循环内，从视频捕获对象中捕获帧并将其存储在 frame 变量中。然后将帧裁剪为中心区域的 weight x weight 大小。
+                    ret, frame = cap.read()
+                    if not ret:
+                        warnings.warn('\n##########CAMERA LOST###########\n'
+                                      '###ENTERING NO CAMERA MODE###')
+                        self.camera_is_on = False
+                        self.tag_id = -1
+                        break
+                    frame = frame[cup_h:cup_h + weight, cup_w:cup_w + weight]
+                    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # 将帧转换为灰度并存储在 gray 变量中。
+                    # 使用 AprilTag 检测器对象（self.tag_detector）在灰度帧中检测 AprilTags。检测到的标记存储在 tags 变量中。
+                    tags = tag_detector(gray)
+                    if tags:
+                        if single_tag_mode:
+                            self.tag_id = tags[0].tag_id
+                        else:
+                            # 获取离图像中心最近的 AprilTag
+                            closest_tag = None
+                            closest_dist = float('inf')
+                            for tag in tags:
+                                # 计算当前 AprilTag 的中心点
+                                center = tag.center
+                                # 计算当前 AprilTag 中心点与图像中心的距离
+                                dist = ((center[0] - frame.shape[1] / 2) ** 2 + (
+                                        center[1] - frame.shape[0] / 2) ** 2) ** 0.5
+                                if dist < closest_dist:
+                                    closest_dist = dist
+                                    closest_tag = tag
+                            self.tag_id = closest_tag if closest_tag else tags[0].tag_id
+                        if print_tag_id and time.time() - start_time > print_interval:
+                            print(f"#DETECTED TAG: [{self.tag_id}]")
+                            start_time = time.time()
                     else:
-                        # 获取离图像中心最近的 AprilTag
-                        closest_tag = None
-                        closest_dist = float('inf')
-                        for tag in tags:
-                            # 计算当前 AprilTag 的中心点
-                            center = tag.center
-                            # 计算当前 AprilTag 中心点与图像中心的距离
-                            dist = ((center[0] - frame.shape[1] / 2) ** 2 + (
-                                    center[1] - frame.shape[0] / 2) ** 2) ** 0.5
-                            if dist < closest_dist:
-                                closest_dist = dist
-                                closest_tag = tag
-                        self.tag_id = closest_tag if closest_tag else tags[0].tag_id
-                    if print_tag_id and time.time() - start_time > print_interval:
-                        print(f"#DETECTED TAG: [{self.tag_id}]")
-                        start_time = time.time()
+                        # if not tags detected,return to default
+                        self.tag_id = -1
+                    sleep(check_interval)
                 else:
-                    # if not tags detected,return to default
-                    self.tag_id = -1
-                sleep(check_interval)
-            else:
-                # TODO: This delay may not be correct,since it could cause wrongly activate enemy box action
-                sleep(0.6)
+                    # TODO: This delay may not be correct,since it could cause wrongly activate enemy box action
+                    sleep(0.6)
+
+        except:
+            warnings.warn("###CAM ERROR###")
+            return
 
     # endregion
 
