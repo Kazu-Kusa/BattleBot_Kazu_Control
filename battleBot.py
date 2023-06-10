@@ -449,11 +449,14 @@ class BattleBot(Bot):
 
     # endregion
 
-    def get_away_from_edge(self, adc_list: list[int], io_list: list[int], edge_baseline: int = 1680,
-                           edge_speed_multiplier: float = 0, high_speed_time: int = 180, turn_time: int = 160) -> bool:
+    def get_away_from_edge(self, adc_list: list[int], io_list: list[int],
+                           edge_baseline: int = 1750, min_baseline: int = 1150,
+                           edge_speed_multiplier: float = 3,
+                           high_speed_time: int = 180, turn_time: int = 160) -> bool:
         """
         handles the normal edge case using both adc_list and io_list.
         but well do not do anything if no edge case
+        :param min_baseline:
         :param high_speed_time:
         :param turn_time:
         :param edge_speed_multiplier:
@@ -475,20 +478,25 @@ class BattleBot(Bot):
         l_gray = io_list[6]
         r_gray = io_list[7]
 
-        # use the sum of their returns to get the high_speed
         # the closer to the edge ,the slower the wheels rotates
-        high_spead = 3 * min(edge_rl_sensor, edge_fl_sensor, edge_fr_sensor, edge_rr_sensor)
-        if edge_speed_multiplier:
-            # multiplier to adjust the high_speed
-            high_spead = int(high_spead * edge_speed_multiplier)
+        high_spead = int(edge_speed_multiplier * min(edge_rl_sensor, edge_fl_sensor, edge_fr_sensor, edge_rr_sensor))
 
-        # fixed action duration
-        def watcher() -> bool:
+        def rear_watcher() -> bool:
 
             temp = self.controller.adc_all_channels
             local_edge_rr_sensor = temp[0]
             local_edge_rl_sensor = temp[3]
             if local_edge_rl_sensor < edge_baseline or local_edge_rr_sensor < edge_baseline:
+                # if at least one of the edge sensor is hanging over air
+                return True
+            else:
+                return False
+
+        def front_watcher() -> bool:
+            temp = self.controller.adc_all_channels
+            local_edge_fr_sensor = temp[1]
+            local_edge_fl_sensor = temp[2]
+            if local_edge_fl_sensor < edge_baseline or local_edge_fr_sensor < edge_baseline:
                 # if at least one of the edge sensor is hanging over air
                 return True
             else:
@@ -512,36 +520,36 @@ class BattleBot(Bot):
                            turn_speed=high_spead, turn_time=turn_time,
                            b_multiplier=1.1,
                            t_multiplier=0.7, turn_type=1,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_fr():
             """
-                       fl          [fr]
-                           O-----O
-                              |
-                           O-----O
-                       rl           rr
+           fl          [fr]
+               O-----O
+                  |
+               O-----O
+           rl           rr
 
-                       front-right encounters the edge, turn left,turn type is 0
-                       """
+           front-right encounters the edge, turn left,turn type is 0
+            """
             self.action_BT(back_speed=high_spead, back_time=high_speed_time,
                            turn_speed=high_spead, turn_time=turn_time,
                            b_multiplier=1.1,
                            t_multiplier=0.7, turn_type=0,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_rl():
             """
-                        fl           fr
-                            O-----O
-                               |
-                            O-----O
-                        [rl]         rr
+            fl           fr
+                O-----O
+                   |
+                O-----O
+            [rl]         rr
 
-                        rear-left encounters the edge, turn right,turn type is 1
-                        """
+            rear-left encounters the edge, turn right,turn type is 1
+            """
             self.action_T(turn_type=1, turn_speed=high_spead, turn_time=turn_time, multiplier=1.2)
             return True
 
@@ -571,7 +579,7 @@ class BattleBot(Bot):
                            turn_speed=high_spead, turn_time=turn_time,
                            b_multiplier=0.9,
                            t_multiplier=0.9, turn_type=1,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_r_gary():
@@ -587,7 +595,7 @@ class BattleBot(Bot):
                            turn_speed=high_spead, turn_time=turn_time,
                            b_multiplier=0.9,
                            t_multiplier=0.9, turn_type=0,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_fl_rl():
@@ -661,7 +669,7 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=0.9,
                            turn_type=1, turn_time=turn_time, t_multiplier=0.9,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_fr_r_gray():
@@ -675,7 +683,7 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=0.9,
                            turn_type=0, turn_time=turn_time, t_multiplier=0.9,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_fl_l_gray_rl():
@@ -739,7 +747,7 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=0.9,
                            turn_type=1, turn_time=turn_time, t_multiplier=0.9,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_fr_l_gray_r_gray():
@@ -753,7 +761,7 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=0.9,
                            turn_type=0, turn_time=turn_time, t_multiplier=0.9,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_fl_l_gray_r_gray_fr():
@@ -779,7 +787,7 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=1,
                            turn_time=turn_time, turn_speed=high_spead, turn_type=1, t_multiplier=1,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_fr_l_gray_r_gray_rr():
@@ -793,7 +801,7 @@ class BattleBot(Bot):
             """
             self.action_BT(back_speed=high_spead, back_time=high_speed_time, b_multiplier=1,
                            turn_time=turn_time, turn_speed=high_spead, turn_type=0, t_multiplier=1,
-                           hind_watcher_func=watcher)
+                           hind_watcher_func=rear_watcher)
             return True
 
         def do_fl_l_gray_r_gray_fr_rl():
@@ -822,8 +830,10 @@ class BattleBot(Bot):
 
         # endregion
 
-        sensor_data = (edge_fl_sensor > edge_baseline, edge_fr_sensor > edge_baseline,
-                       edge_rl_sensor > edge_baseline, edge_rr_sensor > edge_baseline,
+        sensor_data = (edge_fl_sensor > edge_baseline and edge_fl_sensor > min_baseline,
+                       edge_fr_sensor > edge_baseline and edge_fr_sensor > min_baseline,
+                       edge_rl_sensor > edge_baseline and edge_rl_sensor > min_baseline,
+                       edge_rr_sensor > edge_baseline and edge_rr_sensor > min_baseline,
                        l_gray, r_gray)
 
         method_table = {(True, True, True, True, 1, 1): do_nothing,
@@ -951,7 +961,12 @@ class BattleBot(Bot):
             adc_list = self.controller.adc_all_channels
             io_list = self.controller.io_all_channels
 
-            if self.get_away_from_edge(adc_list, io_list, edge_baseline=1750, edge_speed_multiplier=0.9):
+            if self.get_away_from_edge(adc_list, io_list,
+                                       edge_baseline=1750,
+                                       min_baseline=1150,
+                                       edge_speed_multiplier=3,
+                                       high_speed_time=200,
+                                       turn_time=170):
                 # normal behave includes all edge encounter solution
                 # if encounters edge,must deal with it first
                 # should update the sensor data too ,since much time passed out
@@ -1022,6 +1037,7 @@ class BattleBot(Bot):
             self.controller.move_cmd(0, 0)
             warnings.warn('exiting')
 
+    # region tests
     def evade_test_run(self):
         warnings.warn('evade test')
         self.controller.move_cmd(2000, 2000)
@@ -1084,6 +1100,7 @@ class BattleBot(Bot):
             self.screen.LCD_PutString(0, 0, f'stage_dir:{stage_detector_strict()}')
             self.screen.LCD_PutString(0, 18, f'conner check:{conner_break()} ')
             self.screen.LCD_Refresh()
+    # endregion
 
 
 if __name__ == '__main__':
