@@ -178,10 +178,14 @@ class BattleBot(Bot):
 
     def action_D(self, dash_speed: int = -13000, dash_time: int = 500,
                  with_turn: bool = False, multiplier: float = 0,
-                 breaker_func: Callable[[], bool] = None, break_action_func: Callable[[], None] = None):
+                 breaker_func: Callable[[], bool] = None, break_action_func: Callable[[], None] = None,
+                 with_ready: bool = False):
         # TODO: add ready motion option
         if multiplier:
             dash_speed = int(dash_speed * multiplier)
+        if with_ready:
+            self.controller.move_cmd(-dash_speed, -dash_speed)
+            delay_ms(120)
         self.controller.move_cmd(dash_speed, dash_speed)
         if delay_ms(dash_time, breaker_func=breaker_func, break_action_func=break_action_func):
             # TODO: here may trigger some kind of bug
