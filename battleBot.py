@@ -831,7 +831,7 @@ class BattleBot(Bot):
                 # should update the sensor data too ,since much time passed out
                 adc_list = self.controller.adc_all_channels
 
-            if self.check_surround(adc_list, baseline=1500, basic_speed=6000, evade_prob=0.1):
+            if self.check_surround(adc_list, baseline=1500, basic_speed=6000, evade_prob=0.15):
                 # if no edge is encountered then check if there are anything surrounding
                 # will check surrounding and will act according the case to deal with it
                 # after turning should go to next loop checking the object
@@ -900,5 +900,5 @@ if __name__ == '__main__':
     bot = BattleBot(use_cam=True, team_color='blue')
     # bot = BattleBot(use_cam=True, team_color='yellow')
 
-    bot.Battle(normal_spead=2600)
+    bot.Battle(normal_spead=3500)
     # bot.test_check_surround()
