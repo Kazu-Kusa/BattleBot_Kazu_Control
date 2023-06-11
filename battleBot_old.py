@@ -539,14 +539,15 @@ class BattleBot(Bot):
             l2_sensor = temp[8]
             r2_sensor = temp[7]
 
-            if ftr_sensor > baseline and l2_sensor < baseline and r2_sensor < baseline and rb_sensor > baseline and fb_sensor > baseline:
+            if ftr_sensor > baseline > l2_sensor and r2_sensor < baseline and rb_sensor > baseline and fb_sensor > baseline:
                 return True
 
             return False
 
         try:
             # wait for the battle starts
-            self.wait_start(baseline=1800, with_turn=False, dash_speed=-6000)
+            self.wait_start(baseline=1800, with_turn=True, dash_speed=-7500, dash_time=500,
+                            )
             while True:
                 on_stage = True
                 if on_stage:
@@ -593,6 +594,8 @@ class BattleBot(Bot):
             delay_ms(100)
             temp = self.controller.adc_all_channels
             ftr_sensor = temp[1]
+            bot = BattleBot(use_cam=True, team_color='blue')
+            # bot = BattleBot(use_cam=True,team_color='yellow')
             rb_sensor = temp[5]
             fb_sensor = temp[4]
             l2_sensor = temp[8]
@@ -613,5 +616,5 @@ if __name__ == '__main__':
     # bot = BattleBot(use_cam=True,team_color='yellow')
     bot.controller.move_cmd(0, 0)
     # breakpoint()
-    bot.Battle(interval=2, normal_spead=4000)
+    bot.Battle(interval=0, normal_spead=4000)
     # bot.test_run()

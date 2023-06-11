@@ -846,7 +846,7 @@ class BattleBot(Bot):
             if self.tag_monitor_switch:
                 self.tag_monitor_switch = False
             self.scan_surround(detector=conner_break, with_dash=True,
-                               dash_speed=-5000, dash_time=450, spinning_speed=2000)
+                               dash_speed=-7000, dash_time=450, spinning_speed=2000)
 
         def rear_to_conner() -> None:
             warnings.warn('in_conner,rear_to_conner')
@@ -876,15 +876,16 @@ class BattleBot(Bot):
 
             self.scan_surround(detector=stage_detector_strict, with_ready=True, ready_time=300, with_dash=True,
                                dash_breaker_func=watcher,
-                               dash_breaker_action_func=halt, spinning_speed=300, max_duration=6000)
+                               dash_breaker_action_func=halt, spinning_speed=1200, max_duration=4000)
 
         methods_table = {0: on_stage, 1: to_stage, 2: front_to_conner, 3: rear_to_conner}
         try:
             # wait for the battle starts
-            self.wait_start(baseline=1800, with_turn=False, dash_speed=-6000)
+            self.wait_start(baseline=1800, with_turn=True, dash_speed=-7500, dash_time=500,
+                            )
             while True:
                 method: Callable[[], None] = methods_table.get(
-                    check_surrounding_fence(self.controller.adc_all_channels, baseline=3550, conner_baseline=2600))
+                    check_surrounding_fence(self.controller.adc_all_channels, baseline=3800, conner_baseline=2600))
                 method()
 
 
@@ -897,7 +898,7 @@ class BattleBot(Bot):
 
 if __name__ == '__main__':
     bot = BattleBot(use_cam=True, team_color='blue')
-    # bot = BattleBot(use_cam=True,team_color='yellow')
+    # bot = BattleBot(use_cam=True, team_color='yellow')
 
     bot.Battle(normal_spead=2600)
     # bot.test_check_surround()
