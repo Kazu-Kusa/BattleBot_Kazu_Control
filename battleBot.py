@@ -885,7 +885,7 @@ class BattleBot(Bot):
                             )
             while True:
                 method: Callable[[], None] = methods_table.get(
-                    check_surrounding_fence(self.controller.adc_all_channels, baseline=3800, conner_baseline=2600))
+                    check_surrounding_fence(self.controller.adc_all_channels, baseline=4100, conner_baseline=2600))
                 method()
 
 
