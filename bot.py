@@ -9,18 +9,8 @@ from repo.uptechStar.module.screen import Screen
 from repo.uptechStar.module.up_controller import UpController
 
 
-class Bot(metaclass=ABCMeta):
-    screen = Screen(init_screen=False)
-    controller = UpController(debug=False, fan_control=False)
-
-    def __init__(self, config_path: str = './config.json', team_color: str = 'blue', use_cam: bool = True):
-        """
-
-        :param config_path: the path to the config,but it hasn't been put into use
-        :param team_color:
-        """
-        self.load_config(config_path=config_path)
-
+class Camera(object):
+    def __init__(self, team_color: str):
         self._tag_id: int = -1
         self._tag_monitor_switch: bool = True
         self._enemy_tag = None
@@ -28,22 +18,8 @@ class Bot(metaclass=ABCMeta):
 
         self._set_tags(team_color=team_color)
         self._camera_is_on: bool = False
-        if use_cam:
-            self.apriltag_detect_start()
+        self.apriltag_detect_start()
 
-    # region utilities
-    def load_config(self, config_path: str):
-        """
-        load configuration form json
-        :param config_path:
-        :return:
-        """
-
-        pass
-
-    # endregion
-
-    # region tag detection
     def _set_tags(self, team_color: str = 'blue'):
         """
         set the ally/enemy tag according the team color
@@ -154,9 +130,10 @@ class Bot(metaclass=ABCMeta):
             warnings.warn("###CAM ERROR###")
             return
 
-    # endregion
+        # endregion
 
-    # region properties
+        # region properties
+
     @property
     def camera_is_on(self):
         return self._camera_is_on
@@ -202,6 +179,28 @@ class Bot(metaclass=ABCMeta):
     @property
     def enemy_tag(self):
         return self._enemy_tag
+
+
+class Bot(metaclass=ABCMeta):
+    screen = Screen(init_screen=False)
+    controller = UpController(debug=False, fan_control=False)
+
+    def __init__(self, config_path: str = './config.json'):
+        """
+        :param config_path: the path to the config,but it hasn't been put into use
+        """
+        self.load_config(config_path=config_path)
+
+    # region utilities
+
+    def load_config(self, config_path: str):
+        """
+        load configuration form json
+        :param config_path:
+        :return:
+        """
+
+        pass
 
     # endregion
 
