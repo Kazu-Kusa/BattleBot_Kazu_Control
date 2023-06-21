@@ -1,8 +1,6 @@
 {
   "name": "standard",
   "method_table": {
-    "do_nothing": {},
-    "stop": {},
     "do_fl": {
       "action_list": [
         "action_BT"
