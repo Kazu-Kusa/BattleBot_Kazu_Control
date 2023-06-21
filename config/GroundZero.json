@@ -1,0 +1,33 @@
+{
+  "StrategyName": "FogWalker",
+  "Description": "low threat battle strategy,using low speed but low evading probabilities",
+  "team_color": "blue",
+  "normal_speed": 1800,
+  "wait_start": {
+    "baseline": 1800,
+    "check_interval": 50,
+    "with_turn": true,
+    "dash_time": 500,
+    "dash_speed": -7500
+  },
+  "check_surrounding_fence": {
+    "baseline": 4100,
+    "conner_baseline": 2600
+  },
+  "methods_table": {
+    "on_stage": {
+      "get_away_from_edge": {
+        "edge_baseline": 1750,
+        "min_baseline": 1150,
+        "edge_speed_multiplier": 3,
+        "high_speed_time": 200,
+        "turn_time": 170
+      },
+      "check_surround": {
+        "baseline": 1500,
+        "basic_speed": 6000,
+        "evade_prob": 0.15
+      }
+    }
+  }
+}
