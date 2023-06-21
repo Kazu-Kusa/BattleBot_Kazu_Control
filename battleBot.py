@@ -308,7 +308,7 @@ class BattleBot(Bot):
     # endregion
 
     # region events
-    def util_edge(self, using_gray: bool = True, using_edge_sensor: bool = True, edge_a: int = 1800,
+    def util_edge(self, using_gray: bool = True, using_edge_sensor: bool = True, edge_baseline: int = 1800,
                   breaker_func: Callable[[], bool] = lambda: None, max_duration: int = 3000):
         """
         a conditioned delay function ,will delay util the condition is satisfied
@@ -316,7 +316,7 @@ class BattleBot(Bot):
         :param breaker_func:
         :param using_gray: use the gray the judge if the condition is satisfied
         :param using_edge_sensor: use the edge sensors to judge if the condition is satisfied
-        :param edge_a: edge sensors judge baseline
+        :param edge_baseline: edge sensors judge baseline
         :return:
         """
         end = perf_counter_ns() + max_duration * 1000000
@@ -330,7 +330,7 @@ class BattleBot(Bot):
 
         def edge_sensor_check():
             adc_list = self.controller.adc_all_channels
-            while (adc_list[1] > edge_a or adc_list[2] > edge_a) and perf_counter_ns() < end:
+            while (adc_list[1] > edge_baseline or adc_list[2] > edge_baseline) and perf_counter_ns() < end:
                 adc_list = self.controller.adc_all_channels
                 if breaker_func():
                     return
@@ -338,7 +338,7 @@ class BattleBot(Bot):
         def mixed_check():
             io_list = self.controller.io_all_channels
             adc_list = self.controller.adc_all_channels
-            while (adc_list[1] > edge_a or adc_list[2] > edge_a) and io_list[6] + io_list[
+            while (adc_list[1] > edge_baseline or adc_list[2] > edge_baseline) and io_list[6] + io_list[
                 7] > 1 and perf_counter_ns() < end:
                 adc_list = self.controller.adc_all_channels
                 io_list = self.controller.io_all_channels

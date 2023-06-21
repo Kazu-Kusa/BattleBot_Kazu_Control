@@ -37,3 +37,4 @@
 *.deb
 /testRoot/
 /.idea/
+*.pyc
