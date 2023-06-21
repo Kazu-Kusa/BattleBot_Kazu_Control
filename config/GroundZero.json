@@ -1,8 +1,9 @@
 {
   "StrategyName": "FogWalker",
   "Description": "low threat battle strategy,using low speed but low evading probabilities",
+  "normal_speed": 1200,
+  "use_cam": true,
   "team_color": "blue",
-  "normal_speed": 1800,
   "wait_start": {
     "baseline": 1800,
     "check_interval": 50,

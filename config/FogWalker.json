@@ -1,8 +1,9 @@
 {
   "StrategyName": "FogWalker",
   "Description": "medium threat battle strategy,using medium speed but higher evading probabilities",
-  "team_color": "blue",
   "normal_speed": 2800,
+  "use_cam": true,
+  "team_color": "blue",
   "wait_start": {
     "baseline": 1800,
     "check_interval": 50,

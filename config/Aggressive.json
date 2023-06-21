@@ -1,8 +1,9 @@
 {
   "StrategyName": "Aggressive",
   "Description": "Aggressive battle strategy,using higher speed",
-  "team_color": "blue",
   "normal_speed": 3500,
+  "use_cam": true,
+  "team_color": "blue",
   "wait_start": {
     "baseline": 1800,
     "check_interval": 50,
