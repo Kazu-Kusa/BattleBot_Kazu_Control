@@ -13,25 +13,28 @@ class Bot(metaclass=ABCMeta):
     screen = Screen(init_screen=False)
     controller = UpController(debug=False, fan_control=False)
 
-    def __init__(self, config_path: str = './config.json', team_color: str = 'blue', use_cam: bool = True):
+    def __init__(self, config_path: str = './Aggressive.json', ):
         """
-
         :param config_path: the path to the config,but it hasn't been put into use
-        :param team_color:
         """
-        self.load_config(config_path=config_path)
+        self._config: dict = {}
 
+        self._team_color: str = ''
         self._tag_id: int = -1
         self._tag_monitor_switch: bool = True
-        self._enemy_tag = None
-        self._ally_tag = None
+        self._enemy_tag: int = -999
+        self._ally_tag: int = -999
 
-        self._set_tags(team_color=team_color)
+        self._use_cam: bool = True
         self._camera_is_on: bool = False
-        if use_cam:
+        self.load_config(config_path=config_path)
+
+        self._set_tags(team_color=self._team_color)
+        if self._use_cam:
             self.apriltag_detect_start()
 
     # region utilities
+    @abstractmethod
     def load_config(self, config_path: str):
         """
         load configuration form json
