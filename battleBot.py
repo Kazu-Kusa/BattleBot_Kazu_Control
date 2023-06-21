@@ -1,3 +1,4 @@
+import json
 import warnings
 from random import randint, choice, random
 from typing import Callable
@@ -63,6 +64,29 @@ def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline
 
 
 class BattleBot(Bot):
+
+    def __init__(self, config_path: str = './Aggressive.json', ):
+        super().__init__(config_path)
+        self._wait_start_kwargs = None
+        self._normal_speed = None
+        self._check_surrounding_fence_kwargs = None
+        self._on_stage_kwargs = None
+
+        def on_stage_kwargs_loader(kwargs: dict):
+            self._get_away_from_edge_kwargs = kwargs.get('get_away_from_edge')
+            self._check_surround = kwargs.get('check_surround')
+
+    def load_config(self, config_path: str):
+        """
+
+        :param config_path:
+        :return:
+        """
+        with open(config_path, 'r') as f:
+            self._config: dict = json.load(fp=f)
+            f.close()
+        self._normal_speed = self._config.get('normal_speed')
+        self._wait_start_kwargs = self._config.get('wait_start')
 
     # region basic actions
     def action_BT(self, back_speed: int = 5000, back_time: int = 120,
