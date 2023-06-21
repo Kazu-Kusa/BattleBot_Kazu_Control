@@ -1,4 +1,3 @@
-import json
 import warnings
 from random import randint, choice, random
 from typing import Callable
@@ -65,7 +64,7 @@ def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline
 
 class BattleBot(Bot):
 
-    def __init__(self, config_path: str = './Aggressive.json', ):
+    def __init__(self, config_path: str):
         super().__init__(config_path=config_path)
         self._team_color = None
         self._use_cam = None
@@ -75,7 +74,7 @@ class BattleBot(Bot):
         self._check_surrounding_fence_kwargs: dict = {}
         self._on_stage_kwargs: dict = {}
         self._get_away_from_edge_kwargs: dict = {}
-        self._check_surround: dict = {}
+        self._check_surround_kwargs: dict = {}
 
         self.load_config()
 
@@ -88,7 +87,6 @@ class BattleBot(Bot):
         self._use_cam = self._config.get('use_cam')
         if self._use_cam:
             # if use_cam is True then load the team color and init the hardware
-            # TODO: don't forget the move of the cam utils breaks the current methods with tag-check
             self._team_color = self._config.get('team_color')
             self.camera.set_tags(self._team_color)
             self.camera.apriltag_detect_start()
@@ -97,7 +95,7 @@ class BattleBot(Bot):
 
         self._on_stage_kwargs = self._config.get('on_stage')
         self._get_away_from_edge_kwargs = self._on_stage_kwargs.get('get_away_from_edge')
-        self._check_surround = self._on_stage_kwargs.get('check_surround')
+        self._check_surround_kwargs = self._on_stage_kwargs.get('check_surround')
 
     # region basic actions
     def action_BT(self, back_speed: int = 5000, back_time: int = 120,
@@ -792,10 +790,10 @@ class BattleBot(Bot):
         :return: if it has encountered anything
         """
 
-        if self.tag_id == self.ally_tag and adc_list[4] > baseline:
+        if self.camera.tag_id == self.camera.ally_tag and adc_list[4] > baseline:
             self.on_allay_box(basic_speed, 0.3)
             return True
-        elif self.tag_id == self.enemy_tag and adc_list[4] > baseline:
+        elif self.camera.tag_id == self.camera.enemy_tag and adc_list[4] > baseline:
             self.on_enemy_box(basic_speed, 0.4)
             return True
         elif adc_list[4] > baseline:
@@ -855,18 +853,13 @@ class BattleBot(Bot):
             adc_list = self.controller.adc_all_channels
             io_list = self.controller.io_all_channels
 
-            if self.get_away_from_edge(adc_list, io_list,
-                                       edge_baseline=1750,
-                                       min_baseline=1150,
-                                       edge_speed_multiplier=3,
-                                       high_speed_time=200,
-                                       turn_time=170):
+            if self.get_away_from_edge(adc_list, io_list, **self._get_away_from_edge_kwargs):
                 # normal behave includes all edge encounter solution
                 # if encounters edge,must deal with it first
                 # should update the sensor data too ,since much time passed out
                 adc_list = self.controller.adc_all_channels
 
-            if self.check_surround(adc_list, baseline=1500, basic_speed=6000, evade_prob=0.15):
+            if self.check_surround(adc_list, **self._check_surround_kwargs):
                 # if no edge is encountered then check if there are anything surrounding
                 # will check surrounding and will act according the case to deal with it
                 # after turning should go to next loop checking the object
@@ -916,11 +909,10 @@ class BattleBot(Bot):
         methods_table = {0: on_stage, 1: to_stage, 2: front_to_conner, 3: rear_to_conner}
         try:
             # wait for the battle starts
-            self.wait_start(baseline=1800, with_turn=True, dash_speed=-7500, dash_time=500,
-                            )
+            self.wait_start(**self._wait_start_kwargs)
             while True:
                 method: Callable[[], None] = methods_table.get(
-                    check_surrounding_fence(self.controller.adc_all_channels, baseline=4100, conner_baseline=2600))
+                    check_surrounding_fence(self.controller.adc_all_channels, **self._check_surrounding_fence_kwargs))
                 method()
 
 
@@ -932,8 +924,6 @@ class BattleBot(Bot):
 
 
 if __name__ == '__main__':
-    bot = BattleBot(use_cam=True, team_color='blue')
-    # bot = BattleBot(use_cam=True, team_color='yellow')
-
-    bot.Battle(normal_spead=3500)
+    bot = BattleBot(config_path='config/Aggressive.json')
+    bot.Battle()
     # bot.test_check_surround()
