@@ -67,13 +67,16 @@ class BattleBot(Bot):
 
     def __init__(self, config_path: str = './Aggressive.json', ):
         super().__init__(config_path=config_path)
-        self._normal_speed: int = 1000
+        self._team_color = None
+        self._use_cam = None
+        self._normal_speed = None
 
         self._wait_start_kwargs: dict = {}
         self._check_surrounding_fence_kwargs: dict = {}
         self._on_stage_kwargs: dict = {}
         self._get_away_from_edge_kwargs: dict = {}
         self._check_surround: dict = {}
+
         self.load_config()
 
     def load_config(self):
@@ -82,7 +85,13 @@ class BattleBot(Bot):
         :return:
         """
         self._normal_speed = self._config.get('normal_speed')
-
+        self._use_cam = self._config.get('use_cam')
+        if self._use_cam:
+            # if use_cam is True then load the team color and init the hardware
+            # TODO: don't forget the move of the cam utils breaks the current methods with tag-check
+            self._team_color = self._config.get('team_color')
+            self.camera.set_tags(self._team_color)
+            self.camera.apriltag_detect_start()
         self._wait_start_kwargs = self._config.get('wait_start')
         self._check_surrounding_fence_kwargs = self._config.get('check_surrounding_fence')
 
