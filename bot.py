@@ -11,18 +11,19 @@ from repo.uptechStar.module.up_controller import UpController
 
 
 class Camera(object):
-    def __init__(self, team_color: str):
+    def __init__(self, team_color: str = '', open_camera: bool = True):
         self._tag_id: int = -1
         self._tag_monitor_switch: bool = True
         self._enemy_tag: int = -999
         self._ally_tag: int = -999
 
-        self._use_cam: bool = True
         self._camera_is_on: bool = False
-        self._set_tags(team_color)
-        self.apriltag_detect_start()
+        if team_color:
+            self.set_tags(team_color)
+        if open_camera:
+            self.apriltag_detect_start()
 
-    def _set_tags(self, team_color: str = 'blue'):
+    def set_tags(self, team_color: str = 'blue'):
         """
         set the ally/enemy tag according the team color
 
@@ -38,18 +39,18 @@ class Camera(object):
             self._enemy_tag = 1
             self._ally_tag = 2
 
-    def apriltag_detect_start(self):
+    def apriltag_detect_start(self, **kwargs):
         """
         start the tag-detection thread and set it to daemon
         :return:
         """
-        apriltag_detect = threading.Thread(target=self.apriltag_detect_thread,
-                                           name="apriltag_detect_detect")
+        apriltag_detect = threading.Thread(target=self._apriltag_detect_thread,
+                                           name="apriltag_detect_detect", kwargs=kwargs)
         apriltag_detect.daemon = True
         apriltag_detect.start()
 
-    def apriltag_detect_thread(self, single_tag_mode: bool = True, print_tag_id: bool = False,
-                               check_interval: float = 0.1):
+    def _apriltag_detect_thread(self, single_tag_mode: bool = True, print_tag_id: bool = False,
+                                check_interval: float = 0.1):
         """
         这是一个线程函数，它从摄像头捕获视频帧，处理帧以检测 AprilTags，
         :param check_interval:
@@ -186,6 +187,7 @@ class Camera(object):
 class Bot(metaclass=ABCMeta):
     screen = Screen(init_screen=False)
     controller = UpController(debug=False, fan_control=False)
+    camera = Camera(open_camera=False)
 
     def __init__(self, config_path: str = './config.json'):
         """
