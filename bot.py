@@ -73,7 +73,7 @@ class Camera(object):
                 warnings.warn('########CAN\'T GET VIDEO########\n')
 
                 return
-            self.camera_is_on = True
+            self._camera_is_on = True
             # 使用 cap.set(3, w) 和 cap.set(4, h) 设置帧的宽度和高度为 640x480，帧的 weight 为 320。
             w = 640
             h = 480
@@ -94,8 +94,8 @@ class Camera(object):
                     if not ret:
                         warnings.warn('\n##########CAMERA LOST###########\n'
                                       '###ENTERING NO CAMERA MODE###')
-                        self.camera_is_on = False
-                        self.tag_id = -1
+                        self._camera_is_on = False
+                        self._tag_id = -1
                         break
                     frame = frame[cup_h:cup_h + weight, cup_w:cup_w + weight]
                     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # 将帧转换为灰度并存储在 gray 变量中。
@@ -103,7 +103,7 @@ class Camera(object):
                     tags = tag_detector(gray)
                     if tags:
                         if single_tag_mode:
-                            self.tag_id = tags[0].tag_id
+                            self._tag_id = tags[0].tag_id
                         else:
                             # 获取离图像中心最近的 AprilTag
                             closest_tag = None
@@ -117,13 +117,13 @@ class Camera(object):
                                 if dist < closest_dist:
                                     closest_dist = dist
                                     closest_tag = tag
-                            self.tag_id = closest_tag if closest_tag else tags[0].tag_id
+                            self._tag_id = closest_tag if closest_tag else tags[0].tag_id
                         if print_tag_id and time.time() - start_time > print_interval:
-                            print(f"#DETECTED TAG: [{self.tag_id}]")
+                            print(f"#DETECTED TAG: [{self._tag_id}]")
                             start_time = time.time()
                     else:
                         # if not tags detected,return to default
-                        self.tag_id = -1
+                        self._tag_id = -1
                     sleep(check_interval)
                 else:
                     # TODO: This delay may not be correct,since it could cause wrongly activate enemy box action
@@ -141,25 +141,12 @@ class Camera(object):
     def camera_is_on(self):
         return self._camera_is_on
 
-    @camera_is_on.setter
-    def camera_is_on(self, new_state: bool):
-        self._camera_is_on = new_state
-
     @property
     def tag_id(self):
         """
         :return:  current tag id
         """
         return self._tag_id
-
-    @tag_id.setter
-    def tag_id(self, new_tag_id: int):
-        """
-        setter for  current tag id
-        :param new_tag_id:
-        :return:
-        """
-        self._tag_id = new_tag_id
 
     @property
     def tag_monitor_switch(self):
