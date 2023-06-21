@@ -1,3 +1,4 @@
+import json
 import threading
 import time
 import warnings
@@ -18,6 +19,7 @@ class Camera(object):
 
         self._use_cam: bool = True
         self._camera_is_on: bool = False
+        self._set_tags(team_color)
         self.apriltag_detect_start()
 
     def _set_tags(self, team_color: str = 'blue'):
@@ -189,14 +191,16 @@ class Bot(metaclass=ABCMeta):
         """
         :param config_path: the path to the config,but it hasn't been put into use
         """
-        self.load_config(config_path=config_path)
+        # load the config.json file to memory
+        with open(config_path, 'r') as f:
+            self._config: dict = json.load(fp=f)
+            f.close()
 
     # region utilities
-
-    def load_config(self, config_path: str):
+    @abstractmethod
+    def load_config(self):
         """
-        load configuration form json
-        :param config_path:
+        analyze configuration form _config
         :return:
         """
 

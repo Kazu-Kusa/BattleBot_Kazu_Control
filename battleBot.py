@@ -66,27 +66,29 @@ def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline
 class BattleBot(Bot):
 
     def __init__(self, config_path: str = './Aggressive.json', ):
-        super().__init__(config_path)
-        self._wait_start_kwargs = None
-        self._normal_speed = None
-        self._check_surrounding_fence_kwargs = None
-        self._on_stage_kwargs = None
+        super().__init__(config_path=config_path)
+        self._normal_speed: int = 1000
 
-        def on_stage_kwargs_loader(kwargs: dict):
-            self._get_away_from_edge_kwargs = kwargs.get('get_away_from_edge')
-            self._check_surround = kwargs.get('check_surround')
+        self._wait_start_kwargs: dict = {}
+        self._check_surrounding_fence_kwargs: dict = {}
+        self._on_stage_kwargs: dict = {}
+        self._get_away_from_edge_kwargs: dict = {}
+        self._check_surround: dict = {}
+        self.load_config()
 
-    def load_config(self, config_path: str):
+    def load_config(self):
         """
-
-        :param config_path:
+        analyze the configuration form the dict in memory
         :return:
         """
-        with open(config_path, 'r') as f:
-            self._config: dict = json.load(fp=f)
-            f.close()
         self._normal_speed = self._config.get('normal_speed')
+
         self._wait_start_kwargs = self._config.get('wait_start')
+        self._check_surrounding_fence_kwargs = self._config.get('check_surrounding_fence')
+
+        self._on_stage_kwargs = self._config.get('on_stage')
+        self._get_away_from_edge_kwargs = self._on_stage_kwargs.get('get_away_from_edge')
+        self._check_surround = self._on_stage_kwargs.get('check_surround')
 
     # region basic actions
     def action_BT(self, back_speed: int = 5000, back_time: int = 120,
