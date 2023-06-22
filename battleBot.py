@@ -381,6 +381,7 @@ class ActionFrame:
             delay_ms(milliseconds=self._action_duration,
                      breaker_func=self._breaker_func,
                      break_action_func=self._break_action_func)
+            # TODO: stop using inlay action,use stack instead
             if end_with_stop:
                 self.controller.set_all_motors_speed(0)
 
