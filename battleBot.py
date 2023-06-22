@@ -9,6 +9,7 @@ from repo.uptechStar.module.algrithm_tools import compute_inferior_arc, calculat
     multiply
 from repo.uptechStar.module.pid import PD_control, PID_control
 from repo.uptechStar.module.up_controller import UpController
+from functools import lru_cache
 
 
 def is_tilted(roll: float, pitch: float, threshold=45):
@@ -382,6 +383,11 @@ class ActionFrame:
             return action_with_speed_list()
         else:
             return action()
+
+
+@lru_cache(maxsize=512)
+def new_action_frame(**kwargs) -> ActionFrame:
+    return ActionFrame(**kwargs)
 
 
 class ActionStack:
