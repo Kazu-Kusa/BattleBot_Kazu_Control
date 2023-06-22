@@ -333,7 +333,7 @@ class ActionFrame:
                  action_duration_multiplier: float = 0,
                  action_speed_list: tuple[int, int, int, int] = (0, 0, 0, 0),
                  breaker_func: Callable[[], bool] = None,
-                 break_action_func: Callable[[], None] = None):
+                 break_action: object = None):
         self._action_speed_list = None
         self._action_speed = None
         self._action_duration = None
@@ -342,7 +342,7 @@ class ActionFrame:
                            action_speed_multiplier)
 
         self._breaker_func = breaker_func
-        self._break_action_func = break_action_func
+        self._break_action = break_action
 
     @final
     def _create_frame(self, action_duration, action_duration_multiplier, action_speed, action_speed_list,
@@ -374,22 +374,20 @@ class ActionFrame:
     def _list_multiply(factor_list: tuple[int, int, int, int], multiplier: float):
         return [int(multiplier * x) for x in factor_list]
 
-    def action_start(self, end_with_stop: bool = False):
-        # TODO: after the fix of the delay functions ' exitcode problem add the logic to here
-        def action():
+    def action_start(self, end_with_stop: bool = False) -> object or None:
+        def action() -> ActionFrame or None:
             self.controller.set_all_motors_speed(self._action_speed)
-            delay_ms(milliseconds=self._action_duration,
-                     breaker_func=self._breaker_func,
-                     break_action_func=self._break_action_func)
-            # TODO: stop using inlay action,use stack instead
+            if delay_ms(milliseconds=self._action_duration,
+                        breaker_func=self._breaker_func):
+                return self._break_action
             if end_with_stop:
                 self.controller.set_all_motors_speed(0)
 
-        def action_with_speed_list():
+        def action_with_speed_list() -> ActionFrame or None:
             self.controller.set_motors_speed(self._action_speed_list)
-            delay_ms(milliseconds=self._action_duration,
-                     breaker_func=self._breaker_func,
-                     break_action_func=self._break_action_func)
+            if delay_ms(milliseconds=self._action_duration,
+                        breaker_func=self._breaker_func):
+                return self._break_action
             if end_with_stop:
                 self.controller.set_all_motors_speed(0)
 
