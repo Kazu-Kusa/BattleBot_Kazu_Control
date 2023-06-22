@@ -6,8 +6,8 @@ from repo.uptechStar.module.up_controller import UpController
 
 class AbstractEdgeInferrer(metaclass=ABCMeta):
 
-    def __init__(self, controller: UpController):
-        self.controller = controller
+    def __init__(self):
+        pass
 
     @abstractmethod
     def floating_inferrer(self, edge_sensors: tuple[int, int, int, int],
@@ -31,14 +31,13 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
                                 grays=grays)
 
     # region methods
-    @final
+    @abstractmethod
     def stop(self) -> bool:
-        self.controller.move_cmd(0, 0)
-        return True
+        pass
 
-    @final
+    @abstractmethod
     def do_nothing(self) -> bool:
-        return False
+        pass
 
     @abstractmethod
     def do_fl(self) -> bool:
