@@ -331,7 +331,7 @@ class ActionFrame:
     def __init__(self, action_speed: int = 0, action_duration: int = 0,
                  action_speed_multiplier: float = 0,
                  action_duration_multiplier: float = 0,
-                 action_speed_list: tuple[int, int, int, int] = (0, 0, 0, 0),
+                 action_speed_list: list[int, int, int, int] = (0, 0, 0, 0),
                  breaker_func: Callable[[], bool] = None,
                  break_action: object = None):
         self._action_speed_list = None
