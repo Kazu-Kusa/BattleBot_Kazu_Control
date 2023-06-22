@@ -173,7 +173,7 @@ class Camera(object):
 
 class Bot(metaclass=ABCMeta):
     screen = Screen(init_screen=False)
-    controller = UpController(debug=False, fan_control=False)
+
     camera = Camera(open_camera=False)
 
     def __init__(self, config_path: str = './config.json'):
