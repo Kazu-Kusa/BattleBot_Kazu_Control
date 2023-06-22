@@ -397,6 +397,27 @@ class ActionFrame:
             return action()
 
 
+class ActionStack:
+    Action_T_w = ActionFrame()
+    Action_T_cw = ActionFrame()
+
+    def __init__(self):
+        self._action_stack: list[ActionFrame] = []
+
+    def append(self, action: ActionFrame):
+        self._action_stack.append(action)
+
+    def merge(self, action_list: list[ActionFrame]):
+        self._action_stack += action_list
+
+    def run_action(self):
+        while self._action_stack:
+            # if action exit because breaker then it should return the break action or None
+            next_action: ActionFrame or None = self._action_stack.pop(0).action_start()
+            if next_action:
+                self._action_stack.append(next_action)
+
+
 class BattleBot(Bot):
 
     def __init__(self, config_path: str):
