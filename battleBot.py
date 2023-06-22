@@ -52,7 +52,7 @@ def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline
 
 
 class BattleBot(Bot):
-
+    # TODO: unbind the surrounding objects detection logic to a new class based on ActionPlayer
     def __init__(self, config_path: str):
         super().__init__(config_path=config_path)
         self._team_color = None
