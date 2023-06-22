@@ -362,22 +362,18 @@ class ActionFrame:
             action_duration = multiply(action_duration, action_duration_multiplier)
         self._action_duration = action_duration
 
-    def action_start(self, end_with_stop: bool = False) -> object or None:
+    def action_start(self) -> object or None:
         def action() -> ActionFrame or None:
             self.controller.set_all_motors_speed(self._action_speed)
             if delay_ms(milliseconds=self._action_duration,
                         breaker_func=self._breaker_func):
                 return self._break_action
-            if end_with_stop:
-                self.controller.set_all_motors_speed(0)
 
         def action_with_speed_list() -> ActionFrame or None:
             self.controller.set_motors_speed(self._action_speed_list)
             if delay_ms(milliseconds=self._action_duration,
                         breaker_func=self._breaker_func):
                 return self._break_action
-            if end_with_stop:
-                self.controller.set_all_motors_speed(0)
 
         if self._action_speed_list:
             return action_with_speed_list()
