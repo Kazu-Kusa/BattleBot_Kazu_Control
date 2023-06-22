@@ -5,10 +5,10 @@ from typing import Callable, final
 from bot import Bot
 from time import perf_counter_ns
 from repo.uptechStar.module.timer import delay_ms
-from repo.uptechStar.module.algrithm_tools import compute_inferior_arc, calculate_relative_angle
+from repo.uptechStar.module.algrithm_tools import compute_inferior_arc, calculate_relative_angle, list_multiply, \
+    multiply
 from repo.uptechStar.module.pid import PD_control, PID_control
 from repo.uptechStar.module.up_controller import UpController
-from functools import lru_cache
 
 
 def is_tilted(roll: float, pitch: float, threshold=45):
@@ -350,29 +350,16 @@ class ActionFrame:
         if self._action_speed_list:
             # speed list will override the action_speed
             if action_speed_multiplier:
-                action_speed_list = self._list_multiply(action_speed_list, action_speed_multiplier)
+                action_speed_list = list_multiply(action_speed_list, action_speed_multiplier)
             self._action_speed_list = action_speed_list
         else:
             if action_speed_multiplier:
-                action_speed = self._multiply(action_speed, action_speed_multiplier)
+                action_speed = multiply(action_speed, action_speed_multiplier)
             self._action_speed = action_speed
 
         if action_duration_multiplier:
-            action_duration = self._multiply(action_duration, action_duration_multiplier)
+            action_duration = multiply(action_duration, action_duration_multiplier)
         self._action_duration = action_duration
-
-    @staticmethod
-    @final
-    @lru_cache()
-    def _multiply(factor_1: float or int, factor_2: float or int):
-        factor_1 = int(factor_2 * factor_1)
-        return factor_1
-
-    @staticmethod
-    @final
-    @lru_cache()
-    def _list_multiply(factor_list: tuple[int, int, int, int], multiplier: float):
-        return [int(multiplier * x) for x in factor_list]
 
     def action_start(self, end_with_stop: bool = False) -> object or None:
         def action() -> ActionFrame or None:
