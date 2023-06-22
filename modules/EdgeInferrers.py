@@ -1,7 +1,29 @@
 from modules.AbsEdgeInferrer import AbstractEdgeInferrer
+from repo.uptechStar.module.actions import ActionPlayer, new_action_frame
 
 
 class StandardEdgeInferrer(AbstractEdgeInferrer):
+    def do_fl(self) -> bool:
+        """
+        [fl]         fr
+            O-----O
+               |
+            O-----O
+        rl           rr
+
+        front-left encounters the edge, turn right,turn type is 1
+        """
+        pass
+
+    def do_nothing(self) -> bool:
+        return False
+
+    def stop(self) -> bool:
+        self.player.append(new_action_frame())
+        self.player.play()
+        return True
+
+    player = ActionPlayer()
 
     def floating_inferrer(self, edge_sensors: tuple[int, int, int, int],
                           *args, **kwargs) -> tuple[bool, bool, bool, bool]:
