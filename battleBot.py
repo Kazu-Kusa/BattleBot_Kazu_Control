@@ -1,11 +1,13 @@
 import warnings
+from abc import ABCMeta, abstractmethod
 from random import randint, choice, random
-from typing import Callable
+from typing import Callable, final
 from bot import Bot
 from time import perf_counter_ns
 from repo.uptechStar.module.timer import delay_ms
 from repo.uptechStar.module.algrithm_tools import compute_inferior_arc, calculate_relative_angle
 from repo.uptechStar.module.pid import PD_control, PID_control
+from repo.uptechStar.module.up_controller import UpController
 
 
 def is_tilted(roll: float, pitch: float, threshold=45):
@@ -60,6 +62,261 @@ def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline
     else:
         # on stage
         return 0
+
+
+class AbstractEdgeInferrer(metaclass=ABCMeta):
+
+    @abstractmethod
+    def floating_inferrer(self, edge_sensors: tuple[int, int, int, int],
+                          *args, **kwargs) -> tuple[bool, bool, bool, bool]:
+        pass
+
+    def get_away_from_edge(self,
+                           edge_sensors: tuple[int, int, int, int],
+                           grays: tuple[int, int],
+                           *args, **kwargs) -> bool:
+        # TODO: before the actualize , we should make the sensors return tuple instead of list
+        """
+        handles the normal edge case using both adc_list and io_list.
+        but well do not do anything if no edge case
+        :param edge_sensors: the tuple of edge sensors adc returns
+        :param grays:the tuple of grays devices returns
+        :return: if encounter the edge
+        """
+        return self.exec_method(edge_sensor_b=self.floating_inferrer(edge_sensors=edge_sensors, *args, **kwargs),
+                                grays=grays)
+
+    @abstractmethod
+    def stop(self) -> bool:
+        pass
+
+    # region methods
+    @abstractmethod
+    def do_nothing(self) -> bool:
+        pass
+
+    @abstractmethod
+    def do_fl(self) -> bool:
+        """
+        [fl]         fr
+            O-----O
+               |
+            O-----O
+        rl           rr
+
+        front-left encounters the edge, turn right,turn type is 1
+        """
+        pass
+
+    @abstractmethod
+    def do_fr(self) -> bool:
+        """
+       fl          [fr]
+           O-----O
+              |
+           O-----O
+       rl           rr
+
+       front-right encounters the edge, turn left,turn type is 0
+        """
+        pass
+
+    @abstractmethod
+    def do_rl(self) -> bool:
+        """
+        fl           fr
+            O-----O
+               |
+            O-----O
+        [rl]         rr
+
+        rear-left encounters the edge, turn right,turn type is 1
+        """
+        pass
+
+    @abstractmethod
+    def do_rr(self) -> bool:
+        """
+        fl           fr
+            O-----O
+               |
+            O-----O
+        rl          [rr]
+
+        rear-right encounters the edge, turn left,turn type is 0
+        """
+        pass
+
+    @abstractmethod
+    def do_fl_rl(self) -> bool:
+        """
+         [fl]   l   r   fr
+             O-----O
+                |
+             O-----O
+        [rl]            rr
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def do_fr_rr(self) -> bool:
+        """
+          fl   l   r  [fr]
+             O-----O
+                |
+             O-----O
+         rl           [rr]
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def do_rl_rr(self) -> bool:
+        """
+         fl   l   r   fr
+             O-----O
+                |
+             O-----O
+        [rl]          [rr]
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def do_fl_fr(self) -> bool:
+        """
+         [fl]   l   r   [fr]
+             O-----O
+                |
+             O-----O
+        rl          rr
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def do_fr_rl_rr(self) -> bool:
+        """
+         fl   l   r   [fr]
+             O-----O
+                |
+             O-----O
+        [rl]          [rr]
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def do_fl_rl_rr(self) -> bool:
+        """
+        [fl]   l   r   fr
+             O-----O
+                |
+             O-----O
+        [rl]          [rr]
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def do_fl_fr_rr(self) -> bool:
+        """
+         [fl]   l   r   [fr]
+             O-----O
+                |
+             O-----O
+         rl           [rr]
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def do_fl_fr_rl(self) -> bool:
+        """
+         [fl]   l   r   [fr]
+             O-----O
+                |
+             O-----O
+         [rl]            rr
+        :return:
+        """
+        pass
+
+    method_table = {(True, True, True, True): do_nothing,
+                    (False, False, False, False): stop,
+                    # region one edge sensor only
+                    (False, True, True, True): do_fl,
+                    (True, False, True, True): do_fr,
+                    (True, True, False, True): do_rl,
+                    (True, True, True, False): do_rr,
+                    # endregion
+
+                    # region double edge sensor only
+                    (False, True, False, True): do_fl_rl,  # normal
+                    (True, False, True, False): do_fr_rr,
+                    (True, True, False, False): do_rl_rr,
+                    (False, False, True, True): do_fl_fr,
+
+                    # region abnormal case
+                    (True, False, False, True): do_nothing,  # such case are hard to be classified
+                    (False, True, True, False): do_nothing,
+                    # endregion
+                    # endregion
+
+                    # region triple edge sensor
+                    (True, False, False, False): do_fr_rl_rr,  # specified in conner
+                    (False, True, False, False): do_fl_rl_rr,
+                    (False, False, True, False): do_fl_fr_rr,
+                    (False, False, False, True): do_fl_fr_rl,
+                    # endregion
+
+                    # region grays
+                    (1, 1): do_nothing,
+                    (0, 1): do_fl,
+                    (1, 0): do_fr,
+                    (0, 0): do_fl_fr
+                    # endregion
+                    }
+
+    @final
+    def exec_method(self,
+                    edge_sensor_b: tuple[bool, bool, bool, bool],
+                    grays: tuple[int, int]) -> bool:
+        """
+
+        :param edge_sensor_b:
+        :param grays:
+        :return:
+        """
+        if self.method_table.get(grays)():
+            return True
+        return self.method_table.get(edge_sensor_b)()
+
+
+class StandardEdgeInferrer(AbstractEdgeInferrer):
+    def __init__(self, controller: UpController):
+        self.controller = controller
+        self.method_table = None
+
+    def get_away_from_edge(self, adc_list, io_list, edge_baseline: int = 1750, min_baseline: int = 1150,
+                           edge_speed_multiplier: float = 3,
+                           high_speed_time: int = 180, turn_time: int = 160) -> bool:
+        """
+        handles the normal edge case using both adc_list and io_list.
+        but well do not do anything if no edge case
+        :param min_baseline:
+        :param high_speed_time:
+        :param turn_time:
+        :param edge_speed_multiplier:
+        :param adc_list:the list of adc devices returns
+        :param io_list:the list of io devices returns
+        :param edge_baseline: the edge_check baseline
+        :return: if encounter the edge
+        """
+
+    def stop(self) -> bool:
+        pass
 
 
 class BattleBot(Bot):
