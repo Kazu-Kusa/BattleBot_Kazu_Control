@@ -66,11 +66,15 @@ def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline
 
 class AbstractEdgeInferrer(metaclass=ABCMeta):
 
+    def __init__(self, controller: UpController):
+        self.controller = controller
+
     @abstractmethod
     def floating_inferrer(self, edge_sensors: tuple[int, int, int, int],
                           *args, **kwargs) -> tuple[bool, bool, bool, bool]:
         pass
 
+    @final
     def get_away_from_edge(self,
                            edge_sensors: tuple[int, int, int, int],
                            grays: tuple[int, int],
@@ -86,14 +90,15 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         return self.exec_method(edge_sensor_b=self.floating_inferrer(edge_sensors=edge_sensors, *args, **kwargs),
                                 grays=grays)
 
-    @abstractmethod
-    def stop(self) -> bool:
-        pass
-
     # region methods
-    @abstractmethod
+    @final
+    def stop(self) -> bool:
+        self.controller.move_cmd(0, 0)
+        return True
+
+    @final
     def do_nothing(self) -> bool:
-        pass
+        return False
 
     @abstractmethod
     def do_fl(self) -> bool:
@@ -243,6 +248,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         """
         pass
 
+    # endregion
     method_table = {(True, True, True, True): do_nothing,
                     (False, False, False, False): stop,
                     # region one edge sensor only
@@ -295,28 +301,19 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
 
 
 class StandardEdgeInferrer(AbstractEdgeInferrer):
-    def __init__(self, controller: UpController):
-        self.controller = controller
-        self.method_table = None
 
-    def get_away_from_edge(self, adc_list, io_list, edge_baseline: int = 1750, min_baseline: int = 1150,
-                           edge_speed_multiplier: float = 3,
-                           high_speed_time: int = 180, turn_time: int = 160) -> bool:
-        """
-        handles the normal edge case using both adc_list and io_list.
-        but well do not do anything if no edge case
-        :param min_baseline:
-        :param high_speed_time:
-        :param turn_time:
-        :param edge_speed_multiplier:
-        :param adc_list:the list of adc devices returns
-        :param io_list:the list of io devices returns
-        :param edge_baseline: the edge_check baseline
-        :return: if encounter the edge
-        """
-
-    def stop(self) -> bool:
-        pass
+    def floating_inferrer(self, edge_sensors: tuple[int, int, int, int],
+                          *args, **kwargs) -> tuple[bool, bool, bool, bool]:
+        edge_rr_sensor = edge_sensors[0]
+        edge_fr_sensor = edge_sensors[1]
+        edge_fl_sensor = edge_sensors[2]
+        edge_rl_sensor = edge_sensors[3]
+        edge_baseline = kwargs.get('edge_baseline')
+        min_baseline = kwargs.get('min_baseline')
+        return (edge_fl_sensor > edge_baseline and edge_fl_sensor > min_baseline,
+                edge_fr_sensor > edge_baseline and edge_fr_sensor > min_baseline,
+                edge_rl_sensor > edge_baseline and edge_rl_sensor > min_baseline,
+                edge_rr_sensor > edge_baseline and edge_rr_sensor > min_baseline)
 
 
 class BattleBot(Bot):
