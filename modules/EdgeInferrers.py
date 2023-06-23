@@ -1,40 +1,73 @@
 from modules.AbsEdgeInferrer import AbstractEdgeInferrer
-from repo.uptechStar.module.actions import ActionPlayer, new_action_frame
+from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
+from repo.uptechStar.module.uptech import UpTech
 
 
 class StandardEdgeInferrer(AbstractEdgeInferrer):
-    def do_fl(self) -> bool:
-        """
-        [fl]         fr
-            O-----O
-               |
-            O-----O
-        rl           rr
+    # TODO: the params should load form the _config
+    def __init__(self, sensors: UpTech, config_path: str):
+        super().__init__(config_path)
 
-        front-left encounters the edge, turn right,turn type is 1
-        """
-        pass
+        self.edge_baseline = self._config.get('edge_baseline')
+        self.min_baseline = self._config.get('min_baseline')
+        self.straight_action_duration = self._config.get('straight_action_duration')
+        self.curve_action_duration = self._config.get('curve_action_duration')
+        self._sensors = sensors
 
-    def do_nothing(self) -> bool:
-        return False
-
-    def stop(self) -> bool:
-        self.player.append(new_action_frame())
+    def do_fl(self, basic_speed) -> bool:
+        tape = [new_ActionFrame(action_speed=-basic_speed,
+                                action_duration=self.straight_action_duration,
+                                action_speed_multiplier=1.1,
+                                breaker_func=self.rear_watcher),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=basic_speed,
+                                action_duration=self.curve_action_duration,
+                                action_speed_multiplier=0.7),
+                new_ActionFrame()]
+        self.player.extend(tape)
         self.player.play()
         return True
 
+    def stop(self, basic_speed) -> bool:
+        self.player.append(new_ActionFrame())
+        self.player.play()
+        return True
+
+    def do_nothing(self, basic_speed) -> bool:
+        return False
+
     player = ActionPlayer()
 
-    def floating_inferrer(self, edge_sensors: tuple[int, int, int, int],
-                          *args, **kwargs) -> tuple[bool, bool, bool, bool]:
+    def floating_inferrer(self, edge_sensors: tuple[int, int, int, int]) -> tuple[bool, bool, bool, bool]:
         # TODO: there is a chance to pre-bake the search table,but may takes more time
         edge_rr_sensor = edge_sensors[0]
         edge_fr_sensor = edge_sensors[1]
         edge_fl_sensor = edge_sensors[2]
         edge_rl_sensor = edge_sensors[3]
-        edge_baseline = kwargs.get('edge_baseline')
-        min_baseline = kwargs.get('min_baseline')
-        return (edge_fl_sensor > edge_baseline and edge_fl_sensor > min_baseline,
-                edge_fr_sensor > edge_baseline and edge_fr_sensor > min_baseline,
-                edge_rl_sensor > edge_baseline and edge_rl_sensor > min_baseline,
-                edge_rr_sensor > edge_baseline and edge_rr_sensor > min_baseline)
+
+        return (edge_fl_sensor > self.edge_baseline and edge_fl_sensor > self.min_baseline,
+                edge_fr_sensor > self.edge_baseline and edge_fr_sensor > self.min_baseline,
+                edge_rl_sensor > self.edge_baseline and edge_rl_sensor > self.min_baseline,
+                edge_rr_sensor > self.edge_baseline and edge_rr_sensor > self.min_baseline)
+
+    def rear_watcher(self) -> bool:
+        temp = self._sensors.adc_all_channels
+        # TODO: should unbind the constant
+        local_edge_rr_sensor = temp[0]
+        local_edge_rl_sensor = temp[3]
+        if local_edge_rl_sensor < self.edge_baseline or local_edge_rr_sensor < self.edge_baseline:
+            # if at least one of the edge sensor is hanging over air
+            return True
+        else:
+            return False
+
+    def front_watcher(self) -> bool:
+        temp = self._sensors.adc_all_channels
+        # TODO: should unbind the constant
+        local_edge_fr_sensor = temp[1]
+        local_edge_fl_sensor = temp[2]
+        if local_edge_fl_sensor < self.edge_baseline or local_edge_fr_sensor < self.edge_baseline:
+            # if at least one of the edge sensor is hanging over air
+            return True
+        else:
+            return False
