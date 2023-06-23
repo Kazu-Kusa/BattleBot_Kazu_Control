@@ -1,8 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from typing import final
 
-from repo.uptechStar.module.up_controller import UpController
-
 
 class AbstractEdgeInferrer(metaclass=ABCMeta):
 
@@ -18,29 +16,34 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
     def get_away_from_edge(self,
                            edge_sensors: tuple[int, int, int, int],
                            grays: tuple[int, int],
+                           edge_multiplier: int,
                            *args, **kwargs) -> bool:
         # TODO: before the actualize , we should make the sensors return tuple instead of list
         """
         handles the normal edge case using both adc_list and io_list.
         but well do not do anything if no edge case
+        :param edge_multiplier:
         :param edge_sensors: the tuple of edge sensors adc returns
         :param grays:the tuple of grays devices returns
         :return: if encounter the edge
         """
+        # TODO: add back the edge speed decreasing
         return self.exec_method(edge_sensor_b=self.floating_inferrer(edge_sensors=edge_sensors, *args, **kwargs),
-                                grays=grays)
+                                grays=grays,
+                                basic_speed=3000)
 
     # region methods
     @abstractmethod
-    def stop(self) -> bool:
+    def stop(self, basic_speed) -> bool:
         pass
 
     @abstractmethod
-    def do_nothing(self) -> bool:
+    def do_nothing(self, basic_speed) -> bool:
         pass
 
+    # TODO: add the basic speed param convey
     @abstractmethod
-    def do_fl(self) -> bool:
+    def do_fl(self, basic_speed) -> bool:
         """
         [fl]         fr
             O-----O
@@ -49,11 +52,12 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         rl           rr
 
         front-left encounters the edge, turn right,turn type is 1
+        :param basic_speed:
         """
         pass
 
     @abstractmethod
-    def do_fr(self) -> bool:
+    def do_fr(self, basic_speed) -> bool:
         """
        fl          [fr]
            O-----O
@@ -62,11 +66,12 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
        rl           rr
 
        front-right encounters the edge, turn left,turn type is 0
+        :param basic_speed:
         """
         pass
 
     @abstractmethod
-    def do_rl(self) -> bool:
+    def do_rl(self, basic_speed) -> bool:
         """
         fl           fr
             O-----O
@@ -79,7 +84,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_rr(self) -> bool:
+    def do_rr(self, basic_speed) -> bool:
         """
         fl           fr
             O-----O
@@ -92,7 +97,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fl_rl(self) -> bool:
+    def do_fl_rl(self, basic_speed) -> bool:
         """
          [fl]   l   r   fr
              O-----O
@@ -104,7 +109,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fr_rr(self) -> bool:
+    def do_fr_rr(self, basic_speed) -> bool:
         """
           fl   l   r  [fr]
              O-----O
@@ -116,7 +121,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_rl_rr(self) -> bool:
+    def do_rl_rr(self, basic_speed) -> bool:
         """
          fl   l   r   fr
              O-----O
@@ -128,7 +133,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fl_fr(self) -> bool:
+    def do_fl_fr(self, basic_speed) -> bool:
         """
          [fl]   l   r   [fr]
              O-----O
@@ -140,7 +145,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fr_rl_rr(self) -> bool:
+    def do_fr_rl_rr(self, basic_speed) -> bool:
         """
          fl   l   r   [fr]
              O-----O
@@ -152,7 +157,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fl_rl_rr(self) -> bool:
+    def do_fl_rl_rr(self, basic_speed) -> bool:
         """
         [fl]   l   r   fr
              O-----O
@@ -164,7 +169,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fl_fr_rr(self) -> bool:
+    def do_fl_fr_rr(self, basic_speed) -> bool:
         """
          [fl]   l   r   [fr]
              O-----O
@@ -176,7 +181,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fl_fr_rl(self) -> bool:
+    def do_fl_fr_rl(self, basic_speed) -> bool:
         """
          [fl]   l   r   [fr]
              O-----O
@@ -227,13 +232,14 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
     @final
     def exec_method(self,
                     edge_sensor_b: tuple[bool, bool, bool, bool],
-                    grays: tuple[int, int]) -> bool:
+                    grays: tuple[int, int],
+                    basic_speed: int) -> bool:
         """
 
         :param edge_sensor_b:
         :param grays:
         :return:
         """
-        if self.method_table.get(grays)():
+        if self.method_table.get(grays)(basic_speed=basic_speed):
             return True
-        return self.method_table.get(edge_sensor_b)()
+        return self.method_table.get(edge_sensor_b)(basic_speed=basic_speed)
