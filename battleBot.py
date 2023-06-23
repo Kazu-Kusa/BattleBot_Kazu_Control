@@ -1,7 +1,8 @@
 import warnings
 from random import randint, choice, random
 from typing import Callable
-
+from repo.uptechStar.module.close_loop_controller import CloseLoopController
+from repo.uptechStar.module.uptech import UpTech
 from modules.bot import Bot
 from time import perf_counter_ns
 from repo.uptechStar.module.timer import delay_ms
@@ -52,6 +53,9 @@ def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline
 
 
 class BattleBot(Bot):
+    controller = CloseLoopController(debug=False)
+    sensors = UpTech(debug=False, fan_control=False)
+
     # TODO: unbind the surrounding objects detection logic to a new class based on ActionPlayer
     def __init__(self, config_path: str):
         super().__init__(config_path=config_path)
@@ -127,7 +131,7 @@ class BattleBot(Bot):
             # print(left)
 
         def evaluate() -> float:
-            temp = self.controller.atti_all[2]
+            temp = self.sensors.atti_all[2]
 
             return temp
 
@@ -158,7 +162,7 @@ class BattleBot(Bot):
             self.controller.move_cmd(left, right)
 
         def evaluate() -> float:
-            return self.controller.atti_all[2]
+            return self.sensors.atti_all[2]
 
         current_angle = evaluate()
         target_angle = calculate_relative_angle(current_angle=current_angle, offset_angle=offset_angle)
@@ -283,7 +287,7 @@ class BattleBot(Bot):
             print(f'\r##HALT AT {perf_counter_ns()}##', end='')
             delay_ms(check_interval)
             # TODO: shall we make this change be a local function that passed into here as param?
-            temp_list = self.controller.adc_all_channels
+            temp_list = self.sensors.adc_all_channels
             if temp_list[8] > baseline and temp_list[7] > baseline:
                 warnings.warn('!!DASH-TIME!!')
                 self.action_D(with_turn=with_turn, dash_time=dash_time, dash_speed=dash_speed)
@@ -344,26 +348,26 @@ class BattleBot(Bot):
         end = perf_counter_ns() + max_duration * 1000000
 
         def gray_check():
-            io_list = self.controller.io_all_channels
+            io_list = self.sensors.io_all_channels
             while io_list[6] + io_list[7] > 1 and perf_counter_ns() < end:
-                io_list = self.controller.io_all_channels
+                io_list = self.sensors.io_all_channels
                 if breaker_func():
                     return
 
         def edge_sensor_check():
-            adc_list = self.controller.adc_all_channels
+            adc_list = self.sensors.adc_all_channels
             while (adc_list[1] > edge_baseline or adc_list[2] > edge_baseline) and perf_counter_ns() < end:
-                adc_list = self.controller.adc_all_channels
+                adc_list = self.sensors.adc_all_channels
                 if breaker_func():
                     return
 
         def mixed_check():
-            io_list = self.controller.io_all_channels
-            adc_list = self.controller.adc_all_channels
+            io_list = self.sensors.io_all_channels
+            adc_list = self.sensors.adc_all_channels
             while (adc_list[1] > edge_baseline or adc_list[2] > edge_baseline) and io_list[6] + io_list[
                 7] > 1 and perf_counter_ns() < end:
-                adc_list = self.controller.adc_all_channels
-                io_list = self.controller.io_all_channels
+                adc_list = self.sensors.adc_all_channels
+                io_list = self.sensors.io_all_channels
                 if breaker_func():
                     return
 
@@ -509,7 +513,7 @@ class BattleBot(Bot):
 
         def rear_watcher() -> bool:
 
-            temp = self.controller.adc_all_channels
+            temp = self.sensors.adc_all_channels
             local_edge_rr_sensor = temp[0]
             local_edge_rl_sensor = temp[3]
             if local_edge_rl_sensor < edge_baseline or local_edge_rr_sensor < edge_baseline:
@@ -519,7 +523,7 @@ class BattleBot(Bot):
                 return False
 
         def front_watcher() -> bool:
-            temp = self.controller.adc_all_channels
+            temp = self.sensors.adc_all_channels
             local_edge_fr_sensor = temp[1]
             local_edge_fl_sensor = temp[2]
             if local_edge_fl_sensor < edge_baseline or local_edge_fr_sensor < edge_baseline:
@@ -816,13 +820,13 @@ class BattleBot(Bot):
 
         def stage_detector_strict(baseline: int = 1000) -> bool:
 
-            temp = self.controller.adc_all_channels
+            temp = self.sensors.adc_all_channels
             if temp[6] > baseline > temp[8] and temp[7] < baseline < temp[5] and temp[4] > baseline:
                 return True
             return False
 
         def conner_break() -> bool:
-            temp = self.controller.adc_all_channels
+            temp = self.sensors.adc_all_channels
             rb_sensor = temp[5]
             fb_sensor = temp[4]
             l3_sensor = temp[8]
@@ -839,14 +843,14 @@ class BattleBot(Bot):
             warnings.warn('on_stage')
             if not self.tag_monitor_switch:
                 self.tag_monitor_switch = True
-            adc_list = self.controller.adc_all_channels
-            io_list = self.controller.io_all_channels
+            adc_list = self.sensors.adc_all_channels
+            io_list = self.sensors.io_all_channels
 
             if self.get_away_from_edge(adc_list, io_list, **self._get_away_from_edge_kwargs):
                 # normal behave includes all edge encounter solution
                 # if encounters edge,must deal with it first
                 # should update the sensor data too ,since much time passed out
-                adc_list = self.controller.adc_all_channels
+                adc_list = self.sensors.adc_all_channels
 
             if self.check_surround(adc_list, **self._check_surround_kwargs):
                 # if no edge is encountered then check if there are anything surrounding
@@ -879,7 +883,7 @@ class BattleBot(Bot):
 
             def watcher(edge_baseline=1750) -> bool:
 
-                temp = self.controller.adc_all_channels
+                temp = self.sensors.adc_all_channels
                 local_edge_rr_sensor = temp[0]
                 local_edge_rl_sensor = temp[3]
                 if local_edge_rl_sensor < edge_baseline or local_edge_rr_sensor < edge_baseline:
@@ -901,7 +905,7 @@ class BattleBot(Bot):
             self.wait_start(**self._wait_start_kwargs)
             while True:
                 method: Callable[[], None] = methods_table.get(
-                    check_surrounding_fence(self.controller.adc_all_channels, **self._check_surrounding_fence_kwargs))
+                    check_surrounding_fence(self.sensors.adc_all_channels, **self._check_surrounding_fence_kwargs))
                 method()
 
 
