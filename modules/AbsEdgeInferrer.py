@@ -6,7 +6,8 @@ from typing import final
 class AbstractEdgeInferrer(metaclass=ABCMeta):
 
     def __init__(self, config_path: str):
-        self._config = self.load_config(config_path)
+        self._config: dict = self.load_config(config_path)
+        self.edge_multiplier: float = self._config.get('edge_multiplier')
 
     @classmethod
     def load_config(cls, config_path: str):
@@ -29,11 +30,11 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         :return: if encounter the edge
         """
 
-        # TODO: add back the edge speed decreasing
+        # TODO: add back the edge speed decreasing,added but untested
 
         return self.exec_method(edge_sensor_b=self.floating_inferrer(edge_sensors=edge_sensors),
                                 grays=grays,
-                                basic_speed=3000)
+                                basic_speed=int(self.edge_multiplier * sum(edge_sensors)))
 
     # region methods
     @abstractmethod
