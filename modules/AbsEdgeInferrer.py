@@ -4,9 +4,6 @@ from typing import final
 
 class AbstractEdgeInferrer(metaclass=ABCMeta):
 
-    def __init__(self):
-        pass
-
     @abstractmethod
     def floating_inferrer(self, edge_sensors: tuple[int, int, int, int],
                           *args, **kwargs) -> tuple[bool, bool, bool, bool]:
