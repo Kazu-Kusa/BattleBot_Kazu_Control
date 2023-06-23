@@ -27,6 +27,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
 
     def floating_inferrer(self, edge_sensors: tuple[int, int, int, int],
                           *args, **kwargs) -> tuple[bool, bool, bool, bool]:
+        # TODO: there is a chance to pre-bake the search table,but may takes more time
         edge_rr_sensor = edge_sensors[0]
         edge_fr_sensor = edge_sensors[1]
         edge_fl_sensor = edge_sensors[2]
