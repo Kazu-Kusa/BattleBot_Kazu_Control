@@ -1,9 +1,191 @@
+import random
+from random import choice
 from modules.AbsEdgeInferrer import AbstractEdgeInferrer
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
 from repo.uptechStar.module.uptech import UpTech
 
 
 class StandardEdgeInferrer(AbstractEdgeInferrer):
+
+    def do_fl_fr_rl(self, basic_speed) -> bool:
+        sign = self.random_sign()
+        tape = [new_ActionFrame(action_speed=[-basic_speed, -basic_speed, basic_speed, basic_speed],
+                                action_duration=self.curve_action_duration,
+                                action_speed_multiplier=0.3),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=-basic_speed,
+                                action_duration=self.straight_action_duration,
+                                action_speed_multiplier=1.1,
+                                breaker_func=self.rear_watcher),
+                new_ActionFrame(),
+                new_ActionFrame(
+                    action_speed=[-sign * basic_speed, -sign * basic_speed, sign * basic_speed, sign * basic_speed],
+                    action_duration=self.curve_action_duration,
+                    action_speed_multiplier=0.7),
+                new_ActionFrame()]
+
+        self.player.extend(tape)
+        self.player.play()
+        return True
+
+    @classmethod
+    def random_sign(cls) -> int:
+        return choice([-1, 1])
+
+    def do_fl_fr_rr(self, basic_speed) -> bool:
+        sign = self.random_sign()
+        tape = [new_ActionFrame(action_speed=[basic_speed, basic_speed, -basic_speed, -basic_speed],
+                                action_duration=self.curve_action_duration,
+                                action_speed_multiplier=0.3),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=-basic_speed,
+                                action_duration=self.straight_action_duration,
+                                action_speed_multiplier=1.1,
+                                breaker_func=self.rear_watcher),
+                new_ActionFrame(),
+                new_ActionFrame(
+                    action_speed=[-sign * basic_speed, -sign * basic_speed, sign * basic_speed, sign * basic_speed],
+                    action_duration=self.curve_action_duration,
+                    action_speed_multiplier=0.7),
+                new_ActionFrame()]
+
+        self.player.extend(tape)
+        self.player.play()
+        return True
+
+    def do_fl_rl_rr(self, basic_speed) -> bool:
+        tape = [new_ActionFrame(action_speed=[basic_speed, basic_speed, -basic_speed, -basic_speed],
+                                action_duration=self.curve_action_duration,
+                                action_speed_multiplier=0.3),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=basic_speed,
+                                action_duration=self.straight_action_duration,
+                                action_speed_multiplier=1.1,
+                                breaker_func=self.rear_watcher),
+                new_ActionFrame()]
+
+        self.player.extend(tape)
+        self.player.play()
+        return True
+
+    def do_fr_rl_rr(self, basic_speed) -> bool:
+        tape = [new_ActionFrame(action_speed=[-basic_speed, -basic_speed, basic_speed, basic_speed],
+                                action_duration=self.curve_action_duration,
+                                action_speed_multiplier=0.3),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=basic_speed,
+                                action_duration=self.straight_action_duration,
+                                action_speed_multiplier=1.1,
+                                breaker_func=self.rear_watcher),
+                new_ActionFrame()]
+
+        self.player.extend(tape)
+        self.player.play()
+        return True
+
+    def do_fl_fr(self, basic_speed) -> bool:
+        sign = self.random_sign()
+        tape = [new_ActionFrame(action_speed=-basic_speed,
+                                action_duration=self.straight_action_duration,
+                                action_speed_multiplier=1.1,
+                                breaker_func=self.rear_watcher),
+                new_ActionFrame(),
+                new_ActionFrame(
+                    action_speed=[-sign * basic_speed, -sign * basic_speed, sign * basic_speed, sign * basic_speed],
+                    action_duration=self.curve_action_duration,
+                    action_speed_multiplier=0.7,
+                    action_duration_multiplier=1.3),
+                new_ActionFrame()]
+
+        self.player.extend(tape)
+        self.player.play()
+        return True
+
+    def do_rl_rr(self, basic_speed) -> bool:
+        tape = [new_ActionFrame(action_speed=basic_speed,
+                                action_duration=self.straight_action_duration,
+                                action_speed_multiplier=1.1,
+                                breaker_func=self.rear_watcher),
+                new_ActionFrame()]
+        self.player.extend(tape)
+        self.player.play()
+        return True
+
+    def do_fr_rr(self, basic_speed) -> bool:
+        tape = [new_ActionFrame(action_speed=[-basic_speed, -basic_speed, basic_speed, basic_speed],
+                                action_duration=self.curve_action_duration,
+                                action_speed_multiplier=1.2),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=basic_speed,
+                                action_duration=self.straight_action_duration,
+                                action_speed_multiplier=1.1,
+                                breaker_func=self.rear_watcher),
+                new_ActionFrame()]
+
+        self.player.extend(tape)
+        self.player.play()
+        return True
+
+    def do_fl_rl(self, basic_speed) -> bool:
+        tape = [new_ActionFrame(action_speed=[basic_speed, basic_speed, -basic_speed, -basic_speed],
+                                action_duration=self.curve_action_duration,
+                                action_speed_multiplier=1.2),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=basic_speed,
+                                action_duration=self.straight_action_duration,
+                                action_speed_multiplier=1.1,
+                                breaker_func=self.rear_watcher),
+                new_ActionFrame()]
+
+        self.player.extend(tape)
+        self.player.play()
+        return True
+
+    def do_rr(self, basic_speed) -> bool:
+        tape = [new_ActionFrame(action_speed=basic_speed,
+                                action_duration=self.straight_action_duration,
+                                action_speed_multiplier=1.1,
+                                breaker_func=self.rear_watcher),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=[-basic_speed, -basic_speed, basic_speed, basic_speed],
+                                action_duration=self.curve_action_duration,
+                                action_speed_multiplier=0.7),
+                new_ActionFrame()]
+
+        self.player.extend(tape)
+        self.player.play()
+        return True
+
+    def do_rl(self, basic_speed) -> bool:
+        tape = [new_ActionFrame(action_speed=basic_speed,
+                                action_duration=self.straight_action_duration,
+                                action_speed_multiplier=1.1,
+                                breaker_func=self.rear_watcher),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=[basic_speed, basic_speed, -basic_speed, -basic_speed],
+                                action_duration=self.curve_action_duration,
+                                action_speed_multiplier=0.7),
+                new_ActionFrame()]
+
+        self.player.extend(tape)
+        self.player.play()
+        return True
+
+    def do_fr(self, basic_speed) -> bool:
+        tape = [new_ActionFrame(action_speed=-basic_speed,
+                                action_duration=self.straight_action_duration,
+                                action_speed_multiplier=1.1,
+                                breaker_func=self.rear_watcher),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=[-basic_speed, -basic_speed, basic_speed, basic_speed],
+                                action_duration=self.curve_action_duration,
+                                action_speed_multiplier=0.7),
+                new_ActionFrame()]
+
+        self.player.extend(tape)
+        self.player.play()
+        return True
+
     # TODO: the params should load form the _config
     def __init__(self, sensors: UpTech, config_path: str):
         super().__init__(config_path)
@@ -20,7 +202,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                                 action_speed_multiplier=1.1,
                                 breaker_func=self.rear_watcher),
                 new_ActionFrame(),
-                new_ActionFrame(action_speed=basic_speed,
+                new_ActionFrame(action_speed=[basic_speed, basic_speed, -basic_speed, -basic_speed],
                                 action_duration=self.curve_action_duration,
                                 action_speed_multiplier=0.7),
                 new_ActionFrame()]
