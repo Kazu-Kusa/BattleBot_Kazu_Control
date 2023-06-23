@@ -1,31 +1,37 @@
+import json
 from abc import ABCMeta, abstractmethod
 from typing import final
 
 
 class AbstractEdgeInferrer(metaclass=ABCMeta):
 
+    def __init__(self, config_path: str):
+        self._config = self.load_config(config_path)
+
+    @classmethod
+    def load_config(cls, config_path: str):
+        with open(config_path, 'r') as f:
+            return json.load(f)
+
     @abstractmethod
-    def floating_inferrer(self, edge_sensors: tuple[int, int, int, int],
-                          *args, **kwargs) -> tuple[bool, bool, bool, bool]:
+    def floating_inferrer(self, edge_sensors: tuple[int, int, int, int]) -> tuple[bool, bool, bool, bool]:
         pass
 
     @final
     def get_away_from_edge(self,
                            edge_sensors: tuple[int, int, int, int],
-                           grays: tuple[int, int],
-                           edge_multiplier: int,
-                           *args, **kwargs) -> bool:
-        # TODO: before the actualize , we should make the sensors return tuple instead of list
+                           grays: tuple[int, int]) -> bool:
         """
         handles the normal edge case using both adc_list and io_list.
         but well do not do anything if no edge case
-        :param edge_multiplier:
         :param edge_sensors: the tuple of edge sensors adc returns
         :param grays:the tuple of grays devices returns
         :return: if encounter the edge
         """
+
         # TODO: add back the edge speed decreasing
-        return self.exec_method(edge_sensor_b=self.floating_inferrer(edge_sensors=edge_sensors, *args, **kwargs),
+
+        return self.exec_method(edge_sensor_b=self.floating_inferrer(edge_sensors=edge_sensors),
                                 grays=grays,
                                 basic_speed=3000)
 
