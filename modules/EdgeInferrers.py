@@ -61,7 +61,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                 new_ActionFrame(action_speed=basic_speed,
                                 action_duration=self.straight_action_duration,
                                 action_speed_multiplier=1.1,
-                                breaker_func=self.rear_watcher),
+                                breaker_func=self.front_watcher),
                 new_ActionFrame()]
 
         self.player.extend(tape)
@@ -76,7 +76,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                 new_ActionFrame(action_speed=basic_speed,
                                 action_duration=self.straight_action_duration,
                                 action_speed_multiplier=1.1,
-                                breaker_func=self.rear_watcher),
+                                breaker_func=self.front_watcher),
                 new_ActionFrame()]
 
         self.player.extend(tape)
@@ -105,7 +105,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         tape = [new_ActionFrame(action_speed=basic_speed,
                                 action_duration=self.straight_action_duration,
                                 action_speed_multiplier=1.1,
-                                breaker_func=self.rear_watcher),
+                                breaker_func=self.front_watcher),
                 new_ActionFrame()]
         self.player.extend(tape)
         self.player.play()
@@ -119,7 +119,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                 new_ActionFrame(action_speed=basic_speed,
                                 action_duration=self.straight_action_duration,
                                 action_speed_multiplier=1.1,
-                                breaker_func=self.rear_watcher),
+                                breaker_func=self.front_watcher),
                 new_ActionFrame()]
 
         self.player.extend(tape)
@@ -134,7 +134,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                 new_ActionFrame(action_speed=basic_speed,
                                 action_duration=self.straight_action_duration,
                                 action_speed_multiplier=1.1,
-                                breaker_func=self.rear_watcher),
+                                breaker_func=self.front_watcher),
                 new_ActionFrame()]
 
         self.player.extend(tape)
@@ -145,7 +145,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         tape = [new_ActionFrame(action_speed=basic_speed,
                                 action_duration=self.straight_action_duration,
                                 action_speed_multiplier=1.1,
-                                breaker_func=self.rear_watcher),
+                                breaker_func=self.front_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=[-basic_speed, -basic_speed, basic_speed, basic_speed],
                                 action_duration=self.curve_action_duration,
@@ -160,7 +160,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         tape = [new_ActionFrame(action_speed=basic_speed,
                                 action_duration=self.straight_action_duration,
                                 action_speed_multiplier=1.1,
-                                breaker_func=self.rear_watcher),
+                                breaker_func=self.front_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=[basic_speed, basic_speed, -basic_speed, -basic_speed],
                                 action_duration=self.curve_action_duration,
