@@ -7,6 +7,16 @@ from repo.uptechStar.module.uptech import UpTech
 
 class StandardEdgeInferrer(AbstractEdgeInferrer):
 
+    # TODO: the params should load form the _config
+    def __init__(self, sensors: UpTech, config_path: str):
+        super().__init__(config_path)
+
+        self.edge_baseline = self._config.get('edge_baseline')
+        self.min_baseline = self._config.get('min_baseline')
+        self.straight_action_duration = self._config.get('straight_action_duration')
+        self.curve_action_duration = self._config.get('curve_action_duration')
+        self._sensors = sensors
+
     def do_fl_fr_rl(self, basic_speed) -> bool:
         sign = self.random_sign()
         tape = [new_ActionFrame(action_speed=[-basic_speed, -basic_speed, basic_speed, basic_speed],
@@ -27,10 +37,6 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         self.player.extend(tape)
         self.player.play()
         return True
-
-    @classmethod
-    def random_sign(cls) -> int:
-        return choice([-1, 1])
 
     def do_fl_fr_rr(self, basic_speed) -> bool:
         sign = self.random_sign()
@@ -186,16 +192,6 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         self.player.play()
         return True
 
-    # TODO: the params should load form the _config
-    def __init__(self, sensors: UpTech, config_path: str):
-        super().__init__(config_path)
-
-        self.edge_baseline = self._config.get('edge_baseline')
-        self.min_baseline = self._config.get('min_baseline')
-        self.straight_action_duration = self._config.get('straight_action_duration')
-        self.curve_action_duration = self._config.get('curve_action_duration')
-        self._sensors = sensors
-
     def do_fl(self, basic_speed) -> bool:
         tape = [new_ActionFrame(action_speed=-basic_speed,
                                 action_duration=self.straight_action_duration,
@@ -253,3 +249,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
             return True
         else:
             return False
+
+    @classmethod
+    def random_sign(cls) -> int:
+        return choice([-1, 1])
