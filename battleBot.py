@@ -1,23 +1,13 @@
 import warnings
 from random import randint, choice, random
 from typing import Callable
-from bot import Bot
+from repo.uptechStar.module.close_loop_controller import CloseLoopController
+from repo.uptechStar.module.uptech import UpTech
+from modules.bot import Bot
 from time import perf_counter_ns
 from repo.uptechStar.module.timer import delay_ms
 from repo.uptechStar.module.algrithm_tools import compute_inferior_arc, calculate_relative_angle
 from repo.uptechStar.module.pid import PD_control, PID_control
-
-
-def is_tilted(roll: float, pitch: float, threshold=45):
-    """
-    判断当前姿态是否倾倒
-
-    :param roll: 横滚角，单位为度
-    :param pitch: 俯仰角，单位为度
-    :param threshold: 倾倒阈值，超过此角度则判断为倾倒，默认为45度
-    :return: True代表倾倒，False代表未倾倒
-    """
-    return abs(roll) > threshold or abs(pitch) > threshold
 
 
 def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline: int = 2200) -> int:
@@ -63,6 +53,42 @@ def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline
 
 
 class BattleBot(Bot):
+    controller = CloseLoopController(debug=False)
+    sensors = UpTech(debug=False, fan_control=False)
+
+    # TODO: unbind the surrounding objects detection logic to a new class based on ActionPlayer
+    def __init__(self, config_path: str):
+        super().__init__(config_path=config_path)
+        self._team_color = None
+        self._use_cam = None
+        self._normal_speed = None
+
+        self._wait_start_kwargs: dict = {}
+        self._check_surrounding_fence_kwargs: dict = {}
+        self._on_stage_kwargs: dict = {}
+        self._get_away_from_edge_kwargs: dict = {}
+        self._check_surround_kwargs: dict = {}
+
+        self.load_config()
+
+    def load_config(self):
+        """
+        analyze the configuration form the dict in memory
+        :return:
+        """
+        self._normal_speed = self._config.get('normal_speed')
+        self._use_cam = self._config.get('use_cam')
+        if self._use_cam:
+            # if use_cam is True then load the team color and init the hardware
+            self._team_color = self._config.get('team_color')
+            self.camera.set_tags(self._team_color)
+            self.camera.apriltag_detect_start()
+        self._wait_start_kwargs = self._config.get('wait_start')
+        self._check_surrounding_fence_kwargs = self._config.get('check_surrounding_fence')
+
+        self._on_stage_kwargs = self._config.get('on_stage')
+        self._get_away_from_edge_kwargs = self._on_stage_kwargs.get('get_away_from_edge')
+        self._check_surround_kwargs = self._on_stage_kwargs.get('check_surround')
 
     # region basic actions
     def action_BT(self, back_speed: int = 5000, back_time: int = 120,
@@ -105,7 +131,7 @@ class BattleBot(Bot):
             # print(left)
 
         def evaluate() -> float:
-            temp = self.controller.atti_all[2]
+            temp = self.sensors.atti_all[2]
 
             return temp
 
@@ -136,7 +162,7 @@ class BattleBot(Bot):
             self.controller.move_cmd(left, right)
 
         def evaluate() -> float:
-            return self.controller.atti_all[2]
+            return self.sensors.atti_all[2]
 
         current_angle = evaluate()
         target_angle = calculate_relative_angle(current_angle=current_angle, offset_angle=offset_angle)
@@ -261,7 +287,7 @@ class BattleBot(Bot):
             print(f'\r##HALT AT {perf_counter_ns()}##', end='')
             delay_ms(check_interval)
             # TODO: shall we make this change be a local function that passed into here as param?
-            temp_list = self.controller.adc_all_channels
+            temp_list = self.sensors.adc_all_channels
             if temp_list[8] > baseline and temp_list[7] > baseline:
                 warnings.warn('!!DASH-TIME!!')
                 self.action_D(with_turn=with_turn, dash_time=dash_time, dash_speed=dash_speed)
@@ -322,26 +348,26 @@ class BattleBot(Bot):
         end = perf_counter_ns() + max_duration * 1000000
 
         def gray_check():
-            io_list = self.controller.io_all_channels
+            io_list = self.sensors.io_all_channels
             while io_list[6] + io_list[7] > 1 and perf_counter_ns() < end:
-                io_list = self.controller.io_all_channels
+                io_list = self.sensors.io_all_channels
                 if breaker_func():
                     return
 
         def edge_sensor_check():
-            adc_list = self.controller.adc_all_channels
+            adc_list = self.sensors.adc_all_channels
             while (adc_list[1] > edge_baseline or adc_list[2] > edge_baseline) and perf_counter_ns() < end:
-                adc_list = self.controller.adc_all_channels
+                adc_list = self.sensors.adc_all_channels
                 if breaker_func():
                     return
 
         def mixed_check():
-            io_list = self.controller.io_all_channels
-            adc_list = self.controller.adc_all_channels
+            io_list = self.sensors.io_all_channels
+            adc_list = self.sensors.adc_all_channels
             while (adc_list[1] > edge_baseline or adc_list[2] > edge_baseline) and io_list[6] + io_list[
                 7] > 1 and perf_counter_ns() < end:
-                adc_list = self.controller.adc_all_channels
-                io_list = self.controller.io_all_channels
+                adc_list = self.sensors.adc_all_channels
+                io_list = self.sensors.io_all_channels
                 if breaker_func():
                     return
 
@@ -487,7 +513,7 @@ class BattleBot(Bot):
 
         def rear_watcher() -> bool:
 
-            temp = self.controller.adc_all_channels
+            temp = self.sensors.adc_all_channels
             local_edge_rr_sensor = temp[0]
             local_edge_rl_sensor = temp[3]
             if local_edge_rl_sensor < edge_baseline or local_edge_rr_sensor < edge_baseline:
@@ -497,7 +523,7 @@ class BattleBot(Bot):
                 return False
 
         def front_watcher() -> bool:
-            temp = self.controller.adc_all_channels
+            temp = self.sensors.adc_all_channels
             local_edge_fr_sensor = temp[1]
             local_edge_fl_sensor = temp[2]
             if local_edge_fl_sensor < edge_baseline or local_edge_fr_sensor < edge_baseline:
@@ -757,10 +783,10 @@ class BattleBot(Bot):
         :return: if it has encountered anything
         """
 
-        if self.tag_id == self.ally_tag and adc_list[4] > baseline:
+        if self.camera.tag_id == self.camera.ally_tag and adc_list[4] > baseline:
             self.on_allay_box(basic_speed, 0.3)
             return True
-        elif self.tag_id == self.enemy_tag and adc_list[4] > baseline:
+        elif self.camera.tag_id == self.camera.enemy_tag and adc_list[4] > baseline:
             self.on_enemy_box(basic_speed, 0.4)
             return True
         elif adc_list[4] > baseline:
@@ -794,13 +820,13 @@ class BattleBot(Bot):
 
         def stage_detector_strict(baseline: int = 1000) -> bool:
 
-            temp = self.controller.adc_all_channels
+            temp = self.sensors.adc_all_channels
             if temp[6] > baseline > temp[8] and temp[7] < baseline < temp[5] and temp[4] > baseline:
                 return True
             return False
 
         def conner_break() -> bool:
-            temp = self.controller.adc_all_channels
+            temp = self.sensors.adc_all_channels
             rb_sensor = temp[5]
             fb_sensor = temp[4]
             l3_sensor = temp[8]
@@ -817,21 +843,16 @@ class BattleBot(Bot):
             warnings.warn('on_stage')
             if not self.tag_monitor_switch:
                 self.tag_monitor_switch = True
-            adc_list = self.controller.adc_all_channels
-            io_list = self.controller.io_all_channels
+            adc_list = self.sensors.adc_all_channels
+            io_list = self.sensors.io_all_channels
 
-            if self.get_away_from_edge(adc_list, io_list,
-                                       edge_baseline=1750,
-                                       min_baseline=1150,
-                                       edge_speed_multiplier=3,
-                                       high_speed_time=200,
-                                       turn_time=170):
+            if self.get_away_from_edge(adc_list, io_list, **self._get_away_from_edge_kwargs):
                 # normal behave includes all edge encounter solution
                 # if encounters edge,must deal with it first
                 # should update the sensor data too ,since much time passed out
-                adc_list = self.controller.adc_all_channels
+                adc_list = self.sensors.adc_all_channels
 
-            if self.check_surround(adc_list, baseline=1500, basic_speed=6000, evade_prob=0.15):
+            if self.check_surround(adc_list, **self._check_surround_kwargs):
                 # if no edge is encountered then check if there are anything surrounding
                 # will check surrounding and will act according the case to deal with it
                 # after turning should go to next loop checking the object
@@ -862,7 +883,7 @@ class BattleBot(Bot):
 
             def watcher(edge_baseline=1750) -> bool:
 
-                temp = self.controller.adc_all_channels
+                temp = self.sensors.adc_all_channels
                 local_edge_rr_sensor = temp[0]
                 local_edge_rl_sensor = temp[3]
                 if local_edge_rl_sensor < edge_baseline or local_edge_rr_sensor < edge_baseline:
@@ -881,11 +902,10 @@ class BattleBot(Bot):
         methods_table = {0: on_stage, 1: to_stage, 2: front_to_conner, 3: rear_to_conner}
         try:
             # wait for the battle starts
-            self.wait_start(baseline=1800, with_turn=True, dash_speed=-7500, dash_time=500,
-                            )
+            self.wait_start(**self._wait_start_kwargs)
             while True:
                 method: Callable[[], None] = methods_table.get(
-                    check_surrounding_fence(self.controller.adc_all_channels, baseline=4100, conner_baseline=2600))
+                    check_surrounding_fence(self.sensors.adc_all_channels, **self._check_surrounding_fence_kwargs))
                 method()
 
 
@@ -897,8 +917,6 @@ class BattleBot(Bot):
 
 
 if __name__ == '__main__':
-    bot = BattleBot(use_cam=True, team_color='blue')
-    # bot = BattleBot(use_cam=True, team_color='yellow')
-
-    bot.Battle(normal_spead=3500)
+    bot = BattleBot(config_path='config/Aggressive.json')
+    bot.Battle()
     # bot.test_check_surround()

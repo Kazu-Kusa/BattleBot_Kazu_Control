@@ -1,0 +1,137 @@
+{
+  "name": "standard",
+  "method_table": {
+    "do_fl": {
+      "action_list": [
+        "action_BT"
+      ],
+      "action_BT": {
+        "b_multiplier": 1.1,
+        "t_multiplier": 0.7
+      }
+    },
+    "do_fr": {
+      "action_list": [
+        "action_BT"
+      ],
+      "action_BT": {
+        "b_multiplier": 1.1,
+        "t_multiplier": 0.7
+      }
+    },
+    "do_rl": {
+      "action_list": [
+        "action_BT"
+      ],
+      "action_BT": {
+        "b_multiplier": 1.1,
+        "t_multiplier": 0.7
+      }
+    },
+    "do_rr": {
+      "action_list": [
+        "action_BT"
+      ],
+      "action_BT": {
+        "b_multiplier": 1.1,
+        "t_multiplier": 0.7
+      }
+    },
+    "do_fl_rl": {
+      "action_list": [
+        "action_T",
+        "action_D"
+      ],
+      "action_T": {
+        "multiplier": 1.2
+      },
+      "action_D": {
+        "multiplier": 1.1
+      }
+    },
+    "do_fr_rr": {
+      "action_list": [
+        "action_T",
+        "action_D"
+      ],
+      "action_T": {
+        "multiplier": 1.2
+      },
+      "action_D": {
+        "multiplier": 1.1
+      }
+    },
+    "do_rl_rr": {
+      "action_list": [
+        "action_T",
+        "action_D"
+      ],
+      "action_T": {
+        "multiplier": 1.2
+      },
+      "action_D": {
+        "multiplier": 1.1
+      }
+    },
+    "do_fl_fr": {
+      "action_list": [
+        "action_T",
+        "action_D"
+      ],
+      "action_T": {
+        "multiplier": 1.2
+      },
+      "action_D": {
+        "multiplier": 1.1
+      }
+    },
+    "do_fr_rl_rr": {
+      "action_list": [
+        "action_T",
+        "action_D"
+      ],
+      "action_T": {
+        "multiplier": 0.3
+      },
+      "action_D": {
+        "multiplier": 1.1
+      }
+    },
+    "do_fl_rl_rr": {
+      "action_list": [
+        "action_T",
+        "action_D"
+      ],
+      "action_T": {
+        "multiplier": 0.3
+      },
+      "action_D": {
+        "multiplier": 1.1
+      }
+    },
+    "do_fl_fr_rr": {
+      "action_list": [
+        "action_T",
+        "action_D"
+      ],
+      "action_T": {
+        "multiplier": 0.3
+      },
+      "action_D": {
+        "multiplier": 1.1
+      }
+    },
+    "do_fl_fr_rl": {
+      "action_list": [
+        "action_T",
+        "action_D"
+      ],
+      "action_T": {
+        "multiplier": 0.3
+      },
+      "action_D": {
+        "multiplier": 1.1
+      }
+    }
+  }
+}
