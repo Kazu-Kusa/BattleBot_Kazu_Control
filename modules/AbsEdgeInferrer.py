@@ -10,7 +10,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         self.edge_multiplier: float = self._config.get('edge_multiplier')
 
     @classmethod
-    def load_config(cls, config_path: str):
+    def load_config(cls, config_path: str) -> dict:
         with open(config_path, 'r') as f:
             return json.load(f)
 
