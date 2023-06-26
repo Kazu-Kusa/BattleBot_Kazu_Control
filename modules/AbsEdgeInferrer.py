@@ -239,11 +239,13 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
                     grays: tuple[int, int],
                     basic_speed: int) -> bool:
         """
-
+        check the edge_sensor and check the grays
+        :param basic_speed:
         :param edge_sensor_b:
         :param grays:
         :return:
         """
-        if self.method_table.get(grays)(basic_speed=basic_speed):
+        status: bool = self.method_table.get(edge_sensor_b)(basic_speed=basic_speed)
+        if status:
             return True
-        return self.method_table.get(edge_sensor_b)(basic_speed=basic_speed)
+        return self.method_table.get(grays)(basic_speed=basic_speed)
