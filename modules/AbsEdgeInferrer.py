@@ -1,6 +1,6 @@
 import json
 from abc import ABCMeta, abstractmethod
-from typing import final
+from typing import final, Tuple
 
 
 class AbstractEdgeInferrer(metaclass=ABCMeta):
@@ -15,13 +15,13 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
             return json.load(f)
 
     @abstractmethod
-    def floating_inferrer(self, edge_sensors: tuple[int, int, int, int]) -> tuple[bool, bool, bool, bool]:
+    def floating_inferrer(self, edge_sensors: Tuple[int, int, int, int]) -> Tuple[bool, bool, bool, bool]:
         pass
 
     @final
     def get_away_from_edge(self,
-                           edge_sensors: tuple[int, int, int, int],
-                           grays: tuple[int, int]) -> bool:
+                           edge_sensors: Tuple[int, int, int, int],
+                           grays: Tuple[int, int]) -> bool:
         """
         handles the normal edge case using both adc_list and io_list.
         but well do not do anything if no edge case
@@ -38,16 +38,16 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
 
     # region methods
     @abstractmethod
-    def stop(self, basic_speed) -> bool:
+    def stop(self, basic_speed: int) -> bool:
         pass
 
     @abstractmethod
-    def do_nothing(self, basic_speed) -> bool:
+    def do_nothing(self, basic_speed: int) -> bool:
         pass
 
     # TODO: add the basic speed param convey
     @abstractmethod
-    def do_fl(self, basic_speed) -> bool:
+    def do_fl(self, basic_speed: int) -> bool:
         """
         [fl]         fr
             O-----O
@@ -61,7 +61,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fr(self, basic_speed) -> bool:
+    def do_fr(self, basic_speed: int) -> bool:
         """
        fl          [fr]
            O-----O
@@ -75,7 +75,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_rl(self, basic_speed) -> bool:
+    def do_rl(self, basic_speed: int) -> bool:
         """
         fl           fr
             O-----O
@@ -88,7 +88,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_rr(self, basic_speed) -> bool:
+    def do_rr(self, basic_speed: int) -> bool:
         """
         fl           fr
             O-----O
@@ -101,7 +101,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fl_rl(self, basic_speed) -> bool:
+    def do_fl_rl(self, basic_speed: int) -> bool:
         """
          [fl]   l   r   fr
              O-----O
@@ -113,7 +113,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fr_rr(self, basic_speed) -> bool:
+    def do_fr_rr(self, basic_speed: int) -> bool:
         """
           fl   l   r  [fr]
              O-----O
@@ -125,7 +125,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_rl_rr(self, basic_speed) -> bool:
+    def do_rl_rr(self, basic_speed: int) -> bool:
         """
          fl   l   r   fr
              O-----O
@@ -137,7 +137,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fl_fr(self, basic_speed) -> bool:
+    def do_fl_fr(self, basic_speed: int) -> bool:
         """
          [fl]   l   r   [fr]
              O-----O
@@ -149,7 +149,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fr_rl_rr(self, basic_speed) -> bool:
+    def do_fr_rl_rr(self, basic_speed: int) -> bool:
         """
          fl   l   r   [fr]
              O-----O
@@ -161,7 +161,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fl_rl_rr(self, basic_speed) -> bool:
+    def do_fl_rl_rr(self, basic_speed: int) -> bool:
         """
         [fl]   l   r   fr
              O-----O
@@ -173,7 +173,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fl_fr_rr(self, basic_speed) -> bool:
+    def do_fl_fr_rr(self, basic_speed: int) -> bool:
         """
          [fl]   l   r   [fr]
              O-----O
@@ -185,7 +185,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fl_fr_rl(self, basic_speed) -> bool:
+    def do_fl_fr_rl(self, basic_speed: int) -> bool:
         """
          [fl]   l   r   [fr]
              O-----O
@@ -235,8 +235,8 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
 
     @final
     def exec_method(self,
-                    edge_sensor_b: tuple[bool, bool, bool, bool],
-                    grays: tuple[int, int],
+                    edge_sensor_b: Tuple[bool, bool, bool, bool],
+                    grays: Tuple[int, int],
                     basic_speed: int) -> bool:
         """
         check the edge_sensor and check the grays
