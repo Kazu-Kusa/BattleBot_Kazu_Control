@@ -10,7 +10,6 @@ from repo.uptechStar.module.close_loop_controller import CloseLoopController
 class Bot(metaclass=ABCMeta):
     screen = Screen(init_screen=False)
     camera = Camera(open_camera=False)
-    controller = CloseLoopController(debug=False, motor_ids_list=(4, 3, 1, 2))
     sensors = UpTech(debug=False, fan_control=False)
 
     def __init__(self, config_path: str = './config.json'):
