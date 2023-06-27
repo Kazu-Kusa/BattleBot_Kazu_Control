@@ -4,10 +4,12 @@ from typing import Callable
 
 from modules.AbsSurroundInferrer import AbstractSurroundInferrer
 from modules.motion import Motion
-
+from modules.EdgeInferrers import StandardEdgeInferrer
 from modules.bot import Bot
+
 from time import perf_counter_ns
 from repo.uptechStar.module.timer import delay_ms
+from repo.uptechStar.module.actions import ActionPlayer
 
 
 def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline: int = 2200) -> int:
@@ -57,6 +59,10 @@ class BattleBot(Bot, AbstractSurroundInferrer, Motion):
     # TODO: unbind the surrounding objects detection logic to a new class based on ActionPlayer
     def __init__(self, config_path: str):
         super().__init__(config_path=config_path)
+        self._player = ActionPlayer()
+        self.edge_inferrer = StandardEdgeInferrer(sensors=self.sensors,
+                                                  action_player=self._player,
+                                                  config_path='config/edge_reaction_configs/standard.json')
         self._team_color = None
         self._use_cam = None
         self._normal_speed = None
@@ -663,11 +669,8 @@ class BattleBot(Bot, AbstractSurroundInferrer, Motion):
             adc_list = self.sensors.adc_all_channels
             io_list = self.sensors.io_all_channels
 
-            if self.get_away_from_edge(adc_list, io_list, **self._get_away_from_edge_kwargs):
-                # normal behave includes all edge encounter solution
-                # if encounters edge,must deal with it first
-                # should update the sensor data too ,since much time passed out
-                adc_list = self.sensors.adc_all_channels
+            if self.edge_inferrer.get_away_from_edge(adc_list[:4], io_list[:2]):
+                return
 
             if self.check_surround(adc_list, **self._check_surround_kwargs):
                 # if no edge is encountered then check if there are anything surrounding
