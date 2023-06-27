@@ -1,13 +1,13 @@
 import warnings
 from random import randint, choice, random
 from typing import Callable
-from repo.uptechStar.module.close_loop_controller import CloseLoopController
-from repo.uptechStar.module.uptech import UpTech
+
+from modules.AbsSurroundInferrer import AbstractSurroundInferrer
+from modules.motion import Motion
+
 from modules.bot import Bot
 from time import perf_counter_ns
 from repo.uptechStar.module.timer import delay_ms
-from repo.uptechStar.module.algrithm_tools import compute_inferior_arc, calculate_relative_angle
-from repo.uptechStar.module.pid import PD_control, PID_control
 
 
 def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline: int = 2200) -> int:
@@ -52,9 +52,7 @@ def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline
         return 0
 
 
-class BattleBot(Bot):
-    controller = CloseLoopController(debug=False)
-    sensors = UpTech(debug=False, fan_control=False)
+class BattleBot(Bot, AbstractSurroundInferrer, Motion):
 
     # TODO: unbind the surrounding objects detection logic to a new class based on ActionPlayer
     def __init__(self, config_path: str):
