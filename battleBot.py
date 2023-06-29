@@ -9,7 +9,7 @@ from modules.bot import Bot
 
 from time import perf_counter_ns
 from repo.uptechStar.module.timer import delay_ms
-from repo.uptechStar.module.actions import ActionPlayer
+from repo.uptechStar.module.actions import ActionFrame
 
 
 def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline: int = 2200) -> int:
@@ -59,7 +59,7 @@ class BattleBot(Bot, AbstractSurroundInferrer, Motion):
     # TODO: unbind the surrounding objects detection logic to a new class based on ActionPlayer
     def __init__(self, config_path: str):
         super().__init__(config_path=config_path)
-        self._player = ActionPlayer()
+
         self.edge_inferrer = StandardEdgeInferrer(sensors=self.sensors,
                                                   action_player=self._player,
                                                   config_path='config/edge_reaction_configs/standard.json')
