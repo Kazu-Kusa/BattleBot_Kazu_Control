@@ -1,0 +1,7 @@
+{
+  "edge_multiplier": 1.0,
+  "edge_baseline": 1750,
+  "min_baseline": 1150,
+  "straight_action_duration": 200,
+  "curve_action_duration": 170
+}

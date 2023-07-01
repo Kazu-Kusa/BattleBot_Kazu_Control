@@ -9,7 +9,7 @@ from modules.bot import Bot
 
 from time import perf_counter_ns
 from repo.uptechStar.module.timer import delay_ms
-from repo.uptechStar.module.actions import ActionFrame
+from repo.uptechStar.module.actions import new_ActionFrame
 
 
 def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline: int = 2200) -> int:
@@ -62,7 +62,7 @@ class BattleBot(Bot, AbstractSurroundInferrer, Motion):
 
         self.edge_inferrer = StandardEdgeInferrer(sensors=self.sensors,
                                                   action_player=self._player,
-                                                  config_path='config/edge_reaction_configs/standard.json')
+                                                  config_path='config/edge_reaction_configs/edgeInferrer.json')
         self._team_color = None
         self._use_cam = None
         self._normal_speed = None
@@ -96,26 +96,25 @@ class BattleBot(Bot, AbstractSurroundInferrer, Motion):
 
     # region special actions
     def wait_start(self, baseline: int = 1800, check_interval: int = 50,
-                   with_turn: bool = False, dash_time: int = 600, dash_speed: int = 8000) -> None:
+                   dash_time: int = 600, dash_speed: int = 8000) -> None:
         """
         hold still util the start signal is received
         :param dash_speed:
         :param check_interval:
         :param dash_time:
         :param baseline:
-        :param with_turn:
         :return:
         """
+        tape = [new_ActionFrame(action_speed=dash_speed, action_duration=dash_time),
+                new_ActionFrame()]
         self.screen.ADC_Led_SetColor(0, self.screen.COLOR_BROWN)
-        while True:
+        temp_list = self.sensors.adc_all_channels
+        while temp_list[8] < baseline or temp_list[7] < baseline:
             print(f'\r##HALT AT {perf_counter_ns()}##', end='')
             delay_ms(check_interval)
-            # TODO: shall we make this change be a local function that passed into here as param?
             temp_list = self.sensors.adc_all_channels
-            if temp_list[8] > baseline and temp_list[7] > baseline:
-                warnings.warn('!!DASH-TIME!!')
-                self.action_D(with_turn=with_turn, dash_time=dash_time, dash_speed=dash_speed)
-                return
+        warnings.warn('!!DASH-TIME!!')
+        self._player.extend(tape)
 
     def scan_surround(self, detector: Callable[[], bool],
                       with_ready: bool = False,
