@@ -1,7 +1,6 @@
-import random
 from random import choice
 from modules.AbsEdgeInferrer import AbstractEdgeInferrer
-from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
+from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame, ActionFrame
 from repo.uptechStar.module.uptech import UpTech
 
 
@@ -31,7 +30,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                                 breaker_func=self.rear_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(
-                    action_speed=[-sign * basic_speed, sign * basic_speed],
+                    action_speed=(-sign * basic_speed, sign * basic_speed),
                     action_duration=self.curve_action_duration,
                     action_speed_multiplier=0.7),
                 new_ActionFrame()]
@@ -41,7 +40,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
 
     def do_fl_fr_rr(self, basic_speed: int) -> bool:
         sign = self.random_sign()
-        tape = [new_ActionFrame(action_speed=[basic_speed, -basic_speed],
+        tape = [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
                                 action_duration=self.curve_action_duration,
                                 action_speed_multiplier=0.3),
                 new_ActionFrame(),
@@ -51,7 +50,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                                 breaker_func=self.rear_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(
-                    action_speed=[-sign * basic_speed, sign * basic_speed],
+                    action_speed=(-sign * basic_speed, sign * basic_speed),
                     action_duration=self.curve_action_duration,
                     action_speed_multiplier=0.7),
                 new_ActionFrame()]
@@ -60,7 +59,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         return True
 
     def do_fl_rl_rr(self, basic_speed: int) -> bool:
-        tape = [new_ActionFrame(action_speed=[basic_speed, -basic_speed],
+        tape = [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
                                 action_duration=self.curve_action_duration,
                                 action_speed_multiplier=0.3),
                 new_ActionFrame(),
@@ -74,7 +73,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         return True
 
     def do_fr_rl_rr(self, basic_speed: int) -> bool:
-        tape = [new_ActionFrame(action_speed=[-basic_speed, basic_speed],
+        tape = [new_ActionFrame(action_speed=(-basic_speed, basic_speed),
                                 action_duration=self.curve_action_duration,
                                 action_speed_multiplier=0.3),
                 new_ActionFrame(),
@@ -95,7 +94,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                                 breaker_func=self.rear_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(
-                    action_speed=[-sign * basic_speed, sign * basic_speed],
+                    action_speed=(-sign * basic_speed, sign * basic_speed),
                     action_duration=self.curve_action_duration,
                     action_speed_multiplier=0.7,
                     action_duration_multiplier=1.3),
@@ -114,7 +113,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         return True
 
     def do_fr_rr(self, basic_speed: int) -> bool:
-        tape = [new_ActionFrame(action_speed=[-basic_speed, basic_speed],
+        tape = [new_ActionFrame(action_speed=(-basic_speed, basic_speed),
                                 action_duration=self.curve_action_duration,
                                 action_speed_multiplier=1.2),
                 new_ActionFrame(),
@@ -128,7 +127,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         return True
 
     def do_fl_rl(self, basic_speed: int) -> bool:
-        tape = [new_ActionFrame(action_speed=[basic_speed, -basic_speed],
+        tape = [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
                                 action_duration=self.curve_action_duration,
                                 action_speed_multiplier=1.2),
                 new_ActionFrame(),
@@ -147,7 +146,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                                 action_speed_multiplier=1.1,
                                 breaker_func=self.front_watcher),
                 new_ActionFrame(),
-                new_ActionFrame(action_speed=[-basic_speed, basic_speed],
+                new_ActionFrame(action_speed=(-basic_speed, basic_speed),
                                 action_duration=self.curve_action_duration,
                                 action_speed_multiplier=0.7),
                 new_ActionFrame()]
@@ -161,7 +160,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                                 action_speed_multiplier=1.1,
                                 breaker_func=self.front_watcher),
                 new_ActionFrame(),
-                new_ActionFrame(action_speed=[basic_speed, -basic_speed],
+                new_ActionFrame(action_speed=(basic_speed, -basic_speed),
                                 action_duration=self.curve_action_duration,
                                 action_speed_multiplier=0.7),
                 new_ActionFrame()]
@@ -175,7 +174,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                                 action_speed_multiplier=1.1,
                                 breaker_func=self.rear_watcher),
                 new_ActionFrame(),
-                new_ActionFrame(action_speed=[-basic_speed, basic_speed],
+                new_ActionFrame(action_speed=(-basic_speed, basic_speed),
                                 action_duration=self.curve_action_duration,
                                 action_speed_multiplier=0.7),
                 new_ActionFrame()]
@@ -189,7 +188,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                                 action_speed_multiplier=1.1,
                                 breaker_func=self.rear_watcher),
                 new_ActionFrame(),
-                new_ActionFrame(action_speed=[basic_speed, -basic_speed],
+                new_ActionFrame(action_speed=(basic_speed, -basic_speed),
                                 action_duration=self.curve_action_duration,
                                 action_speed_multiplier=0.7),
                 new_ActionFrame()]
