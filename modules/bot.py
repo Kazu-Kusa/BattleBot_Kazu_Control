@@ -9,7 +9,7 @@ from repo.uptechStar.module.uptech import UpTech
 
 class Bot(metaclass=ABCMeta):
     screen = Screen(init_screen=False)
-    camera = Camera(open_camera=False)
+    camera = Camera(start_detect_tag=False)
     sensors = UpTech(debug=False, fan_control=False)
     _player = ActionPlayer()
 
