@@ -1,14 +1,13 @@
 from random import choice
+
 from modules.AbsEdgeInferrer import AbstractEdgeInferrer
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame, ActionFrame
 from repo.uptechStar.module.uptech import UpTech
 
 
 class StandardEdgeInferrer(AbstractEdgeInferrer):
-    # TODO: the params should load form the _config
-    __tape_set = {
 
-    }
+    # TODO: the params should load form the _config
 
     def __init__(self, sensors: UpTech, action_player: ActionPlayer, config_path: str):
         super().__init__(config_path=config_path)
@@ -32,10 +31,9 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                                 action_speed_multiplier=1.1,
                                 breaker_func=self.rear_watcher),
                 new_ActionFrame(),
-                new_ActionFrame(
-                    action_speed=(-sign * basic_speed, sign * basic_speed),
-                    action_duration=self.curve_action_duration,
-                    action_speed_multiplier=0.7),
+                new_ActionFrame(action_speed=(-sign * basic_speed, sign * basic_speed),
+                                action_duration=self.curve_action_duration,
+                                action_speed_multiplier=0.7),
                 new_ActionFrame()]
 
         self._player.extend(tape)
