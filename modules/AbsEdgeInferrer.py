@@ -45,7 +45,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
     def do_nothing(self, basic_speed: int) -> bool:
         pass
 
-    # TODO: add the basic speed param convey
+    # TODO: add the basic speed param convey,untested
     @abstractmethod
     def do_fl_n_n_n(self, basic_speed: int) -> bool:
         """

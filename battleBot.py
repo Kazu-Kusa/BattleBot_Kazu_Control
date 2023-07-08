@@ -2,64 +2,17 @@ import warnings
 from random import choice, random
 from typing import Callable
 
-from modules.AbsSurroundInferrer import AbstractSurroundInferrer
-from modules.motion import Motion
 from modules.EdgeInferrers import StandardEdgeInferrer
 from modules.bot import Bot
 
 from time import perf_counter_ns
-from repo.uptechStar.module.timer import delay_ms
-from repo.uptechStar.module.actions import new_ActionFrame, ActionFrame
+
+from repo.uptechStar.constant import REAR_SENSOR_ID, FRONT_SENSOR_ID, SIDES_SENSOR_ID, START_MAX_LINE, EDGE_MAX_LINE
+from repo.uptechStar.module.actions import new_ActionFrame
 from repo.uptechStar.module.uptech import build_watcher
 
-SIDES_SENSOR_ID = (7, 8)
 
-START_MAX_LINE = 1800
-
-
-def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline: int = 2200) -> int:
-    """
-    fl           fr
-        O-----O
-           |
-        O-----O
-    rl           rr
-
-    0: on stage
-    1: by stage
-    2: in conner should need fallback
-    3: in conner should push forward
-    :param ad_list:
-    :param baseline:
-    :param conner_baseline:
-    :return:
-    """
-    rb_sensor = ad_list[5]
-    fb_sensor = ad_list[4]
-    l3_sensor = ad_list[8]
-    r3_sensor = ad_list[7]
-
-    total = sum([rb_sensor, fb_sensor, l3_sensor, r3_sensor])
-    if total > baseline:
-        # off-stage
-
-        fl_sum = fb_sensor + l3_sensor
-        fr_sum = fb_sensor + r3_sensor
-        rl_sum = rb_sensor + l3_sensor
-        rr_sum = rb_sensor + r3_sensor
-        result_dict = {
-            (fl_sum, conner_baseline): 2,
-            (fr_sum, conner_baseline): 2,
-            (rl_sum, conner_baseline): 3,
-            (rr_sum, conner_baseline): 3,
-        }
-        return result_dict.get((max(fl_sum, fr_sum, rl_sum, rr_sum), conner_baseline), 0)
-    else:
-        # on stage
-        return 0
-
-
-class BattleBot(Bot, AbstractSurroundInferrer, Motion):
+class BattleBot(Bot):
 
     # TODO: unbind the surrounding objects detection logic to a new class based on ActionPlayer
 
@@ -67,7 +20,7 @@ class BattleBot(Bot, AbstractSurroundInferrer, Motion):
         super().__init__(config_path=config_path)
 
         self.edge_inferrer = StandardEdgeInferrer(sensors=self.sensors,
-                                                  action_player=self._player,
+                                                  action_player=self.player,
                                                   config_path='config/edge_reaction_configs/edgeInferrer.json')
         self._team_color = None
         self._use_cam = None
@@ -84,6 +37,12 @@ class BattleBot(Bot, AbstractSurroundInferrer, Motion):
         self._start_watcher = build_watcher(sensor_update=self.sensors.adc_all_channels,
                                             sensor_id=SIDES_SENSOR_ID,
                                             max_line=START_MAX_LINE)
+        self._rear_watcher = build_watcher(sensor_update=self.sensors.adc_all_channels,
+                                           sensor_id=REAR_SENSOR_ID,
+                                           max_line=EDGE_MAX_LINE)
+        self._front_watcher = build_watcher(sensor_update=self.sensors.adc_all_channels,
+                                            sensor_id=FRONT_SENSOR_ID,
+                                            max_line=EDGE_MAX_LINE)
 
     def load_config(self):
         """
@@ -120,7 +79,7 @@ class BattleBot(Bot, AbstractSurroundInferrer, Motion):
             HALTING
             """
         warnings.warn('!!DASH-TIME!!')
-        self._player.extend(tape)
+        self.player.extend(tape)
 
     # region events
     def util_edge(self, using_gray: bool = True, using_edge_sensor: bool = True, edge_baseline: int = 1800,
@@ -293,8 +252,7 @@ class BattleBot(Bot, AbstractSurroundInferrer, Motion):
                 # after turning should go to next loop checking the object
                 return
                 # if no edge is encountered and nothing surrounding, then just keep moving up
-            self.controller.move_cmd(normal_spead, normal_spead)
-            # loop delay,this is to prevent sending too many cmds to driver causing jam
+            self.player.append(new_ActionFrame(action_speed=self._normal_speed))
             self.screen.ADC_Led_SetColor(1, self.screen.COLOR_YELLOW)
 
         def front_to_conner() -> None:
@@ -316,22 +274,11 @@ class BattleBot(Bot, AbstractSurroundInferrer, Motion):
             if self.tag_monitor_switch:
                 self.tag_monitor_switch = False
 
-            def watcher(edge_baseline=1750) -> bool:
-
-                temp = self.sensors.adc_all_channels
-                local_edge_rr_sensor = temp[0]
-                local_edge_rl_sensor = temp[3]
-                if local_edge_rl_sensor < edge_baseline or local_edge_rr_sensor < edge_baseline:
-                    # if at least one of the edge sensor is hanging over air
-                    return True
-                else:
-                    return False
-
             def halt():
-                self.controller.move_cmd(0, 0)
+                self.player.append(new_ActionFrame())
 
             self.scan_surround(detector=stage_detector_strict, with_ready=True, ready_time=300, with_dash=True,
-                               dash_breaker_func=watcher,
+                               dash_breaker_func=self._rear_watcher,
                                dash_breaker_action_func=halt, spinning_speed=1200, max_duration=4000)
 
         methods_table = {0: on_stage, 1: to_stage, 2: front_to_conner, 3: rear_to_conner}
@@ -347,8 +294,50 @@ class BattleBot(Bot, AbstractSurroundInferrer, Motion):
         except KeyboardInterrupt:
             # forced stop
             self.screen.ADC_Led_SetColor(0, self.screen.COLOR_WHITE)
-            self.controller.move_cmd(0, 0)
+            self.player.append(new_ActionFrame())
             warnings.warn('exiting')
+
+
+def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline: int = 2200) -> int:
+    """
+    fl           fr
+        O-----O
+           |
+        O-----O
+    rl           rr
+
+    0: on stage
+    1: by stage
+    2: in conner should need fallback
+    3: in conner should push forward
+    :param ad_list:
+    :param baseline:
+    :param conner_baseline:
+    :return:
+    """
+    rb_sensor = ad_list[5]
+    fb_sensor = ad_list[4]
+    l3_sensor = ad_list[8]
+    r3_sensor = ad_list[7]
+
+    total = sum([rb_sensor, fb_sensor, l3_sensor, r3_sensor])
+    if total > baseline:
+        # off-stage
+
+        fl_sum = fb_sensor + l3_sensor
+        fr_sum = fb_sensor + r3_sensor
+        rl_sum = rb_sensor + l3_sensor
+        rr_sum = rb_sensor + r3_sensor
+        result_dict = {
+            (fl_sum, conner_baseline): 2,
+            (fr_sum, conner_baseline): 2,
+            (rl_sum, conner_baseline): 3,
+            (rr_sum, conner_baseline): 3,
+        }
+        return result_dict.get((max(fl_sum, fr_sum, rl_sum, rr_sum), conner_baseline), 0)
+    else:
+        # on stage
+        return 0
 
 
 if __name__ == '__main__':

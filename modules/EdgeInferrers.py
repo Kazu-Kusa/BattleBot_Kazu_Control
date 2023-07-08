@@ -1,12 +1,9 @@
 from random import choice
 
 from modules.AbsEdgeInferrer import AbstractEdgeInferrer
-from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame, ActionFrame
+from repo.uptechStar.constant import FRONT_SENSOR_ID, REAR_SENSOR_ID
+from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
 from repo.uptechStar.module.uptech import UpTech, build_watcher
-
-FRONT_SENSOR_ID = (1, 2)
-
-REAR_SENSOR_ID = (0, 3)
 
 
 class StandardEdgeInferrer(AbstractEdgeInferrer):

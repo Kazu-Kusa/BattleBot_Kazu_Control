@@ -11,7 +11,7 @@ class Bot(metaclass=ABCMeta):
     screen = Screen(init_screen=False)
     camera = Camera(start_detect_tag=False)
     sensors = UpTech(debug=False, fan_control=False)
-    _player = ActionPlayer()
+    player = ActionPlayer()
 
     def __init__(self, config_path: str = './config.json'):
         """
