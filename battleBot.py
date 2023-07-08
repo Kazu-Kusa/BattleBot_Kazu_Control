@@ -1,6 +1,6 @@
 import warnings
 from random import choice, random
-from typing import Callable
+from typing import Callable, Optional, List, Union
 
 from modules.EdgeInferrers import StandardEdgeInferrer
 from modules.bot import Bot
@@ -8,11 +8,62 @@ from modules.bot import Bot
 from time import perf_counter_ns
 
 from repo.uptechStar.constant import REAR_SENSOR_ID, FRONT_SENSOR_ID, SIDES_SENSOR_ID, START_MAX_LINE, EDGE_MAX_LINE
-from repo.uptechStar.module.actions import new_ActionFrame
-from repo.uptechStar.module.uptech import build_watcher
+from repo.uptechStar.module.actions import new_ActionFrame, ActionPlayer, ActionFrame
+from repo.uptechStar.module.uptech import build_watcher, UpTech
 
 
-class BattleBot(Bot):
+class AttackPolicy:
+    def __init__(self, sensors: UpTech, player: ActionPlayer):
+        self._sensors: UpTech = sensors
+        self._player: ActionPlayer = player
+
+    def on_attacked(self, position_type: bool, counter_back: bool = False,
+                    run_away: bool = False,
+                    run_speed: int = 5000, run_time: int = 240,
+                    run_away_breaker_func: Optional[Callable[[], bool]] = None,
+                    run_away_break_action_func: Optional[Union[ActionFrame, List[ActionFrame]]] = None,
+                    reacting_speed: int = 6400, reacting_time: int = 350):
+        """
+        use action tf to evade attacks
+        :param run_away_break_action_func:
+        :param run_away_breaker_func:
+        :param run_time:
+        :param run_away:
+        :param run_speed:
+        :param counter_back:
+        :param position_type:
+        :param reacting_speed:
+        :param reacting_time:
+        :return:
+        """
+        if position_type:
+            if counter_back:
+                speeds = (reacting_speed, reacting_speed, reacting_speed, 0)
+
+            else:
+                speeds = (-reacting_speed, -reacting_speed, 0, -reacting_speed)
+
+        else:
+            if counter_back:
+                speeds = (0, reacting_speed, reacting_speed, reacting_speed)
+
+            else:
+                speeds = (-reacting_speed, 0, -reacting_speed, -reacting_speed)
+
+        tape = [new_ActionFrame(action_speed=speeds,
+                                action_duration=reacting_time),
+                new_ActionFrame()]
+        if not counter_back and run_away:
+            action_D = [new_ActionFrame(action_speed=run_speed,
+                                        action_duration=run_time,
+                                        breaker_func=run_away_breaker_func,
+                                        break_action=run_away_break_action_func),
+                        new_ActionFrame()]
+            tape.extend(action_D)
+        self._player.extend(tape)
+
+
+class BattleBot(Bot, AttackPolicy):
 
     # TODO: unbind the surrounding objects detection logic to a new class based on ActionPlayer
 
@@ -125,48 +176,6 @@ class BattleBot(Bot):
             edge_sensor_check()
         elif using_gray:
             gray_check()
-
-    def on_attacked(self, position_type: int, counter_back: bool = False,
-                    run_away: bool = False,
-                    run_speed: int = 5000, run_time: int = 240,
-                    run_away_breaker_func: Callable[[], bool] = None,
-                    run_away_break_action_func: Callable[[], None] = None,
-                    reacting_speed: int = 6400, reacting_time: int = 350):
-        """
-        use action tf to evade attacks
-        :param run_away_break_action_func:
-        :param run_away_breaker_func:
-        :param run_time:
-        :param run_away: 
-        :param run_speed:
-        :param counter_back:
-        :param position_type:
-        :param reacting_speed:
-        :param reacting_time:
-        :return:
-        """
-        if position_type == 0:
-            if counter_back:
-                self.action_TF(fixed_wheel_id=4, speed=reacting_speed, tf_time=reacting_time)
-            else:
-                self.action_TF(fixed_wheel_id=3, speed=-reacting_speed, tf_time=reacting_time)
-                if run_away:
-                    self.action_D(dash_speed=run_speed, dash_time=run_time,
-                                  breaker_func=run_away_breaker_func,
-                                  break_action_func=run_away_break_action_func)
-        elif position_type == 1:
-            if counter_back:
-                self.action_TF(fixed_wheel_id=2, speed=reacting_speed, tf_time=reacting_time)
-            else:
-                self.action_TF(fixed_wheel_id=1, speed=-reacting_speed, tf_time=reacting_time)
-                if run_away:
-                    self.action_D(dash_speed=run_speed, dash_time=run_time,
-                                  breaker_func=run_away_breaker_func,
-                                  break_action_func=run_away_break_action_func)
-        elif position_type == 2:
-            if counter_back:
-                reacting_time = reacting_time * 0.9
-            self.action_TF(fixed_wheel_id=choice([1, 3]), speed=reacting_speed, tf_time=reacting_time)
 
     # endregion
 
