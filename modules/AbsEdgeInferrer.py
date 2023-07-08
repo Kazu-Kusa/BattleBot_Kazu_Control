@@ -47,7 +47,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
 
     # TODO: add the basic speed param convey
     @abstractmethod
-    def do_fl(self, basic_speed: int) -> bool:
+    def do_fl_n_n_n(self, basic_speed: int) -> bool:
         """
         [fl]         fr
             O-----O
@@ -61,7 +61,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fr(self, basic_speed: int) -> bool:
+    def do_n_n_n_fr(self, basic_speed: int) -> bool:
         """
        fl          [fr]
            O-----O
@@ -75,7 +75,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_rl(self, basic_speed: int) -> bool:
+    def do_n_rl_n_n(self, basic_speed: int) -> bool:
         """
         fl           fr
             O-----O
@@ -88,7 +88,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_rr(self, basic_speed: int) -> bool:
+    def do_n_n_rr_n(self, basic_speed: int) -> bool:
         """
         fl           fr
             O-----O
@@ -101,7 +101,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fl_rl(self, basic_speed: int) -> bool:
+    def do_fl_rl_n_n(self, basic_speed: int) -> bool:
         """
          [fl]   l   r   fr
              O-----O
@@ -113,7 +113,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fr_rr(self, basic_speed: int) -> bool:
+    def do_n_n_rr_fr(self, basic_speed: int) -> bool:
         """
           fl   l   r  [fr]
              O-----O
@@ -125,7 +125,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_rl_rr(self, basic_speed: int) -> bool:
+    def do_n_rl_rr_n(self, basic_speed: int) -> bool:
         """
          fl   l   r   fr
              O-----O
@@ -137,7 +137,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fl_fr(self, basic_speed: int) -> bool:
+    def do_fl_n_n_fr(self, basic_speed: int) -> bool:
         """
          [fl]   l   r   [fr]
              O-----O
@@ -149,7 +149,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fr_rl_rr(self, basic_speed: int) -> bool:
+    def do_n_rl_rr_fr(self, basic_speed: int) -> bool:
         """
          fl   l   r   [fr]
              O-----O
@@ -161,7 +161,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fl_rl_rr(self, basic_speed: int) -> bool:
+    def do_fl_rl_rr_n(self, basic_speed: int) -> bool:
         """
         [fl]   l   r   fr
              O-----O
@@ -173,7 +173,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fl_fr_rr(self, basic_speed: int) -> bool:
+    def do_fl_n_rr_fr(self, basic_speed: int) -> bool:
         """
          [fl]   l   r   [fr]
              O-----O
@@ -185,7 +185,7 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def do_fl_fr_rl(self, basic_speed: int) -> bool:
+    def do_fl_rl_n_fr(self, basic_speed: int) -> bool:
         """
          [fl]   l   r   [fr]
              O-----O
@@ -200,17 +200,17 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
     method_table = {(True, True, True, True): do_nothing,
                     (False, False, False, False): stop,
                     # region one edge sensor only
-                    (False, True, True, True): do_fl,
-                    (True, False, True, True): do_fr,
-                    (True, True, False, True): do_rl,
-                    (True, True, True, False): do_rr,
+                    (False, True, True, True): do_fl_n_n_n,
+                    (True, False, True, True): do_n_n_n_fr,
+                    (True, True, False, True): do_n_rl_n_n,
+                    (True, True, True, False): do_n_n_rr_n,
                     # endregion
 
                     # region double edge sensor only
-                    (False, True, False, True): do_fl_rl,  # normal
-                    (True, False, True, False): do_fr_rr,
-                    (True, True, False, False): do_rl_rr,
-                    (False, False, True, True): do_fl_fr,
+                    (False, True, False, True): do_fl_rl_n_n,  # normal
+                    (True, False, True, False): do_n_n_rr_fr,
+                    (True, True, False, False): do_n_rl_rr_n,
+                    (False, False, True, True): do_fl_n_n_fr,
 
                     # region abnormal case
                     (True, False, False, True): do_nothing,  # such case are hard to be classified
@@ -219,17 +219,17 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
                     # endregion
 
                     # region triple edge sensor
-                    (True, False, False, False): do_fr_rl_rr,  # specified in conner
-                    (False, True, False, False): do_fl_rl_rr,
-                    (False, False, True, False): do_fl_fr_rr,
-                    (False, False, False, True): do_fl_fr_rl,
+                    (True, False, False, False): do_n_rl_rr_fr,  # specified in conner
+                    (False, True, False, False): do_fl_rl_rr_n,
+                    (False, False, True, False): do_fl_n_rr_fr,
+                    (False, False, False, True): do_fl_rl_n_fr,
                     # endregion
 
                     # region grays
                     (1, 1): do_nothing,
-                    (0, 1): do_fl,
-                    (1, 0): do_fr,
-                    (0, 0): do_fl_fr
+                    (0, 1): do_fl_n_n_n,
+                    (1, 0): do_n_n_n_fr,
+                    (0, 0): do_fl_n_n_fr
                     # endregion
                     }
 

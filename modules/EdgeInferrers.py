@@ -5,8 +5,11 @@ from repo.uptechStar.module.uptech import UpTech
 
 
 class StandardEdgeInferrer(AbstractEdgeInferrer):
-
     # TODO: the params should load form the _config
+    __tape_set = {
+
+    }
+
     def __init__(self, sensors: UpTech, action_player: ActionPlayer, config_path: str):
         super().__init__(config_path=config_path)
 
@@ -18,7 +21,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         self._player: ActionPlayer = action_player
 
     # region tapes
-    def do_fl_fr_rl(self, basic_speed: int) -> bool:
+    def do_fl_rl_n_fr(self, basic_speed: int) -> bool:
         sign = self.random_sign()
         tape = [new_ActionFrame(action_speed=(-basic_speed, basic_speed),
                                 action_duration=self.curve_action_duration,
@@ -38,7 +41,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         self._player.extend(tape)
         return True
 
-    def do_fl_fr_rr(self, basic_speed: int) -> bool:
+    def do_fl_n_rr_fr(self, basic_speed: int) -> bool:
         sign = self.random_sign()
         tape = [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
                                 action_duration=self.curve_action_duration,
@@ -58,7 +61,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         self._player.extend(tape)
         return True
 
-    def do_fl_rl_rr(self, basic_speed: int) -> bool:
+    def do_fl_rl_rr_n(self, basic_speed: int) -> bool:
         tape = [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
                                 action_duration=self.curve_action_duration,
                                 action_speed_multiplier=0.3),
@@ -72,7 +75,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         self._player.extend(tape)
         return True
 
-    def do_fr_rl_rr(self, basic_speed: int) -> bool:
+    def do_n_rl_rr_fr(self, basic_speed: int) -> bool:
         tape = [new_ActionFrame(action_speed=(-basic_speed, basic_speed),
                                 action_duration=self.curve_action_duration,
                                 action_speed_multiplier=0.3),
@@ -86,7 +89,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         self._player.extend(tape)
         return True
 
-    def do_fl_fr(self, basic_speed: int) -> bool:
+    def do_fl_n_n_fr(self, basic_speed: int) -> bool:
         sign = self.random_sign()
         tape = [new_ActionFrame(action_speed=-basic_speed,
                                 action_duration=self.straight_action_duration,
@@ -103,7 +106,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         self._player.extend(tape)
         return True
 
-    def do_rl_rr(self, basic_speed: int) -> bool:
+    def do_n_rl_rr_n(self, basic_speed: int) -> bool:
         tape = [new_ActionFrame(action_speed=basic_speed,
                                 action_duration=self.straight_action_duration,
                                 action_speed_multiplier=1.1,
@@ -112,7 +115,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         self._player.extend(tape)
         return True
 
-    def do_fr_rr(self, basic_speed: int) -> bool:
+    def do_n_n_rr_fr(self, basic_speed: int) -> bool:
         tape = [new_ActionFrame(action_speed=(-basic_speed, basic_speed),
                                 action_duration=self.curve_action_duration,
                                 action_speed_multiplier=1.2),
@@ -126,7 +129,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         self._player.extend(tape)
         return True
 
-    def do_fl_rl(self, basic_speed: int) -> bool:
+    def do_fl_rl_n_n(self, basic_speed: int) -> bool:
         tape = [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
                                 action_duration=self.curve_action_duration,
                                 action_speed_multiplier=1.2),
@@ -140,7 +143,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         self._player.extend(tape)
         return True
 
-    def do_rr(self, basic_speed: int) -> bool:
+    def do_n_n_rr_n(self, basic_speed: int) -> bool:
         tape = [new_ActionFrame(action_speed=basic_speed,
                                 action_duration=self.straight_action_duration,
                                 action_speed_multiplier=1.1,
@@ -154,7 +157,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         self._player.extend(tape)
         return True
 
-    def do_rl(self, basic_speed: int) -> bool:
+    def do_n_rl_n_n(self, basic_speed: int) -> bool:
         tape = [new_ActionFrame(action_speed=basic_speed,
                                 action_duration=self.straight_action_duration,
                                 action_speed_multiplier=1.1,
@@ -168,7 +171,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         self._player.extend(tape)
         return True
 
-    def do_fr(self, basic_speed: int) -> bool:
+    def do_n_n_n_fr(self, basic_speed: int) -> bool:
         tape = [new_ActionFrame(action_speed=-basic_speed,
                                 action_duration=self.straight_action_duration,
                                 action_speed_multiplier=1.1,
@@ -182,7 +185,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         self._player.extend(tape)
         return True
 
-    def do_fl(self, basic_speed: int) -> bool:
+    def do_fl_n_n_n(self, basic_speed: int) -> bool:
         tape = [new_ActionFrame(action_speed=-basic_speed,
                                 action_duration=self.straight_action_duration,
                                 action_speed_multiplier=1.1,
