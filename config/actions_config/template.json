@@ -20,17 +20,19 @@
       ],
       "action_duration": 3,
       "breaker_func": null,
-      "break_action": {
-        "action_speed": [
-          1,
-          3,
-          0,
-          0
-        ],
-        "action_duration": 1,
-        "breaker_func": null,
-        "break_action": null
-      }
+      "break_action": [
+        {
+          "action_speed": [
+            1,
+            3,
+            0,
+            0
+          ],
+          "action_duration": 1,
+          "breaker_func": null,
+          "break_action": null
+        }
+      ]
     },
     {
       "action_speed": [
@@ -65,6 +67,30 @@
           "break_action": null
         }
       ]
+    }
+  ],
+  "action_turn_back": [
+    {
+      "action_speed": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "action_duration": 2,
+      "breaker_func": null,
+      "break_action": null
+    },
+    {
+      "action_speed": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "action_duration": 2,
+      "breaker_func": null,
+      "break_action": null
     }
   ]
 }
