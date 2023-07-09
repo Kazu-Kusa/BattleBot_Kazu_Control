@@ -1,0 +1,64 @@
+{
+  "actions": [
+    {
+      "action_speed": [
+        0.1,
+        0,
+        0
+      ],
+      "action_duration": 2,
+      "breaker_func": null,
+      "break_action": null
+    },
+    {
+      "action_speed": [
+        0,
+        0,
+        0.2
+      ],
+      "action_duration": 3,
+      "breaker_func": null,
+      "break_action": {
+        "action_speed": [
+          0,
+          0.1,
+          0
+        ],
+        "action_duration": 1,
+        "breaker_func": null,
+        "break_action": null
+      }
+    },
+    {
+      "action_speed": [
+        0.2,
+        0,
+        0
+      ],
+      "action_duration": 2,
+      "breaker_func": null,
+      "break_action": [
+        {
+          "action_speed": [
+            0,
+            0.1,
+            0
+          ],
+          "action_duration": 1,
+          "breaker_func": null,
+          "break_action": null
+        },
+        {
+          "action_speed": [
+            0,
+            0,
+            0.2
+          ],
+          "action_duration": 2,
+          "breaker_func": null,
+          "break_action": null
+        }
+      ]
+    }
+  ]
+}
