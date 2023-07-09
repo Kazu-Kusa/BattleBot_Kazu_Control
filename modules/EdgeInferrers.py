@@ -3,7 +3,8 @@ from random import choice
 from modules.AbsEdgeInferrer import AbstractEdgeInferrer
 from repo.uptechStar.constant import FRONT_SENSOR_ID, REAR_SENSOR_ID
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
-from repo.uptechStar.module.uptech import UpTech, build_watcher
+from repo.uptechStar.module.uptech import UpTech
+from repo.uptechStar.module.watcher import build_watcher
 
 
 class StandardEdgeInferrer(AbstractEdgeInferrer):
@@ -19,7 +20,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         self.curve_action_duration: int = self._config.get('curve_action_duration')
         self._sensors: UpTech = sensors
         self._player: ActionPlayer = action_player
-
+        # TODO: may directly use watcher in watcher.py instead of building a new one
         self._rear_watcher = build_watcher(sensor_update=self._sensors.adc_all_channels,
                                            sensor_id=REAR_SENSOR_ID,
                                            max_line=self.edge_baseline)
