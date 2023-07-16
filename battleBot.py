@@ -7,7 +7,8 @@ from modules.bot import Bot
 
 from time import perf_counter_ns
 
-from repo.uptechStar.constant import REAR_SENSOR_ID, FRONT_SENSOR_ID, SIDES_SENSOR_ID, START_MAX_LINE, EDGE_MAX_LINE
+from repo.uptechStar.constant import EDGE_REAR_SENSOR_ID, EDGE_FRONT_SENSOR_ID, SIDES_SENSOR_ID, START_MAX_LINE, \
+    EDGE_MAX_LINE
 from repo.uptechStar.module.actions import new_ActionFrame, ActionPlayer, ActionFrame
 from repo.uptechStar.module.uptech import UpTech
 from repo.uptechStar.module.watcher import build_watcher
@@ -90,10 +91,10 @@ class BattleBot(Bot, AttackPolicy):
                                             sensor_id=SIDES_SENSOR_ID,
                                             max_line=START_MAX_LINE)
         self._rear_watcher = build_watcher(sensor_update=self.sensors.adc_all_channels,
-                                           sensor_id=REAR_SENSOR_ID,
+                                           sensor_id=EDGE_REAR_SENSOR_ID,
                                            max_line=EDGE_MAX_LINE)
         self._front_watcher = build_watcher(sensor_update=self.sensors.adc_all_channels,
-                                            sensor_id=FRONT_SENSOR_ID,
+                                            sensor_id=EDGE_FRONT_SENSOR_ID,
                                             max_line=EDGE_MAX_LINE)
 
     def load_config(self):
