@@ -106,8 +106,8 @@ class BattleBot(Bot, AttackPolicy):
         if self._use_cam:
             # if use_cam is True then load the team color and init the hardware
             self._team_color = self._config.get('team_color')
-            self.camera.set_tags(self._team_color)
-            self.camera.apriltag_detect_start()
+            self.tag_detector.set_tags(self._team_color)
+            self.tag_detector.apriltag_detect_start()
         self._wait_start_kwargs = self._config.get('wait_start')
         self._check_surrounding_fence_kwargs = self._config.get('check_surrounding_fence')
 
@@ -191,10 +191,10 @@ class BattleBot(Bot, AttackPolicy):
         :return: if it has encountered anything
         """
 
-        if self.camera.tag_id == self.camera.ally_tag and adc_list[4] > baseline:
+        if self.tag_detector.tag_id == self.tag_detector.ally_tag and adc_list[4] > baseline:
             self.on_allay_box(basic_speed, 0.3)
             return True
-        elif self.camera.tag_id == self.camera.enemy_tag and adc_list[4] > baseline:
+        elif self.tag_detector.tag_id == self.tag_detector.enemy_tag and adc_list[4] > baseline:
             self.on_enemy_box(basic_speed, 0.4)
             return True
         elif adc_list[4] > baseline:
@@ -252,10 +252,10 @@ class BattleBot(Bot, AttackPolicy):
                 self.tag_monitor_switch = True
             adc_list = self.sensors.adc_all_channels
             io_list = self.sensors.io_all_channels
-
+            self.tag_detector.tag_monitor_switch = False
             if self.edge_inferrer.get_away_from_edge(adc_list[:4], io_list[:2]):
                 return
-
+            self.tag_detector.tag_monitor_switch = True
             if self.check_surround(adc_list, **self._check_surround_kwargs):
                 # if no edge is encountered then check if there are anything surrounding
                 # will check surrounding and will act according the case to deal with it

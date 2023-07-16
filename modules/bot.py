@@ -2,14 +2,14 @@ import json
 from abc import ABCMeta, abstractmethod
 
 from repo.uptechStar.module.actions import ActionPlayer
-from repo.uptechStar.module.camera import Camera
+from repo.uptechStar.module.tagdetector import TagDetector
 from repo.uptechStar.module.screen import Screen
 from repo.uptechStar.module.uptech import UpTech
 
 
 class Bot(metaclass=ABCMeta):
     screen = Screen(init_screen=False)
-    camera = Camera(start_detect_tag=False)
+    tag_detector = TagDetector(start_detect_tag=False)
     sensors = UpTech(debug=False, fan_control=False)
     player = ActionPlayer()
 
