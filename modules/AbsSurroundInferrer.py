@@ -1,6 +1,8 @@
 from abc import ABCMeta, abstractmethod
 from typing import final, Dict, List, Callable, Tuple, Optional
 
+from repo.uptechStar.module.actions import ActionPlayer
+
 KEY_BEHIND_OBJECT = 5
 
 KEY_RIGHT_OBJECT = 4
@@ -15,6 +17,10 @@ KEY_FRONT_ALLY_BOX = 0
 
 
 class AbstractSurroundInferrer(metaclass=ABCMeta):
+
+    def __init__(self, basic_duration: int, player: ActionPlayer):
+        self._basic_duration = basic_duration
+        self._player = player
 
     @abstractmethod
     def on_allay_box_at_front(self, basic_speed, multiplier):
