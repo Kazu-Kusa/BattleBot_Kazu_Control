@@ -1,8 +1,7 @@
-from random import choice
-
 from modules.AbsEdgeInferrer import AbstractEdgeInferrer
 from repo.uptechStar.constant import EDGE_FRONT_SENSOR_ID, EDGE_REAR_SENSOR_ID
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
+from repo.uptechStar.module.algrithm_tools import random_sign
 from repo.uptechStar.module.uptech import UpTech
 from repo.uptechStar.module.watcher import build_watcher
 
@@ -30,7 +29,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
 
     # region tapes
     def do_fl_rl_n_fr(self, basic_speed: int) -> bool:
-        sign = self.random_sign()
+        sign = random_sign()
         tape = [new_ActionFrame(action_speed=(-basic_speed, basic_speed),
                                 action_duration=self.curve_action_duration,
                                 action_speed_multiplier=0.3),
@@ -49,7 +48,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         return True
 
     def do_fl_n_rr_fr(self, basic_speed: int) -> bool:
-        sign = self.random_sign()
+        sign = random_sign()
         tape = [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
                                 action_duration=self.curve_action_duration,
                                 action_speed_multiplier=0.3),
@@ -97,7 +96,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         return True
 
     def do_fl_n_n_fr(self, basic_speed: int) -> bool:
-        sign = self.random_sign()
+        sign = random_sign()
         tape = [new_ActionFrame(action_speed=-basic_speed,
                                 action_duration=self.straight_action_duration,
                                 action_speed_multiplier=1.1,
@@ -224,7 +223,3 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                 edge_fr_sensor > self.edge_baseline and edge_fr_sensor > self.min_baseline,
                 edge_rl_sensor > self.edge_baseline and edge_rl_sensor > self.min_baseline,
                 edge_rr_sensor > self.edge_baseline and edge_rr_sensor > self.min_baseline)
-
-    @classmethod
-    def random_sign(cls) -> int:
-        return choice([-1, 1])
