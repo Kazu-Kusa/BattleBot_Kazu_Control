@@ -3,20 +3,19 @@ from typing import final, Dict, List, Callable, Tuple, Optional
 
 from repo.uptechStar.module.actions import ActionPlayer
 
-KEY_BEHIND_OBJECT = 5
-
-KEY_RIGHT_OBJECT = 4
-
-KET_LEFT_OBJECT = 3
-
-KEY_FRONT_ENEMY_CAR = 2
-
-KEY_FRONT_ENEMY_BOX = 1
-
-KEY_FRONT_ALLY_BOX = 0
-
 
 class AbstractSurroundInferrer(metaclass=ABCMeta):
+    KEY_BEHIND_OBJECT = 5
+
+    KEY_RIGHT_OBJECT = 4
+
+    KET_LEFT_OBJECT = 3
+
+    KEY_FRONT_ENEMY_CAR = 2
+
+    KEY_FRONT_ENEMY_BOX = 1
+
+    KEY_FRONT_ALLY_BOX = 0
 
     def __init__(self, basic_duration: int, player: ActionPlayer):
         self._basic_duration = basic_duration

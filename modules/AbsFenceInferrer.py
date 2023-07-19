@@ -1,17 +1,23 @@
 from abc import ABCMeta, abstractmethod
 from typing import final, Dict, List, Callable, Tuple, Optional
 
-KEY_FRONT_TO_FENCE = 0
-KEY_LEFT_TO_FENCE = 1
-KEY_RIGHT_TO_FENCE = 2
-KEY_BEHIND_TO_FENCE = 3
-KEY_FRONT_LEFT_TO_FENCE = 4
-KEY_FRONT_RIGHT_TO_FENCE = 5
-KEY_BEHIND_LEFT_TO_FENCE = 6
-KEY_BEHIND_RIGHT_TO_FENCE = 7
+from repo.uptechStar.module.actions import ActionPlayer
 
 
 class AbstractFenceInferrer(metaclass=ABCMeta):
+    KEY_FRONT_TO_FENCE = 0
+    KEY_LEFT_TO_FENCE = 1
+    KEY_RIGHT_TO_FENCE = 2
+    KEY_BEHIND_TO_FENCE = 3
+    KEY_FRONT_LEFT_TO_FENCE = 4
+    KEY_FRONT_RIGHT_TO_FENCE = 5
+    KEY_BEHIND_LEFT_TO_FENCE = 6
+    KEY_BEHIND_RIGHT_TO_FENCE = 7
+
+    def __init__(self, basic_duration: int, player: ActionPlayer):
+        self._basic_duration = basic_duration
+        self._player = player
+
     @abstractmethod
     def on_front_to_fence(self, basic_speed, multiplier):
         """
