@@ -201,28 +201,28 @@ class AbstractEdgeInferrer(metaclass=ABCMeta):
                     (False, False, False, False): stop,
                     # region one edge sensor only
                     (False, True, True, True): do_fl_n_n_n,
-                    (True, False, True, True): do_n_n_n_fr,
-                    (True, True, False, True): do_n_rl_n_n,
-                    (True, True, True, False): do_n_n_rr_n,
+                    (True, False, True, True): do_n_rl_n_n,
+                    (True, True, False, True): do_n_n_rr_n,
+                    (True, True, True, False): do_n_n_n_fr,
                     # endregion
 
                     # region double edge sensor only
-                    (False, True, False, True): do_fl_rl_n_n,  # normal
-                    (True, False, True, False): do_n_n_rr_fr,
-                    (True, True, False, False): do_n_rl_rr_n,
-                    (False, False, True, True): do_fl_n_n_fr,
+                    (False, False, True, True): do_fl_rl_n_n,  # normal
+                    (True, True, False, False): do_n_n_rr_fr,
+                    (True, False, False, True): do_n_rl_rr_n,
+                    (False, True, True, False): do_fl_n_n_fr,
 
                     # region abnormal case
-                    (True, False, False, True): do_nothing,  # such case are hard to be classified
-                    (False, True, True, False): do_nothing,
+                    (True, False, True, False): do_nothing,  # such case are hard to be classified
+                    (False, True, False, True): do_nothing,
                     # endregion
                     # endregion
 
                     # region triple edge sensor
                     (True, False, False, False): do_n_rl_rr_fr,  # specified in conner
-                    (False, True, False, False): do_fl_rl_rr_n,
-                    (False, False, True, False): do_fl_n_rr_fr,
-                    (False, False, False, True): do_fl_rl_n_fr,
+                    (False, False, False, True): do_fl_rl_rr_n,
+                    (False, True, False, False): do_fl_n_rr_fr,
+                    (False, False, True, False): do_fl_rl_n_fr,
                     # endregion
 
                     # region grays
