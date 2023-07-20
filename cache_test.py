@@ -2,11 +2,11 @@ import random
 import time
 from matplotlib import pyplot as plt
 
-from repo.uptechStar.module.db_tools import persistent_lru_cache
+from repo.uptechStar.module.db_tools import persistent_cache
 from repo.uptechStar.module.algrithm_tools import bake_to_cache, performance_evaluate
 
 
-@persistent_lru_cache('cache')
+@persistent_cache('cache')
 def my_function(x):
     print("Calculating...")
     time.sleep(0.01)
