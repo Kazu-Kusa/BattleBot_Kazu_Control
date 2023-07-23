@@ -3,6 +3,8 @@ from abc import ABCMeta, abstractmethod
 from typing import Dict, Any, Hashable, final, Tuple, Optional, Callable, Union
 from repo.uptechStar.module.actions import ActionFrame, ActionPlayer
 
+DEFAULT_REACTION = tuple()
+
 ComplexAction = Tuple[Optional[ActionFrame], ...]
 ActionFactory = Callable[[Any, ...], ComplexAction]
 Reaction = Union[ComplexAction, ActionFactory, Any]
@@ -39,16 +41,26 @@ class InferrerBase(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def infer(self, *args, **kwargs) -> Hashable:
+    def infer(self, *args, **kwargs) -> Tuple[Hashable, ...]:
         raise NotImplementedError
+
+    def react(self, *args, **kwargs) -> Any:
+        """
+
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        reaction = self.get_action(self.infer(*args, **kwargs))
+        return self.exc_action(reaction[0])
 
     @final
     def register_action(self, case: Hashable, complex_action: Reaction) -> None:
         self.__action_table[case] = complex_action
 
     @final
-    def get_action(self, case: Hashable) -> ComplexAction:
-        return self.__action_table.get(case, tuple())
+    def get_action(self, case: Hashable) -> Reaction:
+        return self.__action_table.get(case, DEFAULT_REACTION)
 
     @final
     @property
