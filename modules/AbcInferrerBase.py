@@ -2,6 +2,7 @@ import json
 from abc import ABCMeta, abstractmethod
 from typing import Dict, Any, Hashable, final, Tuple, Optional, Callable, Union
 from repo.uptechStar.module.actions import ActionFrame, ActionPlayer
+from repo.uptechStar.module.sensors import SensorHub
 
 DEFAULT_REACTION = tuple()
 
@@ -13,11 +14,18 @@ Reaction = Union[ComplexAction, ActionFactory, Any]
 class InferrerBase(metaclass=ABCMeta):
     __action_table: Dict[Hashable, Reaction] = {}
 
-    def __init__(self, player: ActionPlayer, config_path: str):
-        self._player: ActionPlayer = player
+    def __init__(self, sensor_hub: SensorHub, player: ActionPlayer, config_path: str):
+        """
+        load config into self._config, initiate self._action_table, parse device handle
+        :param sensor_hub:
+        :param player:
+        :param config_path:
+        """
         with open(config_path, mode='r') as f:
             self._config: Dict = json.load(f)
         self._action_table_init()
+        self._player: ActionPlayer = player
+        self._sensors: SensorHub = sensor_hub
 
     @abstractmethod
     def load_config(self, config: Dict) -> None:
