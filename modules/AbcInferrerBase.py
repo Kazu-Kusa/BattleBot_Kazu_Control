@@ -15,7 +15,7 @@ class InferrerBase(metaclass=ABCMeta):
         self._player: ActionPlayer = player
         with open(config_path, mode='r') as f:
             self._config: Dict = json.load(f)
-        self._action_table_key_init()
+        self._action_table_init()
 
     @abstractmethod
     def load_config(self, config: Dict) -> None:
@@ -27,7 +27,7 @@ class InferrerBase(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def _action_table_key_init(self):
+    def _action_table_init(self):
         """
         init the method table
         :return:
