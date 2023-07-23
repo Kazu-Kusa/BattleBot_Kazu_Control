@@ -1,33 +1,38 @@
+from random import choice
+from typing import Dict, Any
+
+from modules.AbcInferrerBase import Reaction
 from modules.AbsEdgeInferrer import AbstractEdgeInferrer
 from repo.uptechStar.constant import EDGE_FRONT_SENSOR_ID, EDGE_REAR_SENSOR_ID
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
 from repo.uptechStar.module.algrithm_tools import random_sign
-from repo.uptechStar.module.uptech import UpTech
-from repo.uptechStar.module.watcher import build_watcher
+from repo.uptechStar.module.sensors import SensorHub
+from repo.uptechStar.module.watcher import build_watcher, Watcher, default_edge_rear_watcher, default_edge_front_watcher
 
 
 class StandardEdgeInferrer(AbstractEdgeInferrer):
 
-    # TODO: the params should load form the _config
+    def exc_action(self, reaction: Reaction, *args, **kwargs) -> Any:
+        raise NotImplementedError
 
-    def __init__(self, sensors: UpTech, action_player: ActionPlayer, config_path: str):
-        super().__init__(config_path=config_path)
+    def load_config(self, config: Dict) -> None:
+        self.edge_baseline: int = config.get('edge_baseline')
+        self.min_baseline: int = config.get('min_baseline')
+        self.straight_action_duration: int = config.get('straight_action_duration')
+        self.curve_action_duration: int = config.get('curve_action_duration')
 
-        self.edge_baseline: int = self._config.get('edge_baseline')
-        self.min_baseline: int = self._config.get('min_baseline')
-        self.straight_action_duration: int = self._config.get('straight_action_duration')
-        self.curve_action_duration: int = self._config.get('curve_action_duration')
-        self._sensors: UpTech = sensors
-        self._player: ActionPlayer = action_player
-        # TODO: may directly use watcher in watcher.py instead of building a new one
-        self._rear_watcher = build_watcher(sensor_update=self._sensors.adc_all_channels,
-                                           sensor_id=EDGE_REAR_SENSOR_ID,
-                                           max_line=self.edge_baseline)
-        self._front_watcher = build_watcher(sensor_update=self._sensors.adc_all_channels,
-                                            sensor_id=EDGE_FRONT_SENSOR_ID,
-                                            max_line=self.edge_baseline)
+    def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str):
+        self.curve_action_duration = None
+        self.straight_action_duration = None
+        self.min_baseline = None
+        self.edge_baseline = None
+        super().__init__(sensor_hub=sensor_hub, player=action_player, config_path=config_path)
+
+        self._rear_watcher: Watcher = default_edge_rear_watcher
+        self._front_watcher: Watcher = default_edge_front_watcher
 
     # region tapes
+    # region 3 sides float case
     def do_fl_rl_n_fr(self, basic_speed: int) -> bool:
         sign = random_sign()
         tape = [new_ActionFrame(action_speed=(-basic_speed, basic_speed),
@@ -95,6 +100,15 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         self._player.extend(tape)
         return True
 
+    # endregion
+
+    # region 2 sides float case
+    def do_fl_n_rr_n(self, basic_speed: int) -> bool:
+        return choice([self.do_fl_n_n_n, self.do_n_n_rr_n])()
+
+    def do_n_rl_n_fr(self, basic_speed: int) -> bool:
+        return choice([self.do_n_rl_n_n, self.do_n_n_n_fr])()
+
     def do_fl_n_n_fr(self, basic_speed: int) -> bool:
         sign = random_sign()
         tape = [new_ActionFrame(action_speed=-basic_speed,
@@ -149,6 +163,9 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         self._player.extend(tape)
         return True
 
+    # endregion
+
+    # region 1 side float case
     def do_n_n_rr_n(self, basic_speed: int) -> bool:
         tape = [new_ActionFrame(action_speed=basic_speed,
                                 action_duration=self.straight_action_duration,
@@ -203,6 +220,8 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                 new_ActionFrame()]
         self._player.extend(tape)
         return True
+
+    # endregion
 
     def stop(self, basic_speed: int) -> bool:
         self._player.append(new_ActionFrame())
