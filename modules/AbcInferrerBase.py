@@ -54,12 +54,12 @@ class InferrerBase(metaclass=ABCMeta):
     def react(self, *args, **kwargs) -> Any:
         """
 
-        :param args:
-        :param kwargs:
+        :param args: will be parsed into the inferring section
+        :param kwargs: will be parsed into the inferring section
         :return:
         """
         reaction = self.get_action(self.infer(*args, **kwargs))
-        return self.exc_action(reaction[0])
+        return self.exc_action(reaction)
 
     @final
     def register_action(self, case: Hashable, complex_action: Reaction) -> None:
