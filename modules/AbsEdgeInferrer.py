@@ -1,6 +1,11 @@
 from abc import abstractmethod
-from typing import final, Tuple, Dict
-from modules.AbcInferrerBase import InferrerBase
+from typing import final, Tuple, Dict, Any, Callable, Sequence
+from modules.AbcInferrerBase import InferrerBase, Reaction
+from repo.uptechStar.module.actions import ActionFrame
+
+ActionPack = Tuple[Sequence[ActionFrame], int]
+
+ActionBuilder = Callable[[int], ActionPack]
 
 
 class AbstractEdgeInferrer(InferrerBase):
@@ -9,17 +14,30 @@ class AbstractEdgeInferrer(InferrerBase):
     def infer(self, edge_sensors: Tuple[int, int, int, int]) -> Tuple[bool, bool, bool, bool]:
         raise NotImplementedError
 
+    def exc_action(self, reaction: ActionBuilder, *args, **kwargs) -> Any:
+        """
+        all parameters are passed to the reaction function
+        :param reaction:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        complex_action, status_code = reaction
+        self._player.override(complex_action(*args, **kwargs))
+
+        return status_code
+
     # region methods
     @abstractmethod
-    def do_nothing(self, basic_speed: int) -> bool:
+    def do_nothing(self, basic_speed: int) -> ActionPack:
         raise NotImplementedError
 
     @abstractmethod
-    def stop(self, basic_speed: int) -> bool:
+    def stop(self, basic_speed: int) -> ActionPack:
         raise NotImplementedError
 
     @abstractmethod
-    def do_fl_n_n_n(self, basic_speed: int) -> bool:
+    def do_fl_n_n_n(self, basic_speed: int) -> ActionPack:
         """
         [fl]         fr
             O-----O
@@ -33,7 +51,7 @@ class AbstractEdgeInferrer(InferrerBase):
         raise NotImplementedError
 
     @abstractmethod
-    def do_n_n_n_fr(self, basic_speed: int) -> bool:
+    def do_n_n_n_fr(self, basic_speed: int) -> ActionPack:
         """
        fl          [fr]
            O-----O
@@ -47,7 +65,7 @@ class AbstractEdgeInferrer(InferrerBase):
         raise NotImplementedError
 
     @abstractmethod
-    def do_n_rl_n_n(self, basic_speed: int) -> bool:
+    def do_n_rl_n_n(self, basic_speed: int) -> ActionPack:
         """
         fl           fr
             O-----O
@@ -60,7 +78,7 @@ class AbstractEdgeInferrer(InferrerBase):
         raise NotImplementedError
 
     @abstractmethod
-    def do_n_n_rr_n(self, basic_speed: int) -> bool:
+    def do_n_n_rr_n(self, basic_speed: int) -> ActionPack:
         """
         fl           fr
             O-----O
@@ -73,7 +91,7 @@ class AbstractEdgeInferrer(InferrerBase):
         raise NotImplementedError
 
     @abstractmethod
-    def do_fl_rl_n_n(self, basic_speed: int) -> bool:
+    def do_fl_rl_n_n(self, basic_speed: int) -> ActionPack:
         """
          [fl]   l   r   fr
              O-----O
@@ -85,7 +103,7 @@ class AbstractEdgeInferrer(InferrerBase):
         raise NotImplementedError
 
     @abstractmethod
-    def do_n_n_rr_fr(self, basic_speed: int) -> bool:
+    def do_n_n_rr_fr(self, basic_speed: int) -> ActionPack:
         """
           fl   l   r  [fr]
              O-----O
@@ -97,7 +115,7 @@ class AbstractEdgeInferrer(InferrerBase):
         raise NotImplementedError
 
     @abstractmethod
-    def do_n_rl_rr_n(self, basic_speed: int) -> bool:
+    def do_n_rl_rr_n(self, basic_speed: int) -> ActionPack:
         """
          fl   l   r   fr
              O-----O
@@ -109,7 +127,7 @@ class AbstractEdgeInferrer(InferrerBase):
         raise NotImplementedError
 
     @abstractmethod
-    def do_fl_n_n_fr(self, basic_speed: int) -> bool:
+    def do_fl_n_n_fr(self, basic_speed: int) -> ActionPack:
         """
          [fl]   l   r   [fr]
              O-----O
@@ -121,7 +139,7 @@ class AbstractEdgeInferrer(InferrerBase):
         raise NotImplementedError
 
     @abstractmethod
-    def do_n_rl_n_fr(self, basic_speed: int) -> bool:
+    def do_n_rl_n_fr(self, basic_speed: int) -> ActionPack:
         """
          fl   l   r   [fr]
              O-----O
@@ -133,7 +151,7 @@ class AbstractEdgeInferrer(InferrerBase):
         raise NotImplementedError
 
     @abstractmethod
-    def do_fl_n_rr_n(self, basic_speed: int) -> bool:
+    def do_fl_n_rr_n(self, basic_speed: int) -> ActionPack:
         """
          [fl]   l   r   fr
              O-----O
@@ -145,7 +163,7 @@ class AbstractEdgeInferrer(InferrerBase):
         raise NotImplementedError
 
     @abstractmethod
-    def do_n_rl_rr_fr(self, basic_speed: int) -> bool:
+    def do_n_rl_rr_fr(self, basic_speed: int) -> ActionPack:
         """
          fl   l   r   [fr]
              O-----O
@@ -157,7 +175,7 @@ class AbstractEdgeInferrer(InferrerBase):
         raise NotImplementedError
 
     @abstractmethod
-    def do_fl_rl_rr_n(self, basic_speed: int) -> bool:
+    def do_fl_rl_rr_n(self, basic_speed: int) -> ActionPack:
         """
         [fl]   l   r   fr
              O-----O
@@ -169,7 +187,7 @@ class AbstractEdgeInferrer(InferrerBase):
         raise NotImplementedError
 
     @abstractmethod
-    def do_fl_n_rr_fr(self, basic_speed: int) -> bool:
+    def do_fl_n_rr_fr(self, basic_speed: int) -> ActionPack:
         """
          [fl]   l   r   [fr]
              O-----O
@@ -181,7 +199,7 @@ class AbstractEdgeInferrer(InferrerBase):
         raise NotImplementedError
 
     @abstractmethod
-    def do_fl_rl_n_fr(self, basic_speed: int) -> bool:
+    def do_fl_rl_n_fr(self, basic_speed: int) -> ActionPack:
         """
          [fl]   l   r   [fr]
              O-----O
