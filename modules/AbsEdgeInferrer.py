@@ -1,6 +1,6 @@
 from abc import abstractmethod
-from typing import final, Tuple, Dict, Any, Callable, Sequence
-from modules.AbcInferrerBase import InferrerBase, Reaction
+from typing import final, Tuple, Any, Callable, Sequence
+from repo.uptechStar.module.inferrer_base import InferrerBase
 from repo.uptechStar.module.actions import ActionFrame
 
 ActionPack = Tuple[Sequence[ActionFrame], int]

@@ -1,13 +1,11 @@
 from random import choice
-from typing import Dict, Any, Tuple
+from typing import Tuple
 
-from modules.AbcInferrerBase import Reaction
-from modules.AbsEdgeInferrer import AbstractEdgeInferrer, ActionBuilder, ActionPack
-from repo.uptechStar.constant import EDGE_FRONT_SENSOR_ID, EDGE_REAR_SENSOR_ID
+from modules.AbsEdgeInferrer import AbstractEdgeInferrer, ActionPack
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
 from repo.uptechStar.module.algrithm_tools import random_sign
 from repo.uptechStar.module.sensors import SensorHub
-from repo.uptechStar.module.watcher import build_watcher, Watcher, default_edge_rear_watcher, default_edge_front_watcher
+from repo.uptechStar.module.watcher import Watcher, default_edge_rear_watcher, default_edge_front_watcher
 
 
 class StandardEdgeInferrer(AbstractEdgeInferrer):
