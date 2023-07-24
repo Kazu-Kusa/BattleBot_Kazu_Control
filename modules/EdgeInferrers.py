@@ -11,21 +11,25 @@ from repo.uptechStar.module.watcher import build_watcher, Watcher, default_edge_
 
 
 class StandardEdgeInferrer(AbstractEdgeInferrer):
+    CONFIG_EDGE_MAX_BASELINE_KEY = r'EdgeMaxBaseline'
+    CONFIG_EDGE_MIN_BASELINE_KEY = r'EdgeMinBaseline'
+    CONFIG_STRAIGHT_ACTION_DURATION_KEY = r'StraightActionDuration'
+    CONFIG_CURVE_ACTION_DURATION_KEY = r'CurveActionDuration'
+
+    def register_all_config(self):
+        self.register_config(config_registry_path=self.CONFIG_EDGE_MAX_BASELINE_KEY,
+                             value=1750)
+        self.register_config(config_registry_path=self.CONFIG_EDGE_MIN_BASELINE_KEY,
+                             value=1150)
+        self.register_config(config_registry_path=self.CONFIG_STRAIGHT_ACTION_DURATION_KEY,
+                             value=200)
+        self.register_config(config_registry_path=self.CONFIG_CURVE_ACTION_DURATION_KEY,
+                             value=170)
 
     def exc_action(self, reaction: Reaction, *args, **kwargs) -> Any:
         raise NotImplementedError
 
-    def load_config(self, config: Dict) -> None:
-        self.edge_baseline: int = config.get('edge_baseline')
-        self.min_baseline: int = config.get('min_baseline')
-        self.straight_action_duration: int = config.get('straight_action_duration')
-        self.curve_action_duration: int = config.get('curve_action_duration')
-
     def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str):
-        self.curve_action_duration = None
-        self.straight_action_duration = None
-        self.min_baseline = None
-        self.edge_baseline = None
         super().__init__(sensor_hub=sensor_hub, player=action_player, config_path=config_path)
 
         self._rear_watcher: Watcher = default_edge_rear_watcher
@@ -232,13 +236,14 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
 
     # endregion
 
-    def floating_inferrer(self, edge_sensors: tuple[int, int, int, int]) -> tuple[bool, bool, bool, bool]:
-        edge_rr_sensor = edge_sensors[0]
-        edge_fr_sensor = edge_sensors[1]
-        edge_fl_sensor = edge_sensors[2]
-        edge_rl_sensor = edge_sensors[3]
-
-        return (edge_fl_sensor > self.edge_baseline and edge_fl_sensor > self.min_baseline,
-                edge_fr_sensor > self.edge_baseline and edge_fr_sensor > self.min_baseline,
-                edge_rl_sensor > self.edge_baseline and edge_rl_sensor > self.min_baseline,
-                edge_rr_sensor > self.edge_baseline and edge_rr_sensor > self.min_baseline)
+    def infer(self, edge_sensors: tuple[int, int, int, int]) -> tuple[bool, bool, bool, bool]:
+        pass
+        # edge_rr_sensor = edge_sensors[0]
+        # edge_fr_sensor = edge_sensors[1]
+        # edge_fl_sensor = edge_sensors[2]
+        # edge_rl_sensor = edge_sensors[3]
+        #
+        # return (edge_fl_sensor > self.edge_baseline and edge_fl_sensor > self.min_baseline,
+        #         edge_fr_sensor > self.edge_baseline and edge_fr_sensor > self.min_baseline,
+        #         edge_rl_sensor > self.edge_baseline and edge_rl_sensor > self.min_baseline,
+        #         edge_rr_sensor > self.edge_baseline and edge_rr_sensor > self.min_baseline)
