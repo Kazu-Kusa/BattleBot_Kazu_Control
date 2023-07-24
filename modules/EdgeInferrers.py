@@ -1,5 +1,5 @@
 from random import choice
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 
 from modules.AbcInferrerBase import Reaction
 from modules.AbsEdgeInferrer import AbstractEdgeInferrer, ActionBuilder, ActionPack
@@ -219,14 +219,8 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
 
     # endregion
 
-    def infer(self, edge_sensors: tuple[int, int, int, int]) -> tuple[bool, bool, bool, bool]:
-        pass
-        # edge_rr_sensor = edge_sensors[0]
-        # edge_fr_sensor = edge_sensors[1]
-        # edge_fl_sensor = edge_sensors[2]
-        # edge_rl_sensor = edge_sensors[3]
-        #
-        # return (edge_fl_sensor > self.edge_baseline and edge_fl_sensor > self.min_baseline,
-        #         edge_fr_sensor > self.edge_baseline and edge_fr_sensor > self.min_baseline,
-        #         edge_rl_sensor > self.edge_baseline and edge_rl_sensor > self.min_baseline,
-        #         edge_rr_sensor > self.edge_baseline and edge_rr_sensor > self.min_baseline)
+    def infer(self, edge_sensors: Tuple[int, int, int, int]) -> Tuple[bool, bool, bool, bool]:
+        edge_min_baseline = getattr(self, self.CONFIG_EDGE_MIN_BASELINE_KEY)
+        edge_max_baseline = getattr(self, self.CONFIG_EDGE_MAX_BASELINE_KEY)
+
+        return tuple(map(lambda x: edge_min_baseline < x < edge_max_baseline, edge_sensors))
