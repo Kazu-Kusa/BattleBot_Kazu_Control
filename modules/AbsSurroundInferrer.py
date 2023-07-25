@@ -1,15 +1,22 @@
 from abc import ABCMeta, abstractmethod
-from typing import final, Dict, List, Callable, Tuple, Optional
+from typing import final, Dict, List, Callable, Tuple, Optional, Hashable, Any
+
+from overrides import overrides
 
 from repo.uptechStar.module.actions import ActionPlayer
+from repo.uptechStar.module.inferrer_base import InferrerBase, Reaction, ComplexAction
+
+FlexActionFactory = Callable[[int], ComplexAction]
+from repo.uptechStar.module.sensors import SensorHub
+from repo.uptechStar.module.watcher import Watcher, default_edge_front_watcher, default_edge_rear_watcher
 
 
-class AbstractSurroundInferrer(metaclass=ABCMeta):
+class AbstractSurroundInferrer(InferrerBase):
     KEY_BEHIND_OBJECT = 5
 
     KEY_RIGHT_OBJECT = 4
 
-    KET_LEFT_OBJECT = 3
+    KEY_LEFT_OBJECT = 3
 
     KEY_FRONT_ENEMY_CAR = 2
 
@@ -17,91 +24,86 @@ class AbstractSurroundInferrer(metaclass=ABCMeta):
 
     KEY_FRONT_ALLY_BOX = 0
 
-    def __init__(self, basic_duration: int, player: ActionPlayer):
-        self._basic_duration = basic_duration
-        self._player = player
+    KEY_FRONT_NEUTRAL_BOX = 6
+
+    # TODO: currently, these cases has only covered the major ones,assuming robot was surrounded by one object at a time
 
     @abstractmethod
-    def on_allay_box_at_front(self, basic_speed, multiplier):
+    def infer(self, *args, **kwargs) -> Tuple[Hashable, ...]:
+        raise NotImplementedError
+
+    @overrides
+    def exc_action(self, reaction: FlexActionFactory, basic_speed: int) -> None:
+        self._player.override(reaction(basic_speed))
+
+    @final
+    def _action_table_init(self):
+        self.register_action(case=self.KEY_BEHIND_OBJECT,
+                             complex_action=self.on_object_encountered_at_behind)
+        self.register_action(case=self.KEY_RIGHT_OBJECT,
+                             complex_action=self.on_object_encountered_at_right)
+        self.register_action(case=self.KEY_LEFT_OBJECT,
+                             complex_action=self.on_object_encountered_at_left)
+        self.register_action(case=self.KEY_FRONT_ENEMY_CAR,
+                             complex_action=self.on_enemy_car_encountered_at_front)
+        self.register_action(case=self.KEY_FRONT_ENEMY_BOX,
+                             complex_action=self.on_enemy_box_encountered_at_front)
+        self.register_action(case=self.KEY_FRONT_ALLY_BOX,
+                             complex_action=self.on_allay_box_encountered_at_front)
+
+    # region methods
+    @abstractmethod
+    def on_allay_box_encountered_at_front(self, basic_speed) -> ComplexAction:
         """
         the action that will be executed on the event when encountering allay box
-        :param basic_speed: the desired speed
-        :param multiplier: the desired speed multiplier
+        :param basic_speed: the desired speed the desired speed multiplier
         :return:
         """
         pass
 
     @abstractmethod
-    def on_enemy_box_at_front(self, basic_speed, multiplier):
+    def on_enemy_box_encountered_at_front(self, basic_speed) -> ComplexAction:
         """
         the action that will be executed on the event when encountering enemy box
         :param basic_speed:
-        :param multiplier:
         :return:
         """
         pass
 
     @abstractmethod
-    def on_enemy_car_at_front(self, basic_speed, multiplier):
+    def on_enemy_car_encountered_at_front(self, basic_speed) -> ComplexAction:
         """
         the action that will be executed on the event when encountering enemy car
         :param basic_speed:
-        :param multiplier:
         :return:
         """
         pass
 
     @abstractmethod
-    def on_object_encountered_at_left(self, basic_speed, multiplier):
+    def on_object_encountered_at_left(self, basic_speed) -> ComplexAction:
         """
         the action that will be executed on the event when encountering object at left
         :param basic_speed:
-        :param multiplier:
         :return:
         """
         pass
 
     @abstractmethod
-    def on_object_encountered_at_right(self, basic_speed, multiplier):
+    def on_object_encountered_at_right(self, basic_speed) -> ComplexAction:
         """
         the action that will be executed on the event when encountering object at right
         :param basic_speed:
-        :param multiplier:
         :return:
         """
         pass
 
     @abstractmethod
-    def on_object_encountered_at_behind(self, basic_speed, multiplier):
+    def on_object_encountered_at_behind(self, basic_speed) -> ComplexAction:
         """
         the action that will be executed on the event when encountering object at behind
         :param basic_speed:
-        :param multiplier:
         :return:
         """
         pass
 
-    @abstractmethod
-    def evaluate_surrounding_status(self, adc_list) -> int:
-        """
-        checks sensors to get surrounding status code
-        :param adc_list:
-        :return: if it has encountered anything
-        """
-        pass
-
-    __method_table: Dict[int, Callable] = {
-        KEY_FRONT_ALLY_BOX: on_allay_box_at_front,
-        KEY_FRONT_ENEMY_BOX: on_enemy_box_at_front,
-        KEY_FRONT_ENEMY_CAR: on_enemy_car_at_front,
-        KET_LEFT_OBJECT: on_object_encountered_at_left,
-        KEY_RIGHT_OBJECT: on_object_encountered_at_right,
-        KEY_BEHIND_OBJECT: on_object_encountered_at_behind
-    }
-
-    @final
-    def react_to_surroundings(self, adc_list, speed, multiplier) -> int:
-        status_code = self.evaluate_surrounding_status(adc_list)
-        method: Callable = self.__method_table.get(status_code)
-        method(speed, multiplier)
-        return status_code
+    # endregion
