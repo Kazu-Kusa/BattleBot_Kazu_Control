@@ -13,6 +13,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
 
     CONFIG_BASIC_DURATION_KEY = 'BasicDuration'
 
+    @final
     def register_all_config(self):
         self.register_config(config_registry_path=self.CONFIG_BASIC_DURATION_KEY,
                              value=1500)

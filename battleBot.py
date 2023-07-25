@@ -4,7 +4,7 @@ from typing import Callable, Optional, List, Union
 
 from modules.EdgeInferrers import StandardEdgeInferrer
 from modules.bot import Bot
-
+from functools import lru_cache
 from time import perf_counter_ns
 
 from repo.uptechStar.constant import EDGE_REAR_SENSOR_ID, EDGE_FRONT_SENSOR_ID, SIDES_SENSOR_ID, START_MAX_LINE, \
@@ -14,65 +14,14 @@ from repo.uptechStar.module.uptech import UpTech
 from repo.uptechStar.module.watcher import build_watcher
 
 
-class AttackPolicy:
-    def __init__(self, sensors: UpTech, player: ActionPlayer):
-        self._sensors: UpTech = sensors
-        self._player: ActionPlayer = player
-
-    def on_attacked(self, position_type: bool, counter_back: bool = False,
-                    run_away: bool = False,
-                    run_speed: int = 5000, run_time: int = 240,
-                    run_away_breaker_func: Optional[Callable[[], bool]] = None,
-                    run_away_break_action_func: Optional[Union[ActionFrame, List[ActionFrame]]] = None,
-                    reacting_speed: int = 6400, reacting_time: int = 350):
-        """
-        use action tf to evade attacks
-        :param run_away_break_action_func:
-        :param run_away_breaker_func:
-        :param run_time:
-        :param run_away:
-        :param run_speed:
-        :param counter_back:
-        :param position_type:
-        :param reacting_speed:
-        :param reacting_time:
-        :return:
-        """
-        if position_type:
-            if counter_back:
-                speeds = (reacting_speed, reacting_speed, reacting_speed, 0)
-
-            else:
-                speeds = (-reacting_speed, -reacting_speed, 0, -reacting_speed)
-
-        else:
-            if counter_back:
-                speeds = (0, reacting_speed, reacting_speed, reacting_speed)
-
-            else:
-                speeds = (-reacting_speed, 0, -reacting_speed, -reacting_speed)
-
-        tape = [new_ActionFrame(action_speed=speeds,
-                                action_duration=reacting_time),
-                new_ActionFrame()]
-        if not counter_back and run_away:
-            action_D = [new_ActionFrame(action_speed=run_speed,
-                                        action_duration=run_time,
-                                        breaker_func=run_away_breaker_func,
-                                        break_action=run_away_break_action_func),
-                        new_ActionFrame()]
-            tape.extend(action_D)
-        self._player.extend(tape)
-
-
-class BattleBot(Bot, AttackPolicy):
+class BattleBot(Bot):
 
     # TODO: unbind the surrounding objects detection logic to a new class based on ActionPlayer
 
     def __init__(self, config_path: str):
         super().__init__(config_path=config_path)
 
-        self.edge_inferrer = StandardEdgeInferrer(sensors=self.sensors,
+        self.edge_inferrer = StandardEdgeInferrer(sensor_hub=self.sensors,
                                                   action_player=self.player,
                                                   config_path='config/edge_reaction_configs/edgeInferrer.json')
         self._team_color = None
@@ -135,89 +84,8 @@ class BattleBot(Bot, AttackPolicy):
         self.player.extend(tape)
 
     # region events
-    def util_edge(self, using_gray: bool = True, using_edge_sensor: bool = True, edge_baseline: int = 1800,
-                  breaker_func: Callable[[], bool] = lambda: None, max_duration: int = 3000):
-        """
-        a conditioned delay function ,will delay util the condition is satisfied
-        :param max_duration:
-        :param breaker_func:
-        :param using_gray: use the gray the judge if the condition is satisfied
-        :param using_edge_sensor: use the edge sensors to judge if the condition is satisfied
-        :param edge_baseline: edge sensors judge baseline
-        :return:
-        """
-        end = perf_counter_ns() + max_duration * 1000000
-
-        def gray_check():
-            io_list = self.sensors.io_all_channels
-            while io_list[6] + io_list[7] > 1 and perf_counter_ns() < end:
-                io_list = self.sensors.io_all_channels
-                if breaker_func():
-                    return
-
-        def edge_sensor_check():
-            adc_list = self.sensors.adc_all_channels
-            while (adc_list[1] > edge_baseline or adc_list[2] > edge_baseline) and perf_counter_ns() < end:
-                adc_list = self.sensors.adc_all_channels
-                if breaker_func():
-                    return
-
-        def mixed_check():
-            io_list = self.sensors.io_all_channels
-            adc_list = self.sensors.adc_all_channels
-            while (adc_list[1] > edge_baseline or adc_list[2] > edge_baseline) and io_list[6] + io_list[
-                7] > 1 and perf_counter_ns() < end:
-                adc_list = self.sensors.adc_all_channels
-                io_list = self.sensors.io_all_channels
-                if breaker_func():
-                    return
-
-        if using_gray and using_edge_sensor:
-            mixed_check()
-        elif using_edge_sensor:
-            edge_sensor_check()
-        elif using_gray:
-            gray_check()
 
     # endregion
-
-    def check_surround(self, adc_list: list[int], baseline: int = 2000, basic_speed: int = 6000,
-                       evade_prob: float = 0.1) -> bool:
-        """
-        checks sensors to get surrounding objects
-        :param evade_prob:
-        :param basic_speed:
-        :param adc_list:
-        :param baseline:
-        :return: if it has encountered anything
-        """
-
-        if self.tag_detector.tag_id == self.tag_detector.ally_tag and adc_list[4] > baseline:
-            self.on_allay_box(basic_speed, 0.3)
-            return True
-        elif self.tag_detector.tag_id == self.tag_detector.enemy_tag and adc_list[4] > baseline:
-            self.on_enemy_box(basic_speed, 0.4)
-            return True
-        elif adc_list[4] > baseline:
-            self.on_enemy_car(basic_speed, 0.5)
-            return True
-        elif adc_list[8] > baseline:
-            if random() < evade_prob:
-                self.on_attacked(0)
-            self.on_thing_surrounding(0)
-            return True
-        elif adc_list[7] > baseline:
-            if random() < evade_prob:
-                self.on_attacked(1)
-            self.on_thing_surrounding(1)
-            return True
-        elif adc_list[5] > baseline:
-            if random() < evade_prob:
-                self.on_attacked(2)
-            self.on_thing_surrounding(2)
-            return True
-        else:
-            return False
 
     def Battle(self, normal_spead: int = 3000):
         """
@@ -225,27 +93,6 @@ class BattleBot(Bot, AttackPolicy):
         :param normal_spead:
         :return:
         """
-
-        def stage_detector_strict(baseline: int = 1000) -> bool:
-
-            temp = self.sensors.adc_all_channels
-            if temp[6] > baseline > temp[8] and temp[7] < baseline < temp[5] and temp[4] > baseline:
-                return True
-            return False
-
-        def conner_break() -> bool:
-            temp = self.sensors.adc_all_channels
-            rb_sensor = temp[5]
-            fb_sensor = temp[4]
-            l3_sensor = temp[8]
-            r3_sensor = temp[7]
-            base_line = 2000
-            delta_front_rear = abs(rb_sensor - fb_sensor)
-            ab_delta_right_left = abs(l3_sensor - r3_sensor)
-            if delta_front_rear + ab_delta_right_left > base_line:
-                return True
-            else:
-                return False
 
         def on_stage() -> None:
             warnings.warn('on_stage')
@@ -266,40 +113,11 @@ class BattleBot(Bot, AttackPolicy):
             self.player.append(new_ActionFrame(action_speed=self._normal_speed))
             self.screen.ADC_Led_SetColor(1, self.screen.COLOR_YELLOW)
 
-        def front_to_conner() -> None:
-            warnings.warn('in_conner,front_to_conner')
-            if self.tag_monitor_switch:
-                self.tag_monitor_switch = False
-            self.scan_surround(detector=conner_break, with_dash=True,
-                               dash_speed=-7000, dash_time=450, spinning_speed=2000)
-
-        def rear_to_conner() -> None:
-            warnings.warn('in_conner,rear_to_conner')
-            if self.tag_monitor_switch:
-                self.tag_monitor_switch = False
-            self.scan_surround(detector=conner_break, with_dash=True,
-                               dash_speed=5000, dash_time=450, spinning_speed=2000)
-
-        def to_stage() -> None:
-            warnings.warn('by_stage')
-            if self.tag_monitor_switch:
-                self.tag_monitor_switch = False
-
-            def halt():
-                self.player.append(new_ActionFrame())
-
-            self.scan_surround(detector=stage_detector_strict, with_ready=True, ready_time=300, with_dash=True,
-                               dash_breaker_func=self._rear_watcher,
-                               dash_breaker_action_func=halt, spinning_speed=1200, max_duration=4000)
-
-        methods_table = {0: on_stage, 1: to_stage, 2: front_to_conner, 3: rear_to_conner}
         try:
             # wait for the battle starts
             self.wait_start(**self._wait_start_kwargs)
             while True:
-                method: Callable[[], None] = methods_table.get(
-                    check_surrounding_fence(self.sensors.adc_all_channels, **self._check_surrounding_fence_kwargs))
-                method()
+                pass
 
 
         except KeyboardInterrupt:
@@ -354,4 +172,3 @@ def check_surrounding_fence(ad_list: list, baseline: int = 5000, conner_baseline
 if __name__ == '__main__':
     bot = BattleBot(config_path='config/Aggressive.json')
     bot.Battle()
-    # bot.test_check_surround()
