@@ -3,6 +3,7 @@ from abc import ABCMeta, abstractmethod
 from repo.uptechStar.module.actions import ActionPlayer
 from repo.uptechStar.module.camra import Camera
 from repo.uptechStar.module.db_tools import Configurable
+from repo.uptechStar.module.sensors import SensorHub
 from repo.uptechStar.module.tagdetector import TagDetector
 from repo.uptechStar.module.screen import Screen
 from repo.uptechStar.module.uptech import UpTech
@@ -19,6 +20,10 @@ class Bot(Configurable, metaclass=ABCMeta):
     # TODO: do remember add the port to the config file
     player = ActionPlayer()
 
+    sensor_hub = SensorHub(updaters=[on_board_sensors.adc_all_channels,
+                                     on_board_sensors.io_all_channels,
+                                     i2c_expansion_sensors.get_all_adc_data])
+
     def __init__(self, config_path: str = './config.json'):
         """
         :param config_path: the path to the config
@@ -26,7 +31,7 @@ class Bot(Configurable, metaclass=ABCMeta):
         super().__init__(config_path=config_path)
 
     @abstractmethod
-    def Battle(self, normal_spead: int, team_color: str) -> None:
+    def Battle(self, normal_spead: int, team_color: str, use_cam: bool) -> None:
         """
         the main function
         :param team_color:
