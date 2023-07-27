@@ -4,7 +4,7 @@ from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub
 from repo.uptechStar.module.watcher import default_edge_rear_watcher, default_edge_front_watcher, Watcher
 from repo.uptechStar.module.algrithm_tools import random_sign, random_enlarge_multiplier, random_float_multiplier
-from typing import final, Dict, List, Callable, Tuple, Optional, Sequence, Union, Hashable
+from typing import final, Dict, List, Callable, Tuple, Optional, Sequence, Union, Hashable, Any
 
 BASIC_DURATION = 200
 
@@ -14,6 +14,9 @@ OFF_STAGE_DASH_SPEED = -8000
 
 
 class StandardFenceInferrer(AbstractFenceInferrer):
+    def react(self, *args, **kwargs) -> Any:
+        pass
+
     CONFIG_BASIC_DURATION_KEY = 'BasicDuration'
     CONFIG_OFF_STAGE_DASH_DURATION_KEY = 'OffStageDashDuration'
     CONFIG_OFF_STAGE_DASH_SPEED_KEY = 'OffStageDashSpeed'

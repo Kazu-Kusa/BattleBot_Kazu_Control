@@ -4,10 +4,13 @@ from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub
 from repo.uptechStar.module.watcher import default_edge_rear_watcher, default_edge_front_watcher, Watcher
 from repo.uptechStar.module.algrithm_tools import random_sign, random_enlarge_multiplier, random_float_multiplier
-from typing import final, Tuple, Hashable
+from typing import final, Tuple, Hashable, Any
 
 
 class StandardSurroundInferrer(AbstractSurroundInferrer):
+    def react(self, *args, **kwargs) -> Any:
+        pass
+
     def infer(self, *args, **kwargs) -> Tuple[Hashable, ...]:
         raise NotImplementedError
 
