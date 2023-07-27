@@ -32,7 +32,6 @@ class AbstractSurroundInferrer(InferrerBase):
     def infer(self, *args, **kwargs) -> Tuple[Hashable, ...]:
         raise NotImplementedError
 
-    @overrides
     def exc_action(self, reaction: FlexActionFactory, basic_speed: int) -> None:
         self._player.override(reaction(basic_speed))
 
