@@ -1,8 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from typing import final, Dict, List, Callable, Tuple, Optional, Hashable, Any
 
-from overrides import overrides
-
 from repo.uptechStar.module.actions import ActionPlayer
 from repo.uptechStar.module.inferrer_base import InferrerBase, Reaction, ComplexAction
 
@@ -32,7 +30,6 @@ class AbstractSurroundInferrer(InferrerBase):
     def infer(self, *args, **kwargs) -> Tuple[Hashable, ...]:
         raise NotImplementedError
 
-    @overrides
     def exc_action(self, reaction: FlexActionFactory, basic_speed: int) -> None:
         self._player.override(reaction(basic_speed))
 

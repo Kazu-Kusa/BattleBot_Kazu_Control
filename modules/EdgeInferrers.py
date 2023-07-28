@@ -1,5 +1,5 @@
 from random import choice
-from typing import Tuple
+from typing import Tuple, Any
 
 from modules.AbsEdgeInferrer import AbstractEdgeInferrer, ActionPack
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
@@ -222,3 +222,6 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         edge_max_baseline = getattr(self, self.CONFIG_EDGE_MAX_BASELINE_KEY)
 
         return tuple(map(lambda x: edge_min_baseline < x < edge_max_baseline, edge_sensors))
+
+    def react(self, *args, **kwargs) -> Any:
+        pass
