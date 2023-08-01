@@ -3,10 +3,17 @@
 APT_FILE_PATH=/etc/apt/sources.list
 sudo sh -c "echo 'deb https://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ bullseye main non-free contrib rpi' > $APT_FILE_PATH"
 sudo sh -c "echo 'deb-src https://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ bullseye main non-free contrib rpi' >> $APT_FILE_PATH"
+sudo sh -c "echo 'deb http://mirrors.ustc.edu.cn/raspbian/raspbian/ bullseye main contrib non-free rpi' >> $APT_FILE_PATH"
+sudo sh -c "echo 'deb http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi' >> $APT_FILE_PATH"
+
+
 
 # apt update
 sudo apt update
 sudo apt upgrade -y
+
+
+sudo apt install -y git gcc cmake
 
 python_version="3.11"  # 要判断的Python版本
 
@@ -57,8 +64,17 @@ function check_python_modules() {
 # 调用函数
 check_python_modules
 
-wget https://project-downloads.drogon.net/wiringpi-latest.deb
-sudo dpkg -i wiringpi-latest.deb
+
+
+if command -v gpio; then
+    echo "wiringpi 已经安装"
+else
+    echo "下载并安装wiringpi中"
+    wget https://project-downloads.drogon.net/wiringpi-latest.deb
+    sudo dpkg -i wiringpi-latest.deb
+fi
+
+
 
 # raspi-config
 sudo raspi-config nonint do_i2c 0  # 激活I2C
@@ -73,10 +89,10 @@ function check_and_append_string() {
     string_to_append="$2"
 
     if grep -q "$string_to_append" "$file_path"; then
-        echo "String already exists in the file."
+        echo "String '$2' already exists in the file '$1'."
     else
         echo "$string_to_append" >> "$file_path"
-        echo "String appended to the file."
+        echo "String '$2' appended to the file '$1'."
     fi
 }
 
@@ -89,4 +105,9 @@ core_freq="core_freq=750"
 check_and_append_string "$config_file" "$arm_freq"
 check_and_append_string "$config_file" "$over_voltage"
 check_and_append_string "$config_file" "$core_freq"
-sudo reboot
+
+if [ "$1" == "reboot" ]; then
+   sudo reboot
+else
+   echo "如果更改了超频选项，则需要重启"
+fi
