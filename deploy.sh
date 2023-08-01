@@ -21,6 +21,9 @@ function installPython(){
 # install python3.11 compile dep
     sudo apt install -y build-essential libffi-dev libssl-dev openssl
     # install python3.11
+    TEMP_DIR="~/temp"
+    mkdir '$TEMP_DIR'
+    cd '$TEMP_DIR'
     wget https://mirrors.huaweicloud.com/python/3.11.0/Python-3.11.0.tar.xz
     tar -xf Python-3.11.0.tar.xz
     cd Python-3.11.0
@@ -70,6 +73,10 @@ if command -v gpio; then
     echo "wiringpi 已经安装"
 else
     echo "下载并安装wiringpi中"
+    TEMP_DIR="~/temp"
+    mkdir '$TEMP_DIR'
+    cd '$TEMP_DIR'
+    rm wiringpi-latest.deb
     wget https://project-downloads.drogon.net/wiringpi-latest.deb
     sudo dpkg -i wiringpi-latest.deb
 fi
