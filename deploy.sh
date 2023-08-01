@@ -63,7 +63,8 @@ sudo dpkg -i wiringpi-latest.deb
 # raspi-config
 sudo raspi-config nonint do_i2c 0  # 激活I2C
 sudo raspi-config nonint do_fan 0  # 激活风扇
-sudo raspi-config nonint set_config_var dtoverlay=gpio-fan,gpiopin=18,temp=60000 /boot/config.txt  # 设置风扇GPIO和激活温度为65℃
+sudo sed -i 's/gpiopin=14/gpiopin=18/' /boot/config.txt
+sudo sed -i 's/temp=80000/temp=60000/' /boot/config.txt  # 设置风扇GPIO和激活温度为60℃
 # open SPI
 sudo raspi-config nonint do_spi 0
 # over clock
