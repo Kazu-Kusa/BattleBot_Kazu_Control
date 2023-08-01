@@ -1,8 +1,8 @@
 #!/bin/bash
 # apt source
 APT_FILE_PATH=/etc/apt/sources.list
-sudo echo "deb https://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ bullseye main non-free contrib rpi" > APT_FILE_PATH
-sudo echo "deb-src https://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ bullseye main non-free contrib rpi" >> APT_FILE_PATH
+sudo sh -c "echo 'deb https://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ bullseye main non-free contrib rpi' > $APT_FILE_PATH"
+sudo sh -c "echo 'deb-src https://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ bullseye main non-free contrib rpi' >> $APT_FILE_PATH"
 
 # apt update
 sudo apt update
