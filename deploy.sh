@@ -67,16 +67,26 @@ sudo sed -i 's/gpiopin=14/gpiopin=18/' /boot/config.txt
 sudo sed -i 's/temp=80000/temp=60000/' /boot/config.txt  # 设置风扇GPIO和激活温度为60℃
 # open SPI
 sudo raspi-config nonint do_spi 0
+
+function check_and_append_string() {
+    file_path="$1"
+    string_to_append="$2"
+
+    if grep -q "$string_to_append" "$file_path"; then
+        echo "String already exists in the file."
+    else
+        echo "$string_to_append" >> "$file_path"
+        echo "String appended to the file."
+    fi
+}
+
 # over clock
-if grep -q "arm_freq=2000" /boot/config.txt; then
-    sudo echo "arm_freq=2000" >> /boot/config.txt
-fi
+config_file="/boot/config.txt"
+arm_freq="arm_freq=2000"
+over_voltage="over_voltage=9"
+core_freq="core_freq=750"
 
-if grep -q "over_voltage=0" /boot/config.txt; then
-    sudo echo "over_voltage=9" >> /boot/config.txt
-fi
-
-if grep -q "core_freq=750" /boot/config.txt; then
-    sudo echo "core_freq=750" >> /boot/config.txt
-fi
-
+check_and_append_string "$config_file" "$arm_freq"
+check_and_append_string "$config_file" "$over_voltage"
+check_and_append_string "$config_file" "$core_freq"
+sudo reboot
