@@ -43,5 +43,15 @@ class motor_test(unittest.TestCase):
         motor_speed_test('COM4')
 
 
+class Sensor_test(unittest.TestCase):
+
+    def test_sensor_record(self):
+        from repo.uptechStar.module.uptech import UpTech
+        from repo.uptechStar.module.sensors import record_updater
+        a = UpTech()
+        recoded = record_updater(updater=a.atti_all, duration=10000, interval=2)
+        recoded.to_csv('test.csv')
+
+
 if __name__ == '__main__':
     unittest.main()
