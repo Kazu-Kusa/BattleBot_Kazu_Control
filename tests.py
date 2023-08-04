@@ -52,6 +52,13 @@ class Sensor_test(unittest.TestCase):
         recoded = record_updater(updater=a.atti_all, duration=10000, interval=2)
         recoded.to_csv('test.csv')
 
+        pad = Screen()
+        pad.set_font_size(pad.FONT_12X16)
+        pad.put_string(0, 0, "Screen Test")
+
+
+# import ctypes
+# a = ctypes.cdll.LoadLibrary('./libuptech.so')
 
 if __name__ == '__main__':
     unittest.main()
