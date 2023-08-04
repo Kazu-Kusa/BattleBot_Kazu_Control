@@ -151,3 +151,5 @@ fi
 
 sudo apt-get install -y libtinfo-dev #llvmlite deps
 sudo apt install -y raspberrypi-kernel-headers #ch34x driver deps
+#sudo apt-get install -y i2c-tools
+#sudo apt-get install --reinstall raspberrypi-bootloader raspberrypi-kernel raspberrypi-kernel-headers
