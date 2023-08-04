@@ -1,5 +1,5 @@
 #!/bin/bash
-dos2unix ./deploy_body.sh
+dos2unix *.sh
 sudo bash ./deploy_body.sh 
 if [ "$1" == "reboot" ]; then
    sudo reboot
