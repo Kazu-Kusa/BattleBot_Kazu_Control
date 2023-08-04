@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# https://github.com/raspberrypi/rpi-firmware/tree/oldstable
 sudo apt upgrade rpi-update
 
 temp_dir=/home/pi/temp
