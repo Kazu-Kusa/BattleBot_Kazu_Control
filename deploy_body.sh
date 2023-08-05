@@ -22,7 +22,7 @@ function installPython() {
     # install python compile dep
     sudo apt install -y build-essential libffi-dev libssl-dev openssl
     # install python
-    cd $TEMP_DIR
+    cd $TEMP_DIR || exit
     wget https://mirrors.huaweicloud.com/python/$python_version/Python-$python_version.tar.xz
     tar -xf Python-$python_version.tar.xz
     cd Python-$python_version
@@ -33,9 +33,23 @@ function installPython() {
     pip3 install --upgrade pip
 }
 
+function apply_autoenv(){
+    PROJECT_DIR=$1
+    VENV_DIR_PATH=$2
+    INSTALL_URL=https://ghproxy.com/https://raw.githubusercontent.com/hyperupcall/autoenv/master/scripts/install.sh
+    wget --show-progress -o /dev/null -O- $INSTALL_URL | sh
+    if test -e $PROJECT_DIR; then
+        echo "Found exists $PROJECT_DIR "
+    else
+        echo "creating $PROJECT_DIR"
+        mkdir $PROJECT_DIR
+    fi
+    echo "source $VENV_DIR_PATH/bin/activate" > $PROJECT_DIR/.env
+}
 function create_venv(){
     BASE_PATH=/home/pi/.virtualenvs
-    PROJECT_NAME=BattleBot_Kazu_Control
+    PROJECT_NAME=$1
+    PROJECT_PATH=/home/pi/$PROJECT_NAME
     # 创建虚拟环境
     if test -e $BASE_PATH/$PROJECT_NAME; then
         echo "虚拟环境已创建"
@@ -45,8 +59,11 @@ function create_venv(){
         source $BASE_PATH/$PROJECT_NAME/bin/activate
         pip3 install --upgrade pip
         pip3 install pyserial pytest
+        deactivate
+        apply_autoenv $PROJECT_PATH $BASE_PATH/$PROJECT_NAME
     fi
 }
+
 
 pip3 config set global.index-url https://pypi.mirrors.ustc.edu.cn/simple
 pip3 config list
@@ -88,7 +105,7 @@ if command -v gpio; then
     echo "wiringpi 已经安装"
 else
     echo "下载并安装wiringpi中"
-    cd $TEMP_DIR
+    cd $TEMP_DIR || exit
     rm wiringpi-latest.deb
     wget https://project-downloads.drogon.net/wiringpi-latest.deb
     sudo dpkg -i wiringpi-latest.deb
@@ -142,7 +159,7 @@ if which llvm-config; then
     echo "LLVM已经安装"
 else
     echo "下载LLVM"
-    cd $TEMP_DIR
+    cd $TEMP_DIR || exit
     if test -e ./$FILE_NAME; then
         echo "llvm-project已经存在"
     else
