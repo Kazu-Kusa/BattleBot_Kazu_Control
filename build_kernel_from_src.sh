@@ -1,5 +1,6 @@
 #!/bin/bash
 
+sudo apt install -y bc bison flex libssl-dev make
 TEMP_DIR=/home/pi/temp
 mkdir $TEMP_DIR
 cd $TEMP_DIR

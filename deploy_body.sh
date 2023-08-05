@@ -22,7 +22,7 @@ function installPython() {
     # install python3.11 compile dep
     sudo apt install -y build-essential libffi-dev libssl-dev openssl
     # install python3.11
-    cd '$TEMP_DIR'
+    cd $TEMP_DIR
     wget https://mirrors.huaweicloud.com/python/3.11.0/Python-3.11.0.tar.xz
     tar -xf Python-3.11.0.tar.xz
     cd Python-3.11.0
@@ -34,10 +34,11 @@ function installPython() {
 
 
 }
-pip3 install --upgrade pip setuptools wheel
+
 
 pip3 config set global.index-url https://pypi.mirrors.ustc.edu.cn/simple
 pip3 config list
+pip3 install --upgrade pip setuptools wheel pyserial pytest
 
 function check_python_modules() {
     if python3 --version 2>&1 | grep -qF "$python_version"; then
@@ -135,6 +136,7 @@ else
     else
         wget $LLVM_URL
     fi
+    sudo apt install pv -y
     sudo chmod 777 $FILE_NAME
     pv ./$FILE_NAME | tar -xJ
     sudo mkdir -p $LLVM_DIR
