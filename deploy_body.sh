@@ -172,6 +172,20 @@ fi
 
 sudo apt-get install -y libtinfo-dev #llvmlite deps
 sudo apt install -y raspberrypi-kernel-headers #ch34x driver deps
-sudo apt-get install -y libpigpiod-if2-1
+sudo apt-get install -y libpigpiod-if2-1 pigpiod
 #sudo apt-get install -y i2c-tools
 #sudo apt-get install --reinstall raspberrypi-bootloader raspberrypi-kernel raspberrypi-kernel-headers
+
+if ! systemctl is-enabled pigpiod >/dev/null 2>&1; then
+  # 设置pigpiod开机自启
+  sudo systemctl enable pigpiod
+  sudo pigpiod
+  echo "已设置pigpiod开机自启"
+else
+  echo "pigpiod已设置开机自启"
+fi
+
+
+
+
+
