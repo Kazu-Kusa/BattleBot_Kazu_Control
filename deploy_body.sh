@@ -13,7 +13,12 @@ sudo apt update
 sudo apt upgrade -y
 
 TEMP_DIR="/home/pi/temp"
-mkdir $TEMP_DIR
+if test -e $TEMP_DIR; then
+  echo
+else
+  mkdir $TEMP_DIR
+fi
+sudo chmod 777 $TEMP_DIR
 sudo apt install -y -q git gcc cmake
 
 python_version="3.11.0"  # 要判断的Python版本
@@ -57,6 +62,7 @@ function create_venv(){
     else
         echo "在$BASE_PATH/$PROJECT_NAME创建虚拟环境"
         python3 -m venv "$BASE_PATH/$PROJECT_NAME"
+        chmod 777 "$BASE_PATH/$PROJECT_NAME"
         source "$BASE_PATH/$PROJECT_NAME/bin/activate"
         pip3 config set global.index-url https://pypi.mirrors.ustc.edu.cn/simple
         pip3 config list
@@ -95,6 +101,24 @@ function check_python_modules() {
         else
             echo "ctypes模块未安装"
             installPython
+        fi
+
+        if  check_module "llvmlite" ; then
+            echo "llvmlite 已经安装"
+        else
+            cd $TEMP_DIR || exit
+            PACKAGE_URL=https://ghproxy.com/https://github.com/numba/llvmlite/archive/refs/tags/v0.41.0dev0.zip
+            ZIP_NAME=$(basename $PACKAGE_URL)
+            if test -e ./$ZIP_NAME;then
+                echo "llvm 已经下载"
+            else
+                wget $PACKAGE_URL
+                unzip ./$ZIP_NAME
+            fi
+            cd ./llvmlite-* || exit
+            python3 setup.py build
+            python3 runtests.py
+            python3 setup.py install
         fi
     else
         echo "Python $python_version 未安装."
@@ -169,7 +193,7 @@ else
     if test -e "./$FILE_NAME"; then
         echo "llvm-project已经存在"
     else
-        wget $LLVM_URL
+        wget $LLVM_URL -O
     fi
     sudo apt install pv -y
     sudo chmod 777 "$FILE_NAME"
@@ -205,7 +229,7 @@ if ! systemctl is-enabled pigpiod >/dev/null 2>&1; then
 else
   echo "pigpiod已设置开机自启"
 fi
-
+sudo chmod -R 777 $TEMP_DIR
 
 
 
