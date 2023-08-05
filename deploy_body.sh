@@ -16,25 +16,37 @@ TEMP_DIR="/home/pi/temp"
 mkdir $TEMP_DIR
 sudo apt install -y git gcc cmake
 
-python_version="3.11"  # 要判断的Python版本
+python_version="3.11.0"  # 要判断的Python版本
 
 function installPython() {
-    # install python3.11 compile dep
+    # install python compile dep
     sudo apt install -y build-essential libffi-dev libssl-dev openssl
-    # install python3.11
+    # install python
     cd $TEMP_DIR
-    wget https://mirrors.huaweicloud.com/python/3.11.0/Python-3.11.0.tar.xz
-    tar -xf Python-3.11.0.tar.xz
-    cd Python-3.11.0
+    wget https://mirrors.huaweicloud.com/python/$python_version/Python-$python_version.tar.xz
+    tar -xf Python-$python_version.tar.xz
+    cd Python-$python_version
     ./configure --enable-optimizations
     make -j4
     sudo make install
     # update pip
     pip3 install --upgrade pip
-
-
 }
 
+function create_venv(){
+    BASE_PATH=/home/pi
+    PROJECT_NAME=BattleBot_Kazu_Control
+    # 创建虚拟环境
+    if test -e $BASE_PATH/$PROJECT_NAME; then
+        echo "虚拟环境已创建"
+    else
+        echo "在$BASE_PATH/$PROJECT_NAME创建虚拟环境"
+        python3 -m venv $BASE_PATH/$PROJECT_NAME
+        source $BASE_PATH/$PROJECT_NAME/bin/activate
+        pip3 install --upgrade pip
+        pip3 install pyserial pytest
+    fi
+}
 
 pip3 config set global.index-url https://pypi.mirrors.ustc.edu.cn/simple
 pip3 config list
@@ -69,7 +81,7 @@ function check_python_modules() {
 
 # 调用函数
 check_python_modules
-
+create_venv
 
 
 if command -v gpio; then
