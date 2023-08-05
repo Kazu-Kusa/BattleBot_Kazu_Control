@@ -12,7 +12,8 @@ sudo sh -c "echo 'deb http://raspbian.raspberrypi.org/raspbian/ bullseye main co
 sudo apt update
 sudo apt upgrade -y
 
-
+TEMP_DIR="/home/pi/temp"
+mkdir $TEMP_DIR
 sudo apt install -y git gcc cmake
 
 python_version="3.11"  # 要判断的Python版本
@@ -21,9 +22,7 @@ function installPython() {
     # install python3.11 compile dep
     sudo apt install -y build-essential libffi-dev libssl-dev openssl
     # install python3.11
-    TEMP_DIR="~/temp"
-    mkdir '$TEMP_DIR'
-    cd '$TEMP_DIR'
+    cd $TEMP_DIR
     wget https://mirrors.huaweicloud.com/python/3.11.0/Python-3.11.0.tar.xz
     tar -xf Python-3.11.0.tar.xz
     cd Python-3.11.0
@@ -35,10 +34,11 @@ function installPython() {
 
 
 }
-pip3 install --upgrade pip setuptools wheel
+
 
 pip3 config set global.index-url https://pypi.mirrors.ustc.edu.cn/simple
 pip3 config list
+pip3 install --upgrade pip setuptools wheel pyserial pytest
 
 function check_python_modules() {
     if python3 --version 2>&1 | grep -qF "$python_version"; then
@@ -76,9 +76,7 @@ if command -v gpio; then
     echo "wiringpi 已经安装"
 else
     echo "下载并安装wiringpi中"
-    TEMP_DIR="~/temp"
-    mkdir '$TEMP_DIR'
-    cd '$TEMP_DIR'
+    cd $TEMP_DIR
     rm wiringpi-latest.deb
     wget https://project-downloads.drogon.net/wiringpi-latest.deb
     sudo dpkg -i wiringpi-latest.deb
@@ -119,22 +117,33 @@ check_and_append_string "$config_file" "$over_voltage"
 echo "核心频率设置为'$core_freq'Mhz，默认500Mhz，推荐范围<=750Mhz"
 check_and_append_string "$config_file" "$core_freq"
 
+echo "检查LLVM"
 source /etc/profile
+LLVM_URL=https://ghproxy.com/https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.6/clang+llvm-14.0.6-armv7a-linux-gnueabihf.tar.xz
+FILE_NAME=$(basename $LLVM_URL)
+UNZIPPED_FOLDER_NAME=$(basename $FILE_NAME .tar.xz)
+LLVM_DIR=/opt/llvm
+echo "target package name: $FILE_NAME"
+echo "unzipped name: $UNZIPPED_FOLDER_NAME"
+echo "install destination: $LLVM_DIR"
 if which llvm-config; then
     echo "LLVM已经安装"
 else
     echo "下载LLVM"
-
-    TEMP_DIR=~/temp
-    mkdir -p "$TEMP_DIR"
-    cd "$TEMP_DIR"
-    wget -q https://ghproxy.com/https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.6/clang+llvm-14.0.6-armv7a-linux-gnueabihf.tar.xz
-    tar xf ./clang+llvm-14.0.6-armv7a-linux-gnueabihf.tar.xz
+    cd $TEMP_DIR
+    if test -e ./$FILE_NAME; then
+        echo "llvm-project已经存在"
+    else
+        wget $LLVM_URL
+    fi
+    sudo apt install pv -y
+    sudo chmod 777 $FILE_NAME
+    pv ./$FILE_NAME | tar -xJ
     sudo mkdir -p $LLVM_DIR
-    sudo mv clang+llvm-14.0.6-armv7a-linux-gnueabihf/* $LLVM_DIR
-    rm -rf clang+llvm-14.0.6-armv7a-linux-gnueabihf
+    sudo mv $UNZIPPED_FOLDER_NAME/* $LLVM_DIR
+    rm -rf $UNZIPPED_FOLDER_NAME
 
-    LLVM_DIR=/opt/llvm
+
     echo "安装LLVM到$LLVM_DIR"
 
     if echo "$PATH" | grep -q "$LLVM_DIR"; then
@@ -151,3 +160,6 @@ fi
 
 sudo apt-get install -y libtinfo-dev #llvmlite deps
 sudo apt install -y raspberrypi-kernel-headers #ch34x driver deps
+sudo apt-get install -y libpigpiod-if2-1
+#sudo apt-get install -y i2c-tools
+#sudo apt-get install --reinstall raspberrypi-bootloader raspberrypi-kernel raspberrypi-kernel-headers
