@@ -34,7 +34,7 @@ function installPython() {
 }
 
 function create_venv(){
-    BASE_PATH=/home/pi
+    BASE_PATH=/home/pi/.virtualenvs
     PROJECT_NAME=BattleBot_Kazu_Control
     # 创建虚拟环境
     if test -e $BASE_PATH/$PROJECT_NAME; then
