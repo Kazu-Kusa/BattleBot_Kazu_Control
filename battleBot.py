@@ -56,7 +56,7 @@ class BattleBot(Bot):
         """
         tape = [new_ActionFrame(action_speed=dash_speed, action_duration=dash_time),
                 new_ActionFrame()]
-        self.screen.ADC_Led_SetColor(0, self.screen.COLOR_BROWN)
+        self.screen.set_led_color(0, self.screen.COLOR_BROWN)
         warnings.warn('##HALTING##')
         while self._start_watcher():
             """
@@ -86,7 +86,7 @@ class BattleBot(Bot):
             self.tag_detector.tag_monitor_switch = True
             self.edge_inferrer.react()
             self.surrounding_inferrer.react()
-            self.screen.ADC_Led_SetColor(1, self.screen.COLOR_YELLOW)
+            self.screen.set_led_color(1, self.screen.COLOR_YELLOW)
 
         def off_stage() -> None:
             self.tag_detector.tag_monitor_switch = False
@@ -104,7 +104,7 @@ class BattleBot(Bot):
 
         except KeyboardInterrupt:
             # forced stop
-            self.screen.ADC_Led_SetColor(0, self.screen.COLOR_WHITE)
+            self.screen.set_led_color(0, self.screen.COLOR_WHITE)
             self.player.append(new_ActionFrame())
             warnings.warn('exiting')
             time.sleep(1)
