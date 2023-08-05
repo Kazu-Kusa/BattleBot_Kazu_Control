@@ -14,7 +14,7 @@ sudo apt upgrade -y
 
 TEMP_DIR="/home/pi/temp"
 mkdir $TEMP_DIR
-sudo apt install -y git gcc cmake
+sudo apt install -y -q git gcc cmake
 
 python_version="3.11.0"  # 要判断的Python版本
 
@@ -25,7 +25,7 @@ function installPython() {
     cd $TEMP_DIR || exit
     wget https://mirrors.huaweicloud.com/python/$python_version/Python-$python_version.tar.xz
     tar -xf Python-$python_version.tar.xz
-    cd Python-$python_version
+    cd Python-$python_version || exit
     ./configure --enable-optimizations
     make -j4
     sudo make install
@@ -34,57 +34,63 @@ function installPython() {
 }
 
 function apply_autoenv(){
-    PROJECT_DIR=$1
+    PROJECT_DIR_PATH=$1
     VENV_DIR_PATH=$2
     INSTALL_URL=https://ghproxy.com/https://raw.githubusercontent.com/hyperupcall/autoenv/master/scripts/install.sh
     wget --show-progress -o /dev/null -O- $INSTALL_URL | sh
-    if test -e $PROJECT_DIR; then
-        echo "Found exists $PROJECT_DIR "
+    if test -e "$PROJECT_DIR_PATH"; then
+        echo "Found exists $PROJECT_DIR_PATH "
     else
-        echo "creating $PROJECT_DIR"
-        mkdir $PROJECT_DIR
+        echo "creating $PROJECT_DIR_PATH"
+        mkdir "$PROJECT_DIR_PATH"
     fi
-    echo "source $VENV_DIR_PATH/bin/activate" > $PROJECT_DIR/.env
+    echo "source $VENV_DIR_PATH/bin/activate&&dos2unix $PROJECT_DIR_PATH/*.sh" > "$PROJECT_DIR_PATH/.env"
+    echo "find /home/pi/battleBot -name "*.sh" -exec dos2unix {} \;" >> "$PROJECT_DIR_PATH/.env"
 }
 function create_venv(){
     BASE_PATH=/home/pi/.virtualenvs
     PROJECT_NAME=$1
     PROJECT_PATH=/home/pi/$PROJECT_NAME
     # 创建虚拟环境
-    if test -e $BASE_PATH/$PROJECT_NAME; then
+    if test -e "$BASE_PATH/$PROJECT_NAME"; then
         echo "虚拟环境已创建"
     else
         echo "在$BASE_PATH/$PROJECT_NAME创建虚拟环境"
-        python3 -m venv $BASE_PATH/$PROJECT_NAME
-        source $BASE_PATH/$PROJECT_NAME/bin/activate
-        pip3 install --upgrade pip
-        pip3 install pyserial pytest
+        python3 -m venv "$BASE_PATH/$PROJECT_NAME"
+        source "$BASE_PATH/$PROJECT_NAME/bin/activate"
+        pip3 config set global.index-url https://pypi.mirrors.ustc.edu.cn/simple
+        pip3 config list
+        pip3 install --upgrade pip setuptools wheel pyserial pytest
         deactivate
-        apply_autoenv $PROJECT_PATH $BASE_PATH/$PROJECT_NAME
+        apply_autoenv "$PROJECT_PATH" "$BASE_PATH/$PROJECT_NAME"
     fi
 }
 
-
 pip3 config set global.index-url https://pypi.mirrors.ustc.edu.cn/simple
-pip3 config list
-pip3 install --upgrade pip setuptools wheel pyserial pytest
 
+
+# 函数：检查模块是否存在
+# 参数：模块名
+# 返回值：0表示模块已安装，1表示模块未安装
+check_module() {
+    python3 -c "import $1" 2>/dev/null
+    return $?
+}
 function check_python_modules() {
     if python3 --version 2>&1 | grep -qF "$python_version"; then
         echo "Python $python_version 已安装."
 
-        # 检查ssl模块是否存在
-        ssl_module=$(python3 -c "import ssl" 2>&1)
-        if [[ $? -eq 0 ]]; then
+
+
+        # 调用示例
+        if check_module "ssl"; then
             echo "ssl模块已安装"
         else
             echo "ssl模块未安装"
             installPython
         fi
 
-        # 检查ctypes模块是否存在
-        ctypes_module=$(python3 -c "import ctypes" 2>&1)
-        if [[ $? -eq 0 ]]; then
+        if check_module "ctypes"; then
             echo "ctypes模块已安装"
         else
             echo "ctypes模块未安装"
@@ -98,7 +104,7 @@ function check_python_modules() {
 
 # 调用函数
 check_python_modules
-create_venv
+create_venv "BattleBot_Kazu_Control"
 
 
 if command -v gpio; then
@@ -150,7 +156,7 @@ echo "检查LLVM"
 source /etc/profile
 LLVM_URL=https://ghproxy.com/https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.6/clang+llvm-14.0.6-armv7a-linux-gnueabihf.tar.xz
 FILE_NAME=$(basename $LLVM_URL)
-UNZIPPED_FOLDER_NAME=$(basename $FILE_NAME .tar.xz)
+UNZIPPED_FOLDER_NAME=$(basename "$FILE_NAME" .tar.xz)
 LLVM_DIR=/opt/llvm
 echo "target package name: $FILE_NAME"
 echo "unzipped name: $UNZIPPED_FOLDER_NAME"
@@ -160,17 +166,17 @@ if which llvm-config; then
 else
     echo "下载LLVM"
     cd $TEMP_DIR || exit
-    if test -e ./$FILE_NAME; then
+    if test -e "./$FILE_NAME"; then
         echo "llvm-project已经存在"
     else
         wget $LLVM_URL
     fi
     sudo apt install pv -y
-    sudo chmod 777 $FILE_NAME
-    pv ./$FILE_NAME | tar -xJ
+    sudo chmod 777 "$FILE_NAME"
+    pv "./$FILE_NAME" | tar -xJ
     sudo mkdir -p $LLVM_DIR
-    sudo mv $UNZIPPED_FOLDER_NAME/* $LLVM_DIR
-    rm -rf $UNZIPPED_FOLDER_NAME
+    sudo mv "$UNZIPPED_FOLDER_NAME/*" $LLVM_DIR
+    rm -rf "$UNZIPPED_FOLDER_NAME"
 
 
     echo "安装LLVM到$LLVM_DIR"
@@ -178,7 +184,7 @@ else
     if echo "$PATH" | grep -q "$LLVM_DIR"; then
       echo "路径 $LLVM_DIR 已存在于 PATH 环境变量中"
     else
-      echo '路径 $LLVM_DIR 不存在于 PATH 环境变量中'
+      echo "路径 $LLVM_DIR 不存在于 PATH 环境变量中"
       sudo sh -c "echo 'export PATH=$PATH:$LLVM_DIR/bin' >> /etc/profile"
       #sudo sh -c "echo 'export secure_path=$secure_path:$LLVM_DIR/bin' >> /etc/sudoers"
       #source /etc/sudoers
@@ -186,10 +192,8 @@ else
     fi
     echo "已在/etc/profile中添加PATH"
 fi
-
-sudo apt-get install -y libtinfo-dev #llvmlite deps
-sudo apt install -y raspberrypi-kernel-headers #ch34x driver deps
-sudo apt-get install -y libpigpiod-if2-1 pigpiod
+#llvmlite deps  #ch34x driver deps
+sudo apt-get install -y -q libtinfo-dev raspberrypi-kernel-headers libpigpiod-if2-1 pigpiod
 #sudo apt-get install -y i2c-tools
 #sudo apt-get install --reinstall raspberrypi-bootloader raspberrypi-kernel raspberrypi-kernel-headers
 

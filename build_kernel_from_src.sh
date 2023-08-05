@@ -3,7 +3,7 @@
 sudo apt install -y bc bison flex libssl-dev make
 TEMP_DIR=/home/pi/temp
 mkdir $TEMP_DIR
-cd $TEMP_DIR
+cd $TEMP_DIR || exit
 
 if [ -z "$1" ]
 then
@@ -13,16 +13,16 @@ else
 fi
 
 SOURCE_URL=https://ghproxy.com/https://github.com/raspberrypi/linux/archive/refs/heads/rpi-$version.y.zip
-zip_name=$(basename $SOURCE_URL)
-unziped_folder_name=linux-$(basename $zip_name .zip)
+zip_name=$(basename "$SOURCE_URL")
+unzipped_folder_name=linux-$(basename "$zip_name" .zip)
 
-if test -e $unziped_folder_name; then
-    cd $unziped_folder_name
+if test -e "$unzipped_folder_name"; then
+    cd "$unzipped_folder_name" || exit
 else
-    wget $SOURCE_URL
-    unzip $zip_name
-    rm $zip_name
-    cd $unziped_folder_name
+    wget "$SOURCE_URL"
+    unzip "$zip_name"
+    rm "$zip_name"
+    cd "$unzipped_folder_name" || exit
 fi
 
 echo "WORK DIR: $(pwd)"
