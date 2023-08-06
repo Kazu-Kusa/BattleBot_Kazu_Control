@@ -50,7 +50,7 @@ function apply_autoenv(){
         mkdir "$PROJECT_DIR_PATH"
     fi
     echo "source $VENV_DIR_PATH/bin/activate&&dos2unix $PROJECT_DIR_PATH/*.sh" > "$PROJECT_DIR_PATH/.env"
-    echo "find /home/pi/battleBot -name "*.sh" -exec dos2unix {} \;" >> "$PROJECT_DIR_PATH/.env"
+    echo "find $PROJECT_DIR_PATH -name "*.sh" -exec dos2unix {} \;" >> "$PROJECT_DIR_PATH/.env"
 }
 function create_venv(){
     BASE_PATH=/home/pi/.virtualenvs
