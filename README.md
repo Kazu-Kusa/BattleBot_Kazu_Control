@@ -105,21 +105,30 @@ MPU-6500包括下列附加功能：
 
 ```python
 """
-edge_rr 0
-edge_fr 1
-edge_fl 2
-edge_rl 3
-l2 8
-r2 7
-ftr 6
-fb 4
-rb 5
-[edge_rr, edge_fr, edge_fl, edge_rl, fb,rb,fr,r2,l2]
-{0:edge_rr,1:edge_fr,2:edge_fl, 3:edge_rl, 4:fb,5:rb,6:fr,7:r2,8:l2}
+fl ad6
+rl ad7
+fr ad2
+rr ad1
 
-{0:r_gray,1:l_gray}
-l_gray io 1
-r_gray io 0
+l1 ad8
+r1 ad0
+fb ad5
+rb ad3
+
+<empty>  ad5
+
+gray l io7
+gray r io6
+
+l3 i0
+l4 i1
+l2 i2
+ftl i3
+
+r3 i4
+r4 i5
+r2 i6
+ftr i7
 """
 ```
 
