@@ -1,4 +1,5 @@
 import unittest
+import warnings
 from typing import List, Dict
 
 from modules.EdgeInferrers import StandardEdgeInferrer
@@ -10,9 +11,23 @@ from repo.uptechStar.module.sensors import SensorHub
 from repo.uptechStar.module.serial_helper import find_serial_ports
 
 EMPTY_JSON = 'config/empty.json'
+import time
+import json
+
+from repo.uptechStar.module.uptech import UpTech
+from repo.uptechStar.module.sensors import record_updater
+from repo.uptechStar.module.screen import Screen
+import numpy as np
+
+# 原始列表
+try:
+    a = UpTech()
+    screen = Screen()
+except:
+    pass
 
 
-def test_decode_recorded_data(json_path='./recorded.json'):
+def test_decode_recorded_data(json_path='./recorded.json', dedup: bool = False):
     import pandas as pd
     import json
 
@@ -21,17 +36,17 @@ def test_decode_recorded_data(json_path='./recorded.json'):
     df = pd.concat({k: pd.Series(v) for k, v in data.items()}, axis=1, sort=False)
 
     df.to_csv(json_path.replace('.json', '.csv'), index=False)
+    if dedup:
+        def remove_duplicates(data_f):
+            data_f = data_f.apply(lambda x: x.ne(x.shift()))
+            data_f = data_f.cumsum()
+            data_f = data_f[data_f.duplicated(keep='last')]
+            data_f = data_f.apply(lambda x: x.ne(x.shift())).dropna()
+            return data_f
 
-    def remove_duplicates(data_f):
-        data_f = data_f.apply(lambda x: x.ne(x.shift()))
-        data_f = data_f.cumsum()
-        data_f = data_f[data_f.duplicated(keep='last')]
-        data_f = data_f.apply(lambda x: x.ne(x.shift())).dropna()
-        return data_f
-
-    # remove duplicated values
-    df = remove_duplicates(df)
-    df.to_csv(json_path.replace('.json', '_dedup.csv'), index=False)
+        # remove duplicated values
+        df = remove_duplicates(df)
+        df.to_csv(json_path.replace('.json', '_dedup.csv'), index=False)
 
 
 class SerialTest(unittest.TestCase):
@@ -68,18 +83,6 @@ class motor_test(unittest.TestCase):
 
 
 def test_sensor_record(duration=10000, interval=0):
-    import time
-    import json
-
-    from repo.uptechStar.module.uptech import UpTech
-    from repo.uptechStar.module.sensors import record_updater
-    from repo.uptechStar.module.screen import Screen
-    import numpy as np
-
-    # 原始列表
-
-    a = UpTech()
-    screen = Screen()
     time.sleep(3)
     updaters = [a.atti_all, a.acc_all, a.gyro_all, a.adc_all_channels]
     result_dict = {}
@@ -110,6 +113,12 @@ def test_sensor_record(duration=10000, interval=0):
 
 class SensorTest(unittest.TestCase):
 
+    def test_multiple_record(self, duration=10000, interval_list=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)):
+        warnings.warn('###############################')
+        for interval in interval_list:
+            print(f'doing with {interval}')
+            test_sensor_record(duration=duration, interval=interval)
+
     def test_decode_all_data(self):
         import os
 
@@ -126,9 +135,6 @@ class SensorTest(unittest.TestCase):
         print(files_list)
         for file in files_list:
             test_decode_recorded_data(json_path=file)
-
-    def test_ADC_data_formating(self):
-        pass
 
     def test_adc_sensor_runtime(self):
         from repo.uptechStar.module.hotConfigure.valueTest import read_sensors
@@ -223,7 +229,7 @@ class ConstructorsTest(unittest.TestCase):
 class ActionTest(unittest.TestCase):
     def test_af_compile(self):
         from repo.uptechStar.module.actions import pre_build_action_frame
-        pre_build_action_frame(speed_range=(0, 30000, 10),
+        pre_build_action_frame(speed_range=(-10000, 10000, 5),
                                duration_range=(0, 5000, 10))
 
 
