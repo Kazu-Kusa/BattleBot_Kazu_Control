@@ -168,6 +168,7 @@ config_file="/boot/config.txt"
 arm_freq="arm_freq=2000"
 over_voltage="over_voltage=7"
 core_freq="core_freq=750"
+arm_64bit="0"
 echo "-超频配置参数-"
 echo "ARM主频设置为'$arm_freq'Mhz，默认1500Mhz，推荐范围<=2147Mhz"
 check_and_append_string "$config_file" "$arm_freq"
@@ -175,6 +176,8 @@ echo "核心电压偏移设置为'$over_voltage'*10^-2V，默认0，推荐范围
 check_and_append_string "$config_file" "$over_voltage"
 echo "核心频率设置为'$core_freq'Mhz，默认500Mhz，推荐范围<=750Mhz"
 check_and_append_string "$config_file" "$core_freq"
+echo "确认系统为32bit"
+check_and_append_string "$config_file" "$arm_64bit"
 
 echo "检查LLVM"
 source /etc/profile
