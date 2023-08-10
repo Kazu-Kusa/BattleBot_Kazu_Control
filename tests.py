@@ -169,6 +169,35 @@ class ScreenTest(unittest.TestCase):
 
 class MiscTest(unittest.TestCase):
 
+    def test_perf(self):
+        from time import perf_counter_ns
+        ct = 1000
+        res = []
+        for _ in range(ct):
+            start = perf_counter_ns()
+            ns_start = perf_counter_ns() - start
+            res.append(ns_start)
+            print(ns_start)
+        print(sum(res) / ct)
+
+    def test_perf2(self):
+        from time import perf_counter_ns
+        from repo.uptechStar.module.timer import delay_us
+        ct = 100
+        res = []
+        for _ in range(ct):
+            start = perf_counter_ns()
+            delay_us(2)
+            ns_start = perf_counter_ns() - start
+            res.append(ns_start)
+            print(ns_start)
+        print(sum(res) / ct)
+
+    def test_perf3(self):
+        from repo.uptechStar.module.timer import calc_hang_time
+        b = calc_hang_time(5000, 4000)
+        print(b)  # must 1.0
+
     def test_shadow_copy(self):
         from copy import copy
         a = [1, 2, 3]
@@ -231,6 +260,140 @@ class ActionTest(unittest.TestCase):
         from repo.uptechStar.module.actions import pre_build_action_frame
         pre_build_action_frame(speed_range=(-10000, 10000, 5),
                                duration_range=(0, 5000, 10))
+
+
+class Algrithm_tools(unittest.TestCase):
+
+    def test_list_multiply(self):
+        from repo.uptechStar.module.algrithm_tools import list_multiply
+        import random
+        a = [random.randint(0, 1000) for i in range(3)]
+        b = [random.randint(0, 1000) for i in range(3)]
+        c = list_multiply(a, b)
+        d = tuple(int(a[i] * b[i]) for i in range(3))
+        self.assertIsInstance(c, tuple)
+        self.assertEqual(c, d)
+
+    def test_factor_list_multiply(self):
+        import random
+        import numpy
+        from repo.uptechStar.module.algrithm_tools import factor_list_multiply
+        b_list = [random.randint(0, 1000) for i in range(10)]
+        a = random.randint(0, 1000)
+        b = factor_list_multiply(a, b_list)
+        self.assertIsInstance(b, tuple)
+        c = numpy.array(b_list) * a
+        c = tuple(c)
+        self.assertEqual(c, b)
+
+    def test_multiply(self):
+        from repo.uptechStar.module.algrithm_tools import multiply
+        a = 3
+        b = 6
+        c = multiply(a, b)
+        self.assertIsInstance(c, int)
+
+    def test_random_sign(self):
+        from repo.uptechStar.module.algrithm_tools import random_sign
+        b = random_sign()
+        self.assertIsInstance(b, int)
+
+    def test_random_enlarge_multiplier(self):
+        from repo.uptechStar.module.algrithm_tools import random_enlarge_multiplier
+        b = random_enlarge_multiplier()
+        self.assertIsInstance(b, float)
+
+    def test_random_shrink_multiplier(self):
+        from repo.uptechStar.module.algrithm_tools import random_shrink_multiplier
+        b = random_shrink_multiplier()
+        self.assertIsInstance(b, float)
+
+    def test_random_float_multiplier(self):
+        from repo.uptechStar.module.algrithm_tools import random_float_multiplier
+        b = random_float_multiplier()
+        self.assertIsInstance(b, float)
+
+    def test_calc_p2p_dst(self):
+        from repo.uptechStar.module.algrithm_tools import calc_p2p_dst
+        import random
+        a = calc_p2p_dst((random.uniform(0, 10), random.uniform(0, 10)), (random.uniform(0, 10), random.uniform(0, 10)))
+        self.assertIsInstance(a, float)
+
+    def test_calc_p2p_error(self):
+        from repo.uptechStar.module.algrithm_tools import calc_p2p_error
+        import random
+        a = calc_p2p_error((random.uniform(0, 10), random.uniform(0, 10)),
+                           (random.uniform(0, 10), random.uniform(0, 10)))
+        self.assertIsInstance(a, tuple)
+
+
+''' 学习注释
+    numpy.array()能将数组改变为向量，进行常量*向量的乘法
+    self.assertEqual(c, b)能将两者进行比较，相同则ture
+    self.assertIsInstance(c, tuple)，判断前者是否是后者的类型
+    tuple(int(a[i]*b[i]) for i in range(3))生成器
+    
+'''
+
+
+# class Pid(unittest.TestCase):
+#     def a_test_def(self):
+#         pass
+#
+#     def test_PD_control(self):
+#         from repo.uptechStar.module.pid import PID_control
+#         import random
+#         a = PID_control()
+
+
+class Uptech(unittest.TestCase):
+    def test_adc_io_open(self):
+        a.adc_io_open()
+        print(a.adc_io_open())
+
+    def test_adc_io_close(self):
+        a.adc_io_close()
+        assert a.adc_io_close() is None
+
+    def test_adc_all_channels(self):
+        a.adc_all_channels()
+        print([x for x in a.adc_all_channels()])
+
+    def test_set_io_level(self):
+        a.set_io_level(1, 1)
+        print(a.set_io_level(1, 1))
+
+    def test_set_all_io_level(self):
+        a.set_all_io_level(1)
+        print(a.set_all_io_level(1))
+
+    def test_get_all_io_mode(self):
+        a.get_all_io_mode(1)
+        print(a.get_all_io_mode(1))
+
+    def test_io_all_channels(self):
+        a.io_all_channels()
+        print(a.io_all_channels())
+
+    def test_MPU6500_Open(self):
+        assert a.acc_all() == -1
+        assert a.atti_all() == -1
+        assert a.gyro_all() == -1
+        a.MPU6500_Open(False)
+        print([x for x in a.acc_all()])
+        print([x for x in a.atti_all()])
+        print([x for x in a.gyro_all()])
+        assert len([x for x in a.acc_all()]) == 3
+        assert len([x for x in a.atti_all()]) == 3
+        assert len([x for x in a.gyro_all()]) == 3
+        print(a.MPU6500_Open())
+
+
+class Tagdetector(unittest.TestCase):
+    def test_get_center_tag(self):
+        from repo.uptechStar.module.tagdetector import get_center_tag
+        b = get_center_tag((1, 2), [3, 4])
+        print(b)
 
 
 if __name__ == '__main__':
