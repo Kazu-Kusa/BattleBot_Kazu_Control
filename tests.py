@@ -14,14 +14,14 @@ EMPTY_JSON = 'config/empty.json'
 import time
 import json
 
-from repo.uptechStar.module.uptech import UpTech
+from repo.uptechStar.module.onboardsensors import OnBoardSensors
 from repo.uptechStar.module.sensors import record_updater
 from repo.uptechStar.module.screen import Screen
 import numpy as np
 
 # 原始列表
 try:
-    a = UpTech()
+    a = OnBoardSensors()
     screen = Screen()
 except:
     pass
@@ -141,9 +141,9 @@ class SensorTest(unittest.TestCase):
         read_sensors()
 
     def test_io_flipping_freq(self):
-        from repo.uptechStar.module.uptech import UpTech
+        from repo.uptechStar.module.onboardsensors import OnBoardSensors
         from time import perf_counter_ns
-        a = UpTech()
+        a = OnBoardSensors()
         ct = 0
         test_duration = 10000
         end_time = perf_counter_ns() + test_duration * 10e6
