@@ -2,8 +2,8 @@ from abc import ABCMeta, abstractmethod
 
 from repo.uptechStar.module.actions import ActionPlayer
 from repo.uptechStar.module.camra import Camera
-from repo.uptechStar.module.db_tools import Configurable
 from repo.uptechStar.module.onboardsensors import OnBoardSensors
+from repo.uptechStar.module.os_tools import Configurable
 from repo.uptechStar.module.screen import Screen
 from repo.uptechStar.module.sensors import SensorHub
 from repo.uptechStar.module.tagdetector import TagDetector
