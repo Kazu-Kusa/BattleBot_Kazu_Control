@@ -168,6 +168,56 @@ class ScreenTest(unittest.TestCase):
 
 
 class MiscTest(unittest.TestCase):
+    @staticmethod
+    def test_indexing_performance():
+        from time import perf_counter_ns
+        class Test():
+
+            def get(self, data):
+                return 0
+
+        def get(data):
+            return 0
+
+        # 创建一个包含大量元素的列表和字典
+        num_elements = 1000000
+        my_list = list(range(num_elements))
+        my_dict = {i: i for i in range(num_elements)}
+
+        # 测试列表索引的性能
+        start_time = perf_counter_ns()
+        for i in range(num_elements):
+            value = my_list[i]
+        end_time = perf_counter_ns()
+        list_time = end_time - start_time
+
+        # 测试字典get方法的性能
+        start_time = perf_counter_ns()
+        for i in range(num_elements):
+            value = my_dict.get(i)
+        end_time = perf_counter_ns()
+        dict_time = end_time - start_time
+
+        a = Test()
+        start_time = perf_counter_ns()
+        for i in range(num_elements):
+            value = a.get(i)
+        end_time = perf_counter_ns()
+        class_time = end_time - start_time
+
+        start_time = perf_counter_ns()
+        for i in range(num_elements):
+            value = get(i)
+        end_time = perf_counter_ns()
+        method_time = end_time - start_time
+        # 输出性能结果
+        print(f"列表索引耗时: {list_time}秒")
+        print(f"字典get方法耗时: {dict_time}秒")
+        print(f"类方法耗时: {class_time}秒")
+        print(f"方法耗时: {method_time}秒")
+        print(f'比例: {dict_time / list_time}')
+        print(f'比例: {class_time / list_time}')
+        print(f'比例: {method_time / list_time}')
 
     def test_perf(self):
         from time import perf_counter_ns
