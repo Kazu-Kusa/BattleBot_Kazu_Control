@@ -1,20 +1,26 @@
 from abc import ABCMeta, abstractmethod
 
 from repo.uptechStar.module.actions import ActionPlayer
-from repo.uptechStar.module.camra import Camera
 from repo.uptechStar.module.i2c import SensorI2CExpansion
 from repo.uptechStar.module.onboardsensors import OnBoardSensors
 from repo.uptechStar.module.os_tools import Configurable
 from repo.uptechStar.module.screen import Screen
 from repo.uptechStar.module.sensors import SensorHub
-from repo.uptechStar.module.tagdetector import TagDetector
+
+BLIND_MODE = False
+try:
+    from repo.uptechStar.module.camra import Camera
+    from repo.uptechStar.module.tagdetector import TagDetector
+except ModuleNotFoundError:
+    BLIND_MODE = True
 
 
 class Bot(Configurable, metaclass=ABCMeta):
     screen = Screen(init_screen=False)
-    camera = Camera(device_id=0)
-    # TODO constant must be defined as named constants or something in the config file
-    tag_detector = TagDetector(camera=camera, start_detect_tag=False)
+    if not BLIND_MODE:
+        camera = Camera(device_id=0)
+        # TODO constant must be defined as named constants or something in the config file
+        tag_detector = TagDetector(camera=camera, start_detect_tag=False)
     # TODO: do remember add the port to the config file
     player = ActionPlayer()
     __on_board_sensors = OnBoardSensors(debug=False)
