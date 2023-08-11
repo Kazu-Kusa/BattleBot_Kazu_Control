@@ -1,16 +1,14 @@
 import time
+import time
 import warnings
-from random import choice, random
-from typing import Callable, Optional, List, Union
 
 from modules.EdgeInferrers import StandardEdgeInferrer
 from modules.FenceInferrers import StandardFenceInferrer
 from modules.SurroundInferrers import StandardSurroundInferrer
 from modules.bot import Bot
-
 from repo.uptechStar.constant import EDGE_REAR_SENSOR_ID, EDGE_FRONT_SENSOR_ID, SIDES_SENSOR_ID, START_MAX_LINE, \
     EDGE_MAX_LINE
-from repo.uptechStar.module.actions import new_ActionFrame, ActionPlayer, ActionFrame
+from repo.uptechStar.module.actions import new_ActionFrame
 from repo.uptechStar.module.watcher import build_watcher
 
 
@@ -35,14 +33,13 @@ class BattleBot(Bot):
         self.fence_inferrer = StandardFenceInferrer(sensor_hub=self.sensor_hub,
                                                     action_player=self.player,
                                                     config_path=fence_inferrer_config)
-
-        self._start_watcher = build_watcher(sensor_update=self.on_board_sensors.adc_all_channels,
+        self._start_watcher = build_watcher(sensor_update=self.__on_board_sensors.adc_all_channels,
                                             sensor_id=SIDES_SENSOR_ID,
                                             max_line=START_MAX_LINE)
-        self._rear_watcher = build_watcher(sensor_update=self.on_board_sensors.adc_all_channels,
+        self._rear_watcher = build_watcher(sensor_update=self.__on_board_sensors.adc_all_channels,
                                            sensor_id=EDGE_REAR_SENSOR_ID,
                                            max_line=EDGE_MAX_LINE)
-        self._front_watcher = build_watcher(sensor_update=self.on_board_sensors.adc_all_channels,
+        self._front_watcher = build_watcher(sensor_update=self.__on_board_sensors.adc_all_channels,
                                             sensor_id=EDGE_FRONT_SENSOR_ID,
                                             max_line=EDGE_MAX_LINE)
 
@@ -55,7 +52,7 @@ class BattleBot(Bot):
         """
         tape = [new_ActionFrame(action_speed=dash_speed, action_duration=dash_time),
                 new_ActionFrame()]
-        self.screen.ADC_Led_SetColor(0, self.screen.COLOR_BROWN)
+        self.screen.set_led_color(0, self.screen.COLOR_BROWN)
         warnings.warn('##HALTING##')
         while self._start_watcher():
             """
@@ -78,40 +75,38 @@ class BattleBot(Bot):
         """
 
         def is_on_stage() -> bool:
+            # TODO: do remember implement this stage check
             return True
 
         def on_stage() -> None:
-            warnings.warn('on_stage')
             self.tag_detector.tag_monitor_switch = True
             self.edge_inferrer.react()
             self.surrounding_inferrer.react()
-            self.screen.ADC_Led_SetColor(1, self.screen.COLOR_YELLOW)
+            self.screen.set_led_color(1, self.screen.COLOR_YELLOW)
 
         def off_stage() -> None:
             self.tag_detector.tag_monitor_switch = False
             self.fence_inferrer.react()
+            self.screen.set_led_color(1, self.screen.COLOR_GREEN)
 
         try:
             # wait for the battle starts
             self.wait_start()
             while True:
-                if is_on_stage():
-                    on_stage()
-                else:
-                    off_stage()
-
+                on_stage() if is_on_stage() else off_stage()
 
         except KeyboardInterrupt:
             # forced stop
-            self.screen.ADC_Led_SetColor(0, self.screen.COLOR_WHITE)
+            self.screen.set_led_color(0, self.screen.COLOR_WHITE)
             self.player.append(new_ActionFrame())
             warnings.warn('exiting')
             time.sleep(1)
 
 
 if __name__ == '__main__':
-    bot = BattleBot(base_config='config/Aggressive.json',
-                    edge_inferrer_config='config/EdgeInferrer.json',
-                    surrounding_inferrer_config='config/SurroundInferrer.json',
-                    fence_inferrer_config='config/FenceInferrer.json')
-    bot.Battle(team_color='blue', normal_spead=3000, use_cam=True)
+    bot = BattleBot(base_config='config/empty.json',
+                    edge_inferrer_config='config/std_edge_inferrer_config.json',
+                    surrounding_inferrer_config='config/std_surround_inferrer_config.json',
+                    fence_inferrer_config='config/std_fence_inferrer_config.json')
+    # bot.Battle(team_color='blue', normal_spead=3000, use_cam=True)
+    bot.save_config('config/std_base.config')

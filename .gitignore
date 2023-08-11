@@ -38,3 +38,4 @@ venv/
 /testRoot/
 /.idea/
 *.pyc
+!/config/customed/

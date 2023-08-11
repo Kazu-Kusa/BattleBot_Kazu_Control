@@ -4,18 +4,18 @@ sudo apt upgrade rpi-update
 
 temp_dir=/home/pi/temp
 mkdir $temp_dir
-cd $temp_dir
+cd $temp_dir || exit
 pwd
 # 定义内核文件的URL
 kernel_url=$1
-wget $kernel_url
-filename=$(basename $kernel_url)
+wget "$kernel_url"
+filename=$(basename "$kernel_url")
 echo "$filename"
 
-unzip_file_dirname=rpi-firmware-$(basename $filename .zip)
+unzip_file_dirname=rpi-firmware-$(basename "$filename" .zip)
 # 解压内核文件
-unzip $filename
-rm $filename
+unzip "$filename"
+rm "$filename"
 
 
 

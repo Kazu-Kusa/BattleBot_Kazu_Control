@@ -1,3 +1,6 @@
 [submodule "repo/uptechStar"]
 	path = repo/uptechStar
-	url = https://github.com/Kazu-Kusa/uptech_star.git
+	url = https://ghproxy.com/https://github.com/Kazu-Kusa/uptech_star.git
+[submodule "repo/ch341par_linux"]
+	path = repo/ch341par_linux
+	url = https://ghproxy.com/https://github.com/WCHSoftGroup/ch341par_linux.git
