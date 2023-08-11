@@ -1,4 +1,5 @@
 import time
+import time
 import warnings
 
 from modules.EdgeInferrers import StandardEdgeInferrer
@@ -103,8 +104,9 @@ class BattleBot(Bot):
 
 
 if __name__ == '__main__':
-    bot = BattleBot(base_config='config/Aggressive.json',
-                    edge_inferrer_config='config/EdgeInferrer.json',
-                    surrounding_inferrer_config='config/SurroundInferrer.json',
-                    fence_inferrer_config='config/FenceInferrer.json')
-    bot.Battle(team_color='blue', normal_spead=3000, use_cam=True)
+    bot = BattleBot(base_config='config/empty.json',
+                    edge_inferrer_config='config/std_edge_inferrer_config.json',
+                    surrounding_inferrer_config='config/std_surround_inferrer_config.json',
+                    fence_inferrer_config='config/std_fence_inferrer_config.json')
+    # bot.Battle(team_color='blue', normal_spead=3000, use_cam=True)
+    bot.save_config('config/std_base.config')
