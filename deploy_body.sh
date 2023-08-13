@@ -178,7 +178,7 @@ function check_and_append_string() {
 # over clock
 config_file="/boot/config.txt"
 arm_freq="arm_freq=2000"
-over_voltage="over_voltage=7"
+over_voltage="over_voltage=10"
 core_freq="core_freq=750"
 arm_64bit="0"
 echo "-超频配置参数-"
