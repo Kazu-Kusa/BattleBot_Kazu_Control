@@ -1,3 +1,4 @@
+import re
 import unittest
 import warnings
 from typing import List, Dict
@@ -219,7 +220,7 @@ class MiscTest(unittest.TestCase):
         print(f'比例: {class_time / list_time}')
         print(f'比例: {method_time / list_time}')
 
-    def test_perf(self):
+    def test_perf_counter_ns(self):
         from time import perf_counter_ns
         ct = 1000
         res = []
@@ -230,7 +231,7 @@ class MiscTest(unittest.TestCase):
             print(ns_start)
         print(sum(res) / ct)
 
-    def test_perf2(self):
+    def test_delay_us(self):
         from time import perf_counter_ns
         from repo.uptechStar.module.timer import delay_us
         ct = 100
@@ -243,7 +244,7 @@ class MiscTest(unittest.TestCase):
             print(ns_start)
         print(sum(res) / ct)
 
-    def test_perf3(self):
+    def test_calc_hang_time(self):
         from repo.uptechStar.module.timer import calc_hang_time
         b = calc_hang_time(5000, 4000)
         print(b)  # must 1.0
@@ -440,10 +441,142 @@ class Uptech(unittest.TestCase):
 
 
 class Tagdetector(unittest.TestCase):
+    # 未完成，当前环境不支持完成该测试，cmake
     def test_get_center_tag(self):
         from repo.uptechStar.module.tagdetector import get_center_tag
         b = get_center_tag((1, 2), [3, 4])
         print(b)
+
+
+class Close_loop_controller(unittest.TestCase):
+    from repo.uptechStar.module.close_loop_controller import CloseLoopController
+
+    b = CloseLoopController((0, 0, 1, 1), (1, 1, 0, 0))
+
+    def test_motor_ids(self):
+        # 测试函数motor_ids 生成元组的功能
+        # 测试内容：判断生成内容是否是元组，是否为输入参数中的关键字motor_ids（b）
+        print(self.b.motor_ids)
+        self.assertIsInstance(self.b.motor_ids, tuple)
+        self.assertEqual(self.b.motor_ids, (0, 0, 1, 1))
+
+    def test_motor_speeds(self):
+        # 测试函数motor_speeds 生成元组的功能
+        # 测试内容：判断生成内容是否是元组，是否为规定的（0，0，0，0）
+        print(self.b.motor_speeds)
+        self.assertIsInstance(self.b.motor_speeds, tuple)
+        self.assertEqual(self.b.motor_speeds, (0, 0, 0, 0))
+
+    def test_motor_dirs(self):
+        # 测试函数motor_idrs 生成元组的功能
+        # 测试内容：判断生成内容是否是元组，是否为输入参数中的关键字motor_idrs（b）
+        print(self.b.motor_dirs)
+        self.assertIsInstance(self.b.motor_dirs, tuple)
+        self.assertEqual(self.b.motor_dirs, (1, 1, 0, 0))
+
+    def test_debug(self):
+        # 测试函数debug 生成布尔值的功能
+        # 测试内容：判断生成内容是否是布尔值，是否为默认参数False
+        print(self.b.debug)
+        self.assertIsInstance(self.b.debug, bool)
+        self.assertEqual(self.b.debug, False)
+
+    def test_stop_msg_sending(self):
+        assert self.b._msg_send_thread_should_run == True
+        try:
+            self.b.stop_msg_sending()
+        except[RuntimeError]:
+            print("RuntimeError,可能是以下错误")
+            print("Thread.__init__() not called")
+            print("cannot join thread before it is started")
+            print("cannot join current thread")
+        assert self.b._msg_send_thread_should_run == False
+
+    def test_start_msg_sending(self):
+        # 包含set_motors_speed和set_all_motors_speed
+        # _msg_sending_loop函数在该项测试中有体现，没有单独拿出来测试
+        from repo.uptechStar.module.timer import delay_ms
+        self._msg_send_thread_should_run: bool = False
+        self.b.start_msg_sending()
+        assert self.b._msg_send_thread_should_run == True
+        for i in range(100):
+            self.b.set_motors_speed((i, i, i, i), 0.1)
+            delay_ms(100)
+        # 10秒内小蓝灯在闪烁，则成功，通信建立成功，set_motors_speed速度传递参数成功
+        for i in range(100):
+            self.b.set_motors_speed((1, 1, 1, 1), 0.1)
+            delay_ms(100)
+        # 10秒内小蓝灯仅仅在开始时闪烁一次，则成功，set_motors_speed拦截相同指令成功
+        for i in range(100):
+            self.b.set_all_motors_speed(i, 0.1)
+            delay_ms(100)
+        # 10秒内小蓝灯在闪烁，则成功
+
+    def test_makeCmds_dirs(self):
+        # TODO: 正则表达式暂时写不出来，不用管
+        c = self.b.makeCmds_dirs((2, 2, 2, 2))
+        print(c)
+        c = str(c)
+
+        d = re.findall(string=c, pattern=r"\d+v\d+\\r")
+        print(d)
+
+    def test_move_cmd(self):
+        self.b.move_cmd(1, 1)
+        # TODO: 要开启电机才可以进行测试
+
+    def test_open_userInput_channel(self):
+        # TODO : 不好测试
+        pass
+
+    def test_is_list_all_zero(self):
+        from repo.uptechStar.module.close_loop_controller import is_list_all_zero
+        import random
+        c = 10
+        while c >= 1:
+            b = [0, random.randint(0, 1), 0, random.randint(0, 1)]
+            print(b)
+            print(is_list_all_zero(b))
+            if b[1] == 0 and b[3] == 0:
+                assert is_list_all_zero(b) is True
+            if b[1] == 1 and b[3] == 1:
+                assert is_list_all_zero(b) is False
+            c = c - 1
+
+    def test_is_rotate_cmd(self):
+        from repo.uptechStar.module.close_loop_controller import is_rotate_cmd
+        import random
+        c = 50
+        while c >= 1:
+            a1 = random.randint(-1, 1)
+            a2 = random.randint(-1, 1)
+            a3 = random.randint(-1, 1)
+            a4 = random.randint(-1, 1)
+            b = (a1, a2, a3, a4)
+            print(b)
+            print(is_rotate_cmd(b))
+            if a1 == a2 and a3 == a4 and a1 + a3 == 0:
+                assert is_rotate_cmd(b) is True
+            else:
+                assert is_rotate_cmd(b) is False
+            c = c - 1
+
+    def test_makeCmd_list(self):
+        # TODO:  正则表达式暂时写不出来
+        from repo.uptechStar.module.close_loop_controller import makeCmd_list
+        a = makeCmd_list(['1', '1', '1', '1'])
+        print(a)
+
+    def test_makeCmd(self):
+        # TODO: 正则表达式暂时写不出来
+        from repo.uptechStar.module.close_loop_controller import makeCmd
+        a = makeCmd("1")
+        print(a)
+
+    def test_motor_speed_test(self):
+        from repo.uptechStar.module.close_loop_controller import motor_speed_test
+        # print(find_serial_ports())
+        motor_speed_test('/dev/ttyUSB0')
 
 
 if __name__ == '__main__':
