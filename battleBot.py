@@ -1,5 +1,4 @@
 import time
-import time
 import warnings
 
 from modules.EdgeInferrers import StandardEdgeInferrer
@@ -15,7 +14,7 @@ from repo.uptechStar.module.watcher import build_watcher
 class BattleBot(Bot):
     # ad4未注册，暂时没有控制单元
     CONFIG_SENSOR_KEY = "Sensor"
-    # region OB config
+    # region OB_ADC_CONFIG
     CONFIG_OB_ADC_KEY = f"{CONFIG_SENSOR_KEY}/OnBoardAdc"
     CONFIG_EDGE_FL_KEY = f"{CONFIG_OB_ADC_KEY}/Fl"
     CONFIG_EDGE_FR_KEY = f'{CONFIG_OB_ADC_KEY}/Fr'
@@ -27,17 +26,17 @@ class BattleBot(Bot):
     CONFIG_RB_KEY = f'{CONFIG_OB_ADC_KEY}/Rb'
     # endregion
 
-    # region IO
+    # region OB_IO_CONFIG
     CONFIG_OB_IO_KEY = f"{CONFIG_SENSOR_KEY}/OnBoardIo"
     CONFIG_GRAY_L_KEY = f'{CONFIG_OB_IO_KEY}/GrayL'
     CONFIG_GRAY_R_KEY = f'{CONFIG_OB_IO_KEY}/GrayR'
     # endregion
 
-    # region EXPAN_ADC
+    # region EXPAN_ADC_CONFIG
     CONFIG_EXPAN_ADC_KEY = f'{CONFIG_SENSOR_KEY}/ExpansionAdc'
-    CONFIG_F3_KEY = f'{CONFIG_EXPAN_ADC_KEY}/F3'
-    CONFIG_F4_KEY = f'{CONFIG_EXPAN_ADC_KEY}/F4'
-    CONFIG_F2_KEY = f'{CONFIG_EXPAN_ADC_KEY}/F2'
+    CONFIG_L3_KEY = f'{CONFIG_EXPAN_ADC_KEY}/L3'
+    CONFIG_L4_KEY = f'{CONFIG_EXPAN_ADC_KEY}/L4'
+    CONFIG_L2_KEY = f'{CONFIG_EXPAN_ADC_KEY}/L2'
     CONFIG_FTL_KEY = f'{CONFIG_EXPAN_ADC_KEY}/Ftl'
     CONFIG_R3_KEY = f'{CONFIG_EXPAN_ADC_KEY}/R3'
     CONFIG_R4_KEY = f'{CONFIG_EXPAN_ADC_KEY}/R4'
@@ -61,6 +60,7 @@ class BattleBot(Bot):
     CONFIG_TAG_GROUP_KEY = f'{CONFIG_CAMERA_KEY}/TagGroup'
     CONFIG_CAMERA_ID_KEY = f'{CONFIG_CAMERA_KEY}/CameraId'
     # endregion
+
     # region Infer
     CONFIG_INFER_KEY = "Infer"
     CONFIG_DEFAULT_EDGE_BASELINE_KEY = f'{CONFIG_INFER_KEY}/DefaultEdgeBaseline'
@@ -79,20 +79,23 @@ class BattleBot(Bot):
         self.register_config(self.CONFIG_FB_KEY, 5)
         self.register_config(self.CONFIG_RB_KEY, 3)
         # endregion
+
         # region EXPAN_ADC
-        self.register_config(self.CONFIG_F3_KEY, 0)
-        self.register_config(self.CONFIG_F4_KEY, 1)
-        self.register_config(self.CONFIG_F2_KEY, 2)
+        self.register_config(self.CONFIG_L3_KEY, 0)
+        self.register_config(self.CONFIG_L4_KEY, 1)
+        self.register_config(self.CONFIG_L2_KEY, 2)
         self.register_config(self.CONFIG_FTL_KEY, 3)
         self.register_config(self.CONFIG_R3_KEY, 4)
         self.register_config(self.CONFIG_R4_KEY, 5)
         self.register_config(self.CONFIG_R2_KEY, 6)
         self.register_config(self.CONFIG_FTR_KEY, 7)
         # endregion
+
         # region IO
         self.register_config(self.CONFIG_GRAY_L_KEY, 7)
         self.register_config(self.CONFIG_GRAY_R_KEY, 6)
         # endregion
+
         # region Driver
         self.register_config(self.CONFIG_PRE_COMPILE_CMD_KEY, True)
         self.register_config(self.CONFIG_DRIVER_DEBUG_MODE_KEY, False)
@@ -101,10 +104,12 @@ class BattleBot(Bot):
         self.register_config(self.CONFIG_HANG_TIME_MAX_ERROR_KEY, 50)
         self.register_config(self.CONFIG_DRIVER_SERIAL_PORT_KEY, None)
         # endregion
+
         # region Camera
         self.register_config(self.CONFIG_TAG_GROUP_KEY, "tag36h11")
         self.register_config(self.CONFIG_CAMERA_ID_KEY, 0)
         # endregion
+
         # region Infer
         self.register_config(self.CONFIG_DEFAULT_EDGE_BASELINE_KEY, 1750)
         self.register_config(self.CONFIG_DEFAULT_NORMAL_BASELINE_KEY, 1000)
@@ -198,7 +203,7 @@ class BattleBot(Bot):
 
 
 if __name__ == '__main__':
-    bot = BattleBot(base_config='config/empty.json',
+    bot = BattleBot(base_config='config/bot_config.json',
                     edge_inferrer_config='config/std_edge_inferrer_config.json',
                     surrounding_inferrer_config='config/std_surround_inferrer_config.json',
                     fence_inferrer_config='config/std_fence_inferrer_config.json')
