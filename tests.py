@@ -579,5 +579,14 @@ class Close_loop_controller(unittest.TestCase):
         motor_speed_test('/dev/ttyUSB0')
 
 
+class I2C_test(unittest.TestCase):
+
+    def test_bytes_to_int(self):
+        from repo.uptechStar.module.i2c import join_bytes_to_uint16
+        byte_array = bytearray([0b00000000, 0b01000000])
+        result = join_bytes_to_uint16(byte_array)
+        print(result)  # 输出 43981
+
+
 if __name__ == '__main__':
     unittest.main()
