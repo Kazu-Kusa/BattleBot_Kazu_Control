@@ -30,9 +30,10 @@ class Bot(Configurable, metaclass=ABCMeta):
         indexed_getter=__on_board_sensors.get_io_level,
         indexed_mode_setter=__on_board_sensors.set_io_mode
     )
-    sensor_hub = SensorHub(on_board_adc_updater=__on_board_sensors.adc_all_channels,
-                           on_board_io_updater=__on_board_sensors.io_all_channels,
-                           expansion_adc_updater=__i2c_expansion_sensors.get_all_sensor)
+    sensor_hub = SensorHub(on_board_adc_updater=(__on_board_sensors.adc_all_channels, None),
+                           on_board_io_updater=(__on_board_sensors.io_all_channels, None),
+                           expansion_adc_updater=(None, None),
+                           expansion_io_updater=(None, None))
 
     @abstractmethod
     def Battle(self, normal_spead: int, use_cam: bool, team_color: str) -> None:
