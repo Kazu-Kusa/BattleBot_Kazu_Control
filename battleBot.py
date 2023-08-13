@@ -66,6 +66,7 @@ class BattleBot(Bot):
     CONFIG_DEFAULT_EDGE_BASELINE_KEY = f'{CONFIG_INFER_KEY}/DefaultEdgeBaseline'
     CONFIG_DEFAULT_NORMAL_BASELINE_KEY = f'{CONFIG_INFER_KEY}/DefaultNormalBaseline'
     CONFIG_DEFAULT_GRAYS_BASELINE_KEY = f'{CONFIG_INFER_KEY}/DefaultGraysBaseline'
+
     # endregion
     def register_all_config(self):
         # region OB config
@@ -109,7 +110,6 @@ class BattleBot(Bot):
         self.register_config(self.CONFIG_DEFAULT_NORMAL_BASELINE_KEY, 1000)
         self.register_config(self.CONFIG_DEFAULT_GRAYS_BASELINE_KEY, 1)
         # endregion
-
 
     def __init__(self, base_config: str,
                  edge_inferrer_config: str,
