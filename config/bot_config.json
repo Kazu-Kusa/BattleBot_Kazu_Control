@@ -25,7 +25,7 @@
   }
 },
 
-  "driver": {
+  "Driver": {
   "PreCompileCmd": true,
   "DriverDebugMode": false,
   "MotorIds": [
@@ -41,9 +41,12 @@
     1
   ],
   "HangTimeMaxError": 50,
+  "DriverSerialPort": null},
+  "Camera" : {
   "TagGroup": "tag36h11",
+  "CameraId": 0},
+  "Infer" : {
   "DefaultEdgeBaseline": 1750,
   "DefaultNormalBaseline": 1000,
-  "DefaultGraysBaseline": 1,
-  "DriverSerialPort": null
+  "DefaultGraysBaseline": 1
 }}
