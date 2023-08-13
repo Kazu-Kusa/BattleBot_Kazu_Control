@@ -23,5 +23,27 @@
     "R2": 6,
     "Ftr": 7
   }
-}
-}
+},
+
+  "driver": {
+  "PreCompileCmd": true,
+  "DriverDebugMode": false,
+  "MotorIds": [
+    4,
+    3,
+    1,
+    2
+  ],
+  "MotorDirs": [
+    -1,
+    -1,
+    1,
+    1
+  ],
+  "HangTimeMaxError": 50,
+  "TagGroup": "tag36h11",
+  "DefaultEdgeBaseline": 1750,
+  "DefaultNormalBaseline": 1000,
+  "DefaultGraysBaseline": 1,
+  "DriverSerialPort": null
+}}
