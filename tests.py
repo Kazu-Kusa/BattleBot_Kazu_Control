@@ -454,25 +454,29 @@ class Close_loop_controller(unittest.TestCase):
     b = CloseLoopController((0, 0, 1, 1), (1, 1, 0, 0))
 
     def test_motor_ids(self):
-        self.b.motor_ids
+        # 测试函数motor_ids 生成元组的功能
+        # 测试内容：判断生成内容是否是元组，是否为输入参数中的关键字motor_ids（b）
         print(self.b.motor_ids)
         self.assertIsInstance(self.b.motor_ids, tuple)
         self.assertEqual(self.b.motor_ids, (0, 0, 1, 1))
 
     def test_motor_speeds(self):
-        self.b.motor_speeds
+        # 测试函数motor_speeds 生成元组的功能
+        # 测试内容：判断生成内容是否是元组，是否为规定的（0，0，0，0）
         print(self.b.motor_speeds)
         self.assertIsInstance(self.b.motor_speeds, tuple)
         self.assertEqual(self.b.motor_speeds, (0, 0, 0, 0))
 
     def test_motor_dirs(self):
-        self.b.motor_dirs
+        # 测试函数motor_idrs 生成元组的功能
+        # 测试内容：判断生成内容是否是元组，是否为输入参数中的关键字motor_idrs（b）
         print(self.b.motor_dirs)
         self.assertIsInstance(self.b.motor_dirs, tuple)
         self.assertEqual(self.b.motor_dirs, (1, 1, 0, 0))
 
     def test_debug(self):
-        self.b.debug
+        # 测试函数debug 生成布尔值的功能
+        # 测试内容：判断生成内容是否是布尔值，是否为默认参数False
         print(self.b.debug)
         self.assertIsInstance(self.b.debug, bool)
         self.assertEqual(self.b.debug, False)
@@ -481,8 +485,11 @@ class Close_loop_controller(unittest.TestCase):
         assert self.b._msg_send_thread_should_run == True
         try:
             self.b.stop_msg_sending()
-        except:
-            print("True")
+        except[RuntimeError]:
+            print("RuntimeError,可能是以下错误")
+            print("Thread.__init__() not called")
+            print("cannot join thread before it is started")
+            print("cannot join current thread")
         assert self.b._msg_send_thread_should_run == False
 
     def test_start_msg_sending(self):
@@ -506,7 +513,7 @@ class Close_loop_controller(unittest.TestCase):
         # 10秒内小蓝灯在闪烁，则成功
 
     def test_makeCmds_dirs(self):
-        # 正则表达式暂时写不出来，不用管
+        # TODO: 正则表达式暂时写不出来，不用管
         c = self.b.makeCmds_dirs((2, 2, 2, 2))
         print(c)
         c = str(c)
@@ -516,33 +523,52 @@ class Close_loop_controller(unittest.TestCase):
 
     def test_move_cmd(self):
         self.b.move_cmd(1, 1)
-        #要开启电机才可以进行测试
+        # TODO: 要开启电机才可以进行测试
 
     def test_open_userInput_channel(self):
+        # TODO : 不好测试
         pass
 
     def test_is_list_all_zero(self):
         from repo.uptechStar.module.close_loop_controller import is_list_all_zero
-        print(is_list_all_zero([0, 0, 0, 0]))
-        assert is_list_all_zero([0, 0, 0, 0]) is True
-        print(is_list_all_zero([1, 1, 1, 1]))
-        assert is_list_all_zero([1, 1, 1, 1]) is False
+        import random
+        c = 10
+        while c >= 1:
+            b = [0, random.randint(0, 1), 0, random.randint(0, 1)]
+            print(b)
+            print(is_list_all_zero(b))
+            if b[1] == 0 and b[3] == 0:
+                assert is_list_all_zero(b) is True
+            if b[1] == 1 and b[3] == 1:
+                assert is_list_all_zero(b) is False
+            c = c - 1
 
     def test_is_rotate_cmd(self):
         from repo.uptechStar.module.close_loop_controller import is_rotate_cmd
-        print(is_rotate_cmd((1, 1, 1, 1)))
-        assert is_rotate_cmd((1, 1, 1, 1)) is False
-        print(is_rotate_cmd((-1, -1, 1, 1)))
-        assert is_rotate_cmd((-1, -1, 1, 1)) is True
+        import random
+        c = 50
+        while c >= 1:
+            a1 = random.randint(-1, 1)
+            a2 = random.randint(-1, 1)
+            a3 = random.randint(-1, 1)
+            a4 = random.randint(-1, 1)
+            b = (a1, a2, a3, a4)
+            print(b)
+            print(is_rotate_cmd(b))
+            if a1 == a2 and a3 == a4 and a1 + a3 == 0:
+                assert is_rotate_cmd(b) is True
+            else:
+                assert is_rotate_cmd(b) is False
+            c = c - 1
 
     def test_makeCmd_list(self):
-        # 正则表达式暂时写不出来
+        # TODO:  正则表达式暂时写不出来
         from repo.uptechStar.module.close_loop_controller import makeCmd_list
         a = makeCmd_list(['1', '1', '1', '1'])
         print(a)
 
     def test_makeCmd(self):
-        # 正则表达式暂时写不出来
+        # TODO: 正则表达式暂时写不出来
         from repo.uptechStar.module.close_loop_controller import makeCmd
         a = makeCmd("1")
         print(a)
@@ -551,6 +577,7 @@ class Close_loop_controller(unittest.TestCase):
         from repo.uptechStar.module.close_loop_controller import motor_speed_test
         # print(find_serial_ports())
         motor_speed_test('/dev/ttyUSB0')
+
 
 if __name__ == '__main__':
     unittest.main()
