@@ -45,6 +45,20 @@ class BattleBot(Bot):
     CONFIG_FTR_KEY = f'{CONFIG_EXPAN_ADC_KEY}/Ftr'
 
     # endregion
+
+    # region Driver
+    CONFIG_DRIVER_KEY = "driver"
+    CONFIG_PRE_COMPILE_CMD_KEY = f'{CONFIG_DRIVER_KEY}/PreCompileCmd'
+    CONFIG_DRIVER_DEBUG_MODE_KEY = f'{CONFIG_DRIVER_KEY}/DriverDebugMode'
+    CONFIG_MOTOR_IDS_KEY = f'{CONFIG_DRIVER_KEY}/MotorIds'
+    CONFIG_MOTOR_DIRS_KEY = f'{CONFIG_DRIVER_KEY}/MotorDirs'
+    CONFIG_HANG_TIME_MAX_ERROR_KEY = f'{CONFIG_DRIVER_KEY}/HangTimeMaxError'
+    CONFIG_TAG_GROUP_KEY = f'{CONFIG_DRIVER_KEY}/TagGroup'
+    CONFIG_DEFAULT_EDGE_BASELINE_KEY = f'{CONFIG_DRIVER_KEY}/DefaultEdgeBaseline'
+    CONFIG_DEFAULT_NORMAL_BASELINE_KEY = f'{CONFIG_DRIVER_KEY}/DefaultNormalBaseline'
+    CONFIG_DEFAULT_GRAYS_BASELINE_KEY = f'{CONFIG_DRIVER_KEY}/DefaultGraysBaseline'
+    CONFIG_DRIVER_SERIAL_PORT_KEY = f'{CONFIG_DRIVER_KEY}/DriverSerialPort'
+    # endregion
     def register_all_config(self):
         self.register_config(self.CONFIG_EDGE_FL_KEY, 6)
         self.register_config(self.CONFIG_EDGE_FR_KEY, 2)
@@ -64,6 +78,17 @@ class BattleBot(Bot):
         self.register_config(self.CONFIG_FTR_KEY, 7)
         self.register_config(self.CONFIG_GRAY_L_KEY, 7)
         self.register_config(self.CONFIG_GRAY_R_KEY, 6)
+        self.register_config(self.CONFIG_PRE_COMPILE_CMD_KEY, True)
+        self.register_config(self.CONFIG_DRIVER_DEBUG_MODE_KEY, False)
+        self.register_config(self.CONFIG_MOTOR_IDS_KEY, [4, 3, 1, 2])
+        self.register_config(self.CONFIG_MOTOR_DIRS_KEY, [-1, -1, 1, 1])
+        self.register_config(self.CONFIG_HANG_TIME_MAX_ERROR_KEY, 50)
+        self.register_config(self.CONFIG_TAG_GROUP_KEY, "tag36h11")
+        self.register_config(self.CONFIG_DEFAULT_EDGE_BASELINE_KEY, 1750)
+        self.register_config(self.CONFIG_DEFAULT_NORMAL_BASELINE_KEY, 1000)
+        self.register_config(self.CONFIG_DEFAULT_GRAYS_BASELINE_KEY, 1)
+        self.register_config(self.CONFIG_DRIVER_SERIAL_PORT_KEY, None)
+
 
     def __init__(self, base_config: str,
                  edge_inferrer_config: str,
