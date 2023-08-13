@@ -47,19 +47,28 @@ class BattleBot(Bot):
     # endregion
 
     # region Driver
-    CONFIG_DRIVER_KEY = "driver"
+    CONFIG_DRIVER_KEY = "Driver"
     CONFIG_PRE_COMPILE_CMD_KEY = f'{CONFIG_DRIVER_KEY}/PreCompileCmd'
     CONFIG_DRIVER_DEBUG_MODE_KEY = f'{CONFIG_DRIVER_KEY}/DriverDebugMode'
     CONFIG_MOTOR_IDS_KEY = f'{CONFIG_DRIVER_KEY}/MotorIds'
     CONFIG_MOTOR_DIRS_KEY = f'{CONFIG_DRIVER_KEY}/MotorDirs'
     CONFIG_HANG_TIME_MAX_ERROR_KEY = f'{CONFIG_DRIVER_KEY}/HangTimeMaxError'
-    CONFIG_TAG_GROUP_KEY = f'{CONFIG_DRIVER_KEY}/TagGroup'
-    CONFIG_DEFAULT_EDGE_BASELINE_KEY = f'{CONFIG_DRIVER_KEY}/DefaultEdgeBaseline'
-    CONFIG_DEFAULT_NORMAL_BASELINE_KEY = f'{CONFIG_DRIVER_KEY}/DefaultNormalBaseline'
-    CONFIG_DEFAULT_GRAYS_BASELINE_KEY = f'{CONFIG_DRIVER_KEY}/DefaultGraysBaseline'
     CONFIG_DRIVER_SERIAL_PORT_KEY = f'{CONFIG_DRIVER_KEY}/DriverSerialPort'
     # endregion
+
+    # region Camera
+    CONFIG_CAMERA_KEY = "Camera"
+    CONFIG_TAG_GROUP_KEY = f'{CONFIG_CAMERA_KEY}/TagGroup'
+    CONFIG_CAMERA_ID_KEY = f'{CONFIG_CAMERA_KEY}/CameraId'
+    # endregion
+    # region Infer
+    CONFIG_INFER_KEY = "Infer"
+    CONFIG_DEFAULT_EDGE_BASELINE_KEY = f'{CONFIG_INFER_KEY}/DefaultEdgeBaseline'
+    CONFIG_DEFAULT_NORMAL_BASELINE_KEY = f'{CONFIG_INFER_KEY}/DefaultNormalBaseline'
+    CONFIG_DEFAULT_GRAYS_BASELINE_KEY = f'{CONFIG_INFER_KEY}/DefaultGraysBaseline'
+    # endregion
     def register_all_config(self):
+        # region OB config
         self.register_config(self.CONFIG_EDGE_FL_KEY, 6)
         self.register_config(self.CONFIG_EDGE_FR_KEY, 2)
         self.register_config(self.CONFIG_EDGE_RL_KEY, 7)
@@ -68,6 +77,8 @@ class BattleBot(Bot):
         self.register_config(self.CONFIG_R1_KEY, 0)
         self.register_config(self.CONFIG_FB_KEY, 5)
         self.register_config(self.CONFIG_RB_KEY, 3)
+        # endregion
+        # region EXPAN_ADC
         self.register_config(self.CONFIG_F3_KEY, 0)
         self.register_config(self.CONFIG_F4_KEY, 1)
         self.register_config(self.CONFIG_F2_KEY, 2)
@@ -76,18 +87,28 @@ class BattleBot(Bot):
         self.register_config(self.CONFIG_R4_KEY, 5)
         self.register_config(self.CONFIG_R2_KEY, 6)
         self.register_config(self.CONFIG_FTR_KEY, 7)
+        # endregion
+        # region IO
         self.register_config(self.CONFIG_GRAY_L_KEY, 7)
         self.register_config(self.CONFIG_GRAY_R_KEY, 6)
+        # endregion
+        # region Driver
         self.register_config(self.CONFIG_PRE_COMPILE_CMD_KEY, True)
         self.register_config(self.CONFIG_DRIVER_DEBUG_MODE_KEY, False)
         self.register_config(self.CONFIG_MOTOR_IDS_KEY, [4, 3, 1, 2])
         self.register_config(self.CONFIG_MOTOR_DIRS_KEY, [-1, -1, 1, 1])
         self.register_config(self.CONFIG_HANG_TIME_MAX_ERROR_KEY, 50)
+        self.register_config(self.CONFIG_DRIVER_SERIAL_PORT_KEY, None)
+        # endregion
+        # region Camera
         self.register_config(self.CONFIG_TAG_GROUP_KEY, "tag36h11")
+        self.register_config(self.CONFIG_CAMERA_ID_KEY, 0)
+        # endregion
+        # region Infer
         self.register_config(self.CONFIG_DEFAULT_EDGE_BASELINE_KEY, 1750)
         self.register_config(self.CONFIG_DEFAULT_NORMAL_BASELINE_KEY, 1000)
         self.register_config(self.CONFIG_DEFAULT_GRAYS_BASELINE_KEY, 1)
-        self.register_config(self.CONFIG_DRIVER_SERIAL_PORT_KEY, None)
+        # endregion
 
 
     def __init__(self, base_config: str,
