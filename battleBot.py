@@ -13,9 +13,57 @@ from repo.uptechStar.module.watcher import build_watcher
 
 
 class BattleBot(Bot):
+    # ad4未注册，暂时没有控制单元
+    CONFIG_SENSOR_KEY = "Sensor"
+    # region OB config
+    CONFIG_OB_ADC_KEY = f"{CONFIG_SENSOR_KEY}/OnBoardAdc"
+    CONFIG_EDGE_FL_KEY = f"{CONFIG_OB_ADC_KEY}/Fl"
+    CONFIG_EDGE_FR_KEY = f'{CONFIG_OB_ADC_KEY}/Fr'
+    CONFIG_EDGE_RL_KEY = f'{CONFIG_OB_ADC_KEY}/Rl'
+    CONFIG_EDGE_RR_KEY = f'{CONFIG_OB_ADC_KEY}/Rr'
+    CONFIG_L1_KEY = f'{CONFIG_OB_ADC_KEY}/L1'
+    CONFIG_R1_KEY = f'{CONFIG_OB_ADC_KEY}/R1'
+    CONFIG_FB_KEY = f'{CONFIG_OB_ADC_KEY}/Fb'
+    CONFIG_RB_KEY = f'{CONFIG_OB_ADC_KEY}/Rb'
+    # endregion
 
+    # region IO
+    CONFIG_OB_IO_KEY = f"{CONFIG_SENSOR_KEY}/OnBoardIo"
+    CONFIG_GRAY_L_KEY = f'{CONFIG_OB_IO_KEY}/GrayL'
+    CONFIG_GRAY_R_KEY = f'{CONFIG_OB_IO_KEY}/GrayR'
+    # endregion
+
+    # region EXPAN_ADC
+    CONFIG_EXPAN_ADC_KEY = f'{CONFIG_SENSOR_KEY}/ExpansionAdc'
+    CONFIG_F3_KEY = f'{CONFIG_EXPAN_ADC_KEY}/F3'
+    CONFIG_F4_KEY = f'{CONFIG_EXPAN_ADC_KEY}/F4'
+    CONFIG_F2_KEY = f'{CONFIG_EXPAN_ADC_KEY}/F2'
+    CONFIG_FTL_KEY = f'{CONFIG_EXPAN_ADC_KEY}/Ftl'
+    CONFIG_R3_KEY = f'{CONFIG_EXPAN_ADC_KEY}/R3'
+    CONFIG_R4_KEY = f'{CONFIG_EXPAN_ADC_KEY}/R4'
+    CONFIG_R2_KEY = f'{CONFIG_EXPAN_ADC_KEY}/R2'
+    CONFIG_FTR_KEY = f'{CONFIG_EXPAN_ADC_KEY}/Ftr'
+
+    # endregion
     def register_all_config(self):
-        pass
+        self.register_config(self.CONFIG_EDGE_FL_KEY, 6)
+        self.register_config(self.CONFIG_EDGE_FR_KEY, 2)
+        self.register_config(self.CONFIG_EDGE_RL_KEY, 7)
+        self.register_config(self.CONFIG_EDGE_RR_KEY, 1)
+        self.register_config(self.CONFIG_L1_KEY, 8)
+        self.register_config(self.CONFIG_R1_KEY, 0)
+        self.register_config(self.CONFIG_FB_KEY, 5)
+        self.register_config(self.CONFIG_RB_KEY, 3)
+        self.register_config(self.CONFIG_F3_KEY, 0)
+        self.register_config(self.CONFIG_F4_KEY, 1)
+        self.register_config(self.CONFIG_F2_KEY, 2)
+        self.register_config(self.CONFIG_FTL_KEY, 3)
+        self.register_config(self.CONFIG_R3_KEY, 4)
+        self.register_config(self.CONFIG_R4_KEY, 5)
+        self.register_config(self.CONFIG_R2_KEY, 6)
+        self.register_config(self.CONFIG_FTR_KEY, 7)
+        self.register_config(self.CONFIG_GRAY_L_KEY, 7)
+        self.register_config(self.CONFIG_GRAY_R_KEY, 6)
 
     def __init__(self, base_config: str,
                  edge_inferrer_config: str,
