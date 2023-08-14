@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from typing import final
 
 from repo.uptechStar.module.actions import ActionPlayer
 from repo.uptechStar.module.i2c import SensorI2CExpansion
@@ -46,3 +47,27 @@ class Bot(Configurable, metaclass=ABCMeta):
             use_cam: if you use the camera during the battle
         """
         pass
+
+    @abstractmethod
+    def wait_start(self) -> None:
+        """
+        hold still util the start signal is received
+        Returns: None
+
+        """
+
+    @abstractmethod
+    def interrupt_handler(self) -> None:
+        """
+        used to handle the KeyboardInterrupt
+        Returns: None
+        """
+
+    @final
+    def start_match(self, normal_spead: int, use_cam: bool, team_color: str, *args, **kwargs) -> None:
+
+        self.wait_start()
+        try:
+            self.Battle(normal_spead, use_cam, team_color)
+        except KeyboardInterrupt:
+            self.interrupt_handler()
