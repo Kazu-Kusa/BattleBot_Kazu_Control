@@ -233,13 +233,13 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
 
     # endregion
 
-    def infer(self, edge_sensors: Sequence[int, int, int, int]) -> Tuple[bool, bool, bool, bool]:
+    def infer(self, edge_sensors: Sequence[int]) -> Tuple[bool, bool, bool, bool]:
         edge_min_baseline = getattr(self, self.CONFIG_EDGE_MIN_BASELINE_KEY)
         edge_max_baseline = getattr(self, self.CONFIG_EDGE_MAX_BASELINE_KEY)
 
         return tuple(map(lambda x: edge_min_baseline < x < edge_max_baseline, edge_sensors))
 
     def react(self) -> int:
-        action, status = self.action_table.get(self.infer(self.updater()))()
+        action, status = self.action_table.get(self.infer(self.updater()))(getattr(self, self.CONFIG_BASIC_SPEED_KEY))
         self._player.extend(action)
         return status
