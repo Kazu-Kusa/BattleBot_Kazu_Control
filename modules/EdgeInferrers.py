@@ -18,6 +18,9 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
     CONFIG_SENSOR_KEY = 'SensorSection'
     CONFIG_SENSOR_IDS_KEY = f'{CONFIG_SENSOR_KEY}/SensorIds'
 
+    CONFIG_MOTION_KEY = 'MotionSection'
+
+    CONFIG_BASIC_SPEED_KEY = f'{CONFIG_MOTION_KEY}/BasicSpeed'
     DO_N_N_N_N_STATUS_CODE = 0
 
     DO_FL_N_N_N_STATUS_CODE = 1
@@ -51,6 +54,9 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                              value=170)
         self.register_config(config_registry_path=self.CONFIG_SENSOR_IDS_KEY,
                              value=[6, 7, 1, 2])
+
+        self.register_config(config_registry_path=self.CONFIG_BASIC_SPEED_KEY,
+                             value=4000)
 
     def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str):
         super().__init__(sensor_hub=sensor_hub, player=action_player, config_path=config_path)
