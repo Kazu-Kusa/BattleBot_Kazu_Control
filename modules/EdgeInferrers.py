@@ -9,10 +9,14 @@ from repo.uptechStar.module.watcher import Watcher, default_edge_rear_watcher, d
 
 
 class StandardEdgeInferrer(AbstractEdgeInferrer):
-    CONFIG_EDGE_MAX_BASELINE_KEY = r'EdgeMaxBaseline'
-    CONFIG_EDGE_MIN_BASELINE_KEY = r'EdgeMinBaseline'
-    CONFIG_STRAIGHT_ACTION_DURATION_KEY = r'StraightActionDuration'
-    CONFIG_CURVE_ACTION_DURATION_KEY = r'CurveActionDuration'
+    CONFIG_INFER_KEY = 'InferSection'
+    CONFIG_EDGE_MAX_BASELINE_KEY = f'{CONFIG_INFER_KEY}/EdgeMaxBaseline'
+    CONFIG_EDGE_MIN_BASELINE_KEY = f'{CONFIG_INFER_KEY}/EdgeMinBaseline'
+    CONFIG_STRAIGHT_ACTION_DURATION_KEY = f'{CONFIG_INFER_KEY}/StraightActionDuration'
+    CONFIG_CURVE_ACTION_DURATION_KEY = f'{CONFIG_INFER_KEY}/CurveActionDuration'
+
+    CONFIG_SENSOR_KEY = 'SensorSection'
+    CONFIG_SENSOR_IDS_KEY = f'{CONFIG_SENSOR_KEY}/SensorIds'
 
     DO_N_N_N_N_STATUS_CODE = 0
 
@@ -36,6 +40,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
     DO_FL_RL_RR_FR_STATUS_CODE = 15
 
     def register_all_config(self):
+        # TODO remember decouple the constant
         self.register_config(config_registry_path=self.CONFIG_EDGE_MAX_BASELINE_KEY,
                              value=1750)
         self.register_config(config_registry_path=self.CONFIG_EDGE_MIN_BASELINE_KEY,
@@ -44,6 +49,8 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                              value=200)
         self.register_config(config_registry_path=self.CONFIG_CURVE_ACTION_DURATION_KEY,
                              value=170)
+        self.register_config(config_registry_path=self.CONFIG_SENSOR_IDS_KEY,
+                             value=[6, 7, 1, 2])
 
     def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str):
         super().__init__(sensor_hub=sensor_hub, player=action_player, config_path=config_path)
