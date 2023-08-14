@@ -1,10 +1,10 @@
 from random import choice
-from typing import Tuple, Any
+from typing import Tuple, Sequence
 
 from modules.AbsEdgeInferrer import AbstractEdgeInferrer, ActionPack
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
 from repo.uptechStar.module.algrithm_tools import random_sign
-from repo.uptechStar.module.sensors import SensorHub
+from repo.uptechStar.module.sensors import SensorHub, LocalFullUpdaterConstructor, FU_INDEX, FullUpdater
 from repo.uptechStar.module.watcher import Watcher, default_edge_rear_watcher, default_edge_front_watcher
 
 
@@ -54,7 +54,10 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
 
     def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str):
         super().__init__(sensor_hub=sensor_hub, player=action_player, config_path=config_path)
-
+        self.updater: FullUpdater = LocalFullUpdaterConstructor.from_full_updater(
+            sensor_hub.on_board_adc_updater[FU_INDEX],
+            getattr(self, self.CONFIG_SENSOR_IDS_KEY)
+        )
         self._rear_watcher: Watcher = default_edge_rear_watcher
         self._front_watcher: Watcher = default_edge_front_watcher
 
@@ -224,11 +227,13 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
 
     # endregion
 
-    def infer(self, edge_sensors: Tuple[int, int, int, int]) -> Tuple[bool, bool, bool, bool]:
+    def infer(self, edge_sensors: Sequence[int, int, int, int]) -> Tuple[bool, bool, bool, bool]:
         edge_min_baseline = getattr(self, self.CONFIG_EDGE_MIN_BASELINE_KEY)
         edge_max_baseline = getattr(self, self.CONFIG_EDGE_MAX_BASELINE_KEY)
 
         return tuple(map(lambda x: edge_min_baseline < x < edge_max_baseline, edge_sensors))
 
-    def react(self, *args, **kwargs) -> Any:
-        pass
+    def react(self) -> int:
+        action, status = self.action_table.get(self.infer(self.updater()))()
+        self._player.extend(action)
+        return status
