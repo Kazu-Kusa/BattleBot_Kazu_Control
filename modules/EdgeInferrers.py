@@ -1,4 +1,3 @@
-from random import choice
 from typing import Tuple, Sequence
 
 from modules.AbsEdgeInferrer import AbstractEdgeInferrer, ActionPack
@@ -8,6 +7,7 @@ from repo.uptechStar.module.sensors import SensorHub, LocalFullUpdaterConstructo
 from repo.uptechStar.module.watcher import Watcher, default_edge_rear_watcher, default_edge_front_watcher
 
 
+# TODO use multiplier generator
 class StandardEdgeInferrer(AbstractEdgeInferrer):
     CONFIG_INFER_KEY = 'InferSection'
     CONFIG_EDGE_MAX_BASELINE_KEY = f'{CONFIG_INFER_KEY}/EdgeMaxBaseline'
@@ -128,10 +128,16 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
 
     # region 2 sides float case
     def do_fl_n_rr_n(self, basic_speed: int) -> ActionPack:
-        return choice([self.do_fl_n_n_n, self.do_n_n_rr_n])(basic_speed=basic_speed)
+        return [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
+                                action_duration=getattr(self, self.CONFIG_CURVE_ACTION_DURATION_KEY),
+                                action_speed_multiplier=0.2),
+                new_ActionFrame()], self.DO_FL_N_RR_N_STATUS_CODE
 
     def do_n_rl_n_fr(self, basic_speed: int) -> ActionPack:
-        return choice([self.do_n_rl_n_n, self.do_n_n_n_fr])(basic_speed=basic_speed)
+        return [new_ActionFrame(action_speed=(-basic_speed, basic_speed),
+                                action_duration=getattr(self, self.CONFIG_CURVE_ACTION_DURATION_KEY),
+                                action_speed_multiplier=0.2),
+                new_ActionFrame()], self.DO_N_RL_N_FR_STATUS_CODE
 
     def do_fl_n_n_fr(self, basic_speed: int) -> ActionPack:
         sign = random_sign()
