@@ -9,7 +9,7 @@ from repo.uptechStar.constant import EDGE_REAR_SENSOR_ID, EDGE_FRONT_SENSOR_ID, 
     EDGE_MAX_LINE
 from repo.uptechStar.module.actions import new_ActionFrame
 from repo.uptechStar.module.sensors import FU_INDEX
-from repo.uptechStar.module.watcher import build_watcher_simple
+from repo.uptechStar.module.watcher import build_watcher_simple, build_watcher_full_ctrl
 
 
 class BattleBot(Bot):
@@ -130,9 +130,15 @@ class BattleBot(Bot):
                                                              action_player=self.player,
                                                              config_path=surrounding_inferrer_config)
 
+
         self.fence_inferrer = StandardFenceInferrer(sensor_hub=self.sensor_hub,
                                                     action_player=self.player,
                                                     config_path=fence_inferrer_config)
+        #TODO remember decouple the constant
+        self._normal_alter_watcher = build_watcher_full_ctrl(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
+                                                            sensor_id=(8,0,3),
+                                                            min_line=(1200,1200,480),
+                                                            max_line=(None,None,None))
         self._start_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
                                                    sensor_id=SIDES_SENSOR_ID,
                                                    min_line=START_MIN_LINE)
@@ -150,10 +156,10 @@ class BattleBot(Bot):
 
         """
         tape = [
-                new_ActionFrame(breaker_func=self._start_watcher,
-                                action_duration=99999999),
-                new_ActionFrame(action_speed=8000, action_duration=600),
-                new_ActionFrame()]
+            new_ActionFrame(breaker_func=self._start_watcher,
+                            action_duration=99999999),
+            new_ActionFrame(action_speed=8000, action_duration=600),
+            new_ActionFrame()]
         warnings.warn('>>>>>>>>>>Waiting for start<<<<<<<')
         self.player.extend(tape)
         warnings.warn(">>>>>>>>>Start<<<<<<<<")
@@ -170,8 +176,15 @@ class BattleBot(Bot):
         :param normal_spead:
         :return:
         """
-        normal_action = new_ActionFrame(action_speed=normal_spead)
-        #TODO the camera is currently disabled, do remember implement it
+        #TODO: may allow a greater speed
+        low_speed_action = new_ActionFrame(action_speed=int(normal_spead / 2))
+        normal_action = new_ActionFrame(action_speed=normal_spead,
+                                        action_duration=5,
+                                        breaker_func=self._normal_alter_watcher,
+                                        break_action=(low_speed_action,))
+
+
+        # TODO the camera is currently disabled, do remember implement it
         def is_on_stage() -> bool:
             # TODO: do remember implement this stage check
             return True
@@ -181,7 +194,10 @@ class BattleBot(Bot):
                 return
             self.surrounding_inferrer.react()
             self.screen.set_led_color(1, self.screen.COLOR_YELLOW)
-            self.player.append(normal_action)
+            if self._normal_alter_watcher():
+                self.player.append(low_speed_action)
+            else:
+                self.player.append(normal_action)
 
         def off_stage() -> None:
             self.fence_inferrer.react()
@@ -201,6 +217,7 @@ class BattleBot(Bot):
         normal_action = new_ActionFrame(action_speed=normal_spead)
         self.screen.open()
         self.screen.set_font_size(self.screen.FONT_12X16)
+
         def is_on_stage() -> bool:
             # TODO: do remember implement this stage check
             return True
@@ -208,7 +225,7 @@ class BattleBot(Bot):
         def on_stage() -> None:
             status_code = self.edge_inferrer.react()
             self.screen.fill_screen(self.screen.COLOR_BLACK)
-            self.screen.put_string(0,0,f'{status_code}')
+            self.screen.put_string(0, 0, f'{status_code}')
             self.screen.refresh()
             if status_code:
                 self.screen.set_led_color(1, self.screen.COLOR_RED)
@@ -223,7 +240,6 @@ class BattleBot(Bot):
 
         while True:
             on_stage() if is_on_stage() else off_stage()
-
 
     def interrupt_handler(self):
         self.screen.set_led_color(0, self.screen.COLOR_WHITE)
