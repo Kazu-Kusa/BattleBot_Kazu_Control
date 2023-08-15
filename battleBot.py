@@ -5,7 +5,7 @@ from modules.EdgeInferrers import StandardEdgeInferrer
 from modules.FenceInferrers import StandardFenceInferrer
 from modules.SurroundInferrers import StandardSurroundInferrer
 from modules.bot import Bot
-from repo.uptechStar.constant import EDGE_REAR_SENSOR_ID, EDGE_FRONT_SENSOR_ID, SIDES_SENSOR_ID, START_MAX_LINE, \
+from repo.uptechStar.constant import EDGE_REAR_SENSOR_ID, EDGE_FRONT_SENSOR_ID, SIDES_SENSOR_ID, START_MIN_LINE, \
     EDGE_MAX_LINE
 from repo.uptechStar.module.actions import new_ActionFrame
 from repo.uptechStar.module.sensors import FU_INDEX
@@ -135,7 +135,7 @@ class BattleBot(Bot):
                                                     config_path=fence_inferrer_config)
         self._start_watcher = build_watcher(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
                                             sensor_id=SIDES_SENSOR_ID,
-                                            max_line=START_MAX_LINE)
+                                            min_line=START_MIN_LINE)
         self._rear_watcher = build_watcher(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
                                            sensor_id=EDGE_REAR_SENSOR_ID,
                                            max_line=EDGE_MAX_LINE)
@@ -144,16 +144,19 @@ class BattleBot(Bot):
                                             max_line=EDGE_MAX_LINE)
 
     def wait_start(self) -> None:
-        tape = [new_ActionFrame(action_speed=8000, action_duration=600),
+        """
+        Wait for start
+        Returns:
+
+        """
+        tape = [
+                new_ActionFrame(breaker_func=self._start_watcher,
+                                action_duration=99999999),
+                new_ActionFrame(action_speed=8000, action_duration=600),
                 new_ActionFrame()]
-        self.screen.set_led_color(0, self.screen.COLOR_BROWN)
-        warnings.warn('##HALTING##')
-        while self._start_watcher():
-            """
-            HALTING
-            """
-        warnings.warn('!!DASH-TIME!!')
+        warnings.warn('>>>>>>>>>>Waiting for start<<<<<<<')
         self.player.extend(tape)
+        warnings.warn(">>>>>>>>>Start<<<<<<<<")
 
     # region events
 
