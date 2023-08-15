@@ -1,6 +1,6 @@
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX
-from repo.uptechStar.module.watcher import Watcher, build_watcher
+from repo.uptechStar.module.watcher import Watcher, build_watcher_simple
 
 ACTION_REVOLVE = (100, 100, 0, 100)
 
@@ -20,8 +20,8 @@ class NormalActions:
         self.player = player
         self.sensor_hub = sensor_hub
         self.how_time = how_time
-        self.view: Watcher = build_watcher(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
-                                           sensor_id=(8, 0, 5, 3), min_line=self.i)
+        self.view: Watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
+                                                  sensor_id=(8, 0, 5, 3), min_line=self.i)
 
     def revolve_action(self):
         # TODO 该函数未测试
