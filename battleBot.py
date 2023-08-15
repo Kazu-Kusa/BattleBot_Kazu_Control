@@ -192,6 +192,41 @@ class BattleBot(Bot):
         while True:
             on_stage() if is_on_stage() else off_stage()
 
+    def Battle_debug(self, normal_spead: int, team_color: str, use_cam: bool) -> None:
+        """
+        the main function
+        :param use_cam:
+        :param team_color:
+        :param normal_spead:
+        :return:
+        """
+        normal_action = new_ActionFrame(action_speed=normal_spead)
+        self.screen.open()
+        self.screen.set_font_size(self.screen.FONT_12X16)
+        def is_on_stage() -> bool:
+            # TODO: do remember implement this stage check
+            return True
+
+        def on_stage() -> None:
+            status_code = self.edge_inferrer.react()
+            self.screen.fill_screen(self.screen.COLOR_BLACK)
+            self.screen.put_string(0,0,f'{status_code}')
+            self.screen.refresh()
+            if status_code:
+                self.screen.set_led_color(1, self.screen.COLOR_RED)
+
+                return
+            self.screen.set_led_color(1, self.screen.COLOR_YELLOW)
+            self.player.append(normal_action)
+
+        def off_stage() -> None:
+            self.fence_inferrer.react()
+            self.screen.set_led_color(1, self.screen.COLOR_GREEN)
+
+        while True:
+            on_stage() if is_on_stage() else off_stage()
+
+
     def interrupt_handler(self):
         self.screen.set_led_color(0, self.screen.COLOR_WHITE)
         self.player.append(new_ActionFrame())
