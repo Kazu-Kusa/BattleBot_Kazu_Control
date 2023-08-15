@@ -135,7 +135,7 @@ class BattleBot(Bot):
                                                     config_path=fence_inferrer_config)
         self._start_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
                                                    sensor_id=SIDES_SENSOR_ID,
-                                                   max_line=START_MIN_LINE)
+                                                   min_line=START_MIN_LINE)
         self._rear_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
                                                   sensor_id=EDGE_REAR_SENSOR_ID,
                                                   max_line=EDGE_MAX_LINE)
