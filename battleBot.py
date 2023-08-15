@@ -9,7 +9,7 @@ from repo.uptechStar.constant import EDGE_REAR_SENSOR_ID, EDGE_FRONT_SENSOR_ID, 
     EDGE_MAX_LINE
 from repo.uptechStar.module.actions import new_ActionFrame
 from repo.uptechStar.module.sensors import FU_INDEX
-from repo.uptechStar.module.watcher import build_watcher
+from repo.uptechStar.module.watcher import build_watcher_simple
 
 
 class BattleBot(Bot):
@@ -133,15 +133,15 @@ class BattleBot(Bot):
         self.fence_inferrer = StandardFenceInferrer(sensor_hub=self.sensor_hub,
                                                     action_player=self.player,
                                                     config_path=fence_inferrer_config)
-        self._start_watcher = build_watcher(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
-                                            sensor_id=SIDES_SENSOR_ID,
-                                            min_line=START_MIN_LINE)
-        self._rear_watcher = build_watcher(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
-                                           sensor_id=EDGE_REAR_SENSOR_ID,
-                                           max_line=EDGE_MAX_LINE)
-        self._front_watcher = build_watcher(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
-                                            sensor_id=EDGE_FRONT_SENSOR_ID,
-                                            max_line=EDGE_MAX_LINE)
+        self._start_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
+                                                   sensor_id=SIDES_SENSOR_ID,
+                                                   max_line=START_MIN_LINE)
+        self._rear_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
+                                                  sensor_id=EDGE_REAR_SENSOR_ID,
+                                                  max_line=EDGE_MAX_LINE)
+        self._front_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
+                                                   sensor_id=EDGE_FRONT_SENSOR_ID,
+                                                   max_line=EDGE_MAX_LINE)
 
     def wait_start(self) -> None:
         """
