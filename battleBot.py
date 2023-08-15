@@ -171,21 +171,19 @@ class BattleBot(Bot):
         :return:
         """
         normal_action = new_ActionFrame(action_speed=normal_spead)
-
+        #TODO the camera is currently disabled, do remember implement it
         def is_on_stage() -> bool:
             # TODO: do remember implement this stage check
             return True
 
         def on_stage() -> None:
-            self.tag_detector.tag_monitor_switch = True
-            self.edge_inferrer.react()
+            if self.edge_inferrer.react():
+                return
             self.surrounding_inferrer.react()
             self.screen.set_led_color(1, self.screen.COLOR_YELLOW)
-
             self.player.append(normal_action)
 
         def off_stage() -> None:
-            self.tag_detector.tag_monitor_switch = False
             self.fence_inferrer.react()
             self.screen.set_led_color(1, self.screen.COLOR_GREEN)
 
@@ -239,4 +237,4 @@ if __name__ == '__main__':
                     edge_inferrer_config='config/std_edge_inferrer_config.json',
                     surrounding_inferrer_config='config/std_surround_inferrer_config.json',
                     fence_inferrer_config='config/std_fence_inferrer_config.json')
-    bot.start_match(team_color='blue', normal_spead=3000, use_cam=True)
+    bot.start_match(team_color='blue', normal_spead=3000, use_cam=False)
