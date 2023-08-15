@@ -45,9 +45,9 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
     def register_all_config(self):
         # TODO remember decouple the constant
         self.register_config(config_registry_path=self.CONFIG_EDGE_MAX_BASELINE_KEY,
-                             value=1750)
+                             value=2150)
         self.register_config(config_registry_path=self.CONFIG_EDGE_MIN_BASELINE_KEY,
-                             value=1150)
+                             value=1750)
         self.register_config(config_registry_path=self.CONFIG_STRAIGHT_ACTION_DURATION_KEY,
                              value=200)
         self.register_config(config_registry_path=self.CONFIG_CURVE_ACTION_DURATION_KEY,
