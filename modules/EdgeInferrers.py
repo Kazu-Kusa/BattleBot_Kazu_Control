@@ -246,6 +246,5 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         return tuple(map(lambda x: edge_min_baseline < x < edge_max_baseline, edge_sensors))
 
     def react(self) -> int:
-        action, status = self.action_table.get(self.infer(self.updater()))(getattr(self, self.CONFIG_BASIC_SPEED_KEY))
-        self._player.extend(action)
-        return status
+        return self.exc_action(self.action_table.get(self.infer(self.updater())),
+                               getattr(self, self.CONFIG_BASIC_SPEED_KEY))
