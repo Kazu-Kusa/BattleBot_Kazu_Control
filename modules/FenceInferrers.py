@@ -3,7 +3,7 @@ from repo.uptechStar.module.actions import ActionPlayer, ActionFrame, new_Action
 from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub
 from repo.uptechStar.module.watcher import default_edge_rear_watcher, default_edge_front_watcher, Watcher
-from repo.uptechStar.module.algrithm_tools import random_sign, random_enlarge_multiplier, random_float_multiplier
+from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplier_ll, float_multiplier_middle
 from typing import final, Dict, List, Callable, Tuple, Optional, Sequence, Union, Hashable, Any
 
 BASIC_DURATION = 200
@@ -47,21 +47,21 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                                 action_duration=OFF_STAGE_DASH_DURATION),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
-                                action_speed_multiplier=random_enlarge_multiplier(),
+                                action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]
 
     @final
     def on_left_to_fence(self, basic_speed) -> ComplexAction:
         return [new_ActionFrame(action_speed=(-basic_speed, basic_speed),
-                                action_speed_multiplier=random_enlarge_multiplier(),
+                                action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]
 
     @final
     def on_right_to_fence(self, basic_speed) -> ComplexAction:
         return [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
-                                action_speed_multiplier=random_enlarge_multiplier(),
+                                action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]
 
@@ -69,35 +69,35 @@ class StandardFenceInferrer(AbstractFenceInferrer):
     def on_behind_to_fence(self, basic_speed) -> ComplexAction:
         sign = random_sign()
         return [new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
-                                action_speed_multiplier=random_enlarge_multiplier(),
+                                action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]
 
     @final
     def on_front_left_to_fence(self, basic_speed) -> ComplexAction:
         return [new_ActionFrame(action_speed=(-basic_speed, basic_speed),
-                                action_speed_multiplier=random_float_multiplier(),
+                                action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]
 
     @final
     def on_front_right_to_fence(self, basic_speed) -> ComplexAction:
         return [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
-                                action_speed_multiplier=random_float_multiplier(),
+                                action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]
 
     @final
     def on_behind_left_to_fence(self, basic_speed) -> ComplexAction:
         return [new_ActionFrame(action_speed=(-basic_speed, basic_speed),
-                                action_speed_multiplier=random_float_multiplier(),
+                                action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]
 
     @final
     def on_behind_right_to_fence(self, basic_speed) -> ComplexAction:
         return [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
-                                action_speed_multiplier=random_float_multiplier(),
+                                action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]
 

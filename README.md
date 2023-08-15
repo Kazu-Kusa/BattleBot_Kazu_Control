@@ -112,8 +112,8 @@ rr ad1
 
 l1 ad8
 r1 ad0
-fb ad5
-rb ad3
+fb ad3
+rb ad5
 
 <empty>  ad4
 
@@ -131,4 +131,3 @@ r2 i6
 ftr i7
 """
 ```
-

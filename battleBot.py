@@ -5,11 +5,11 @@ from modules.EdgeInferrers import StandardEdgeInferrer
 from modules.FenceInferrers import StandardFenceInferrer
 from modules.SurroundInferrers import StandardSurroundInferrer
 from modules.bot import Bot
-from repo.uptechStar.constant import EDGE_REAR_SENSOR_ID, EDGE_FRONT_SENSOR_ID, SIDES_SENSOR_ID, START_MAX_LINE, \
+from repo.uptechStar.constant import EDGE_REAR_SENSOR_ID, EDGE_FRONT_SENSOR_ID, SIDES_SENSOR_ID, START_MIN_LINE, \
     EDGE_MAX_LINE
 from repo.uptechStar.module.actions import new_ActionFrame
 from repo.uptechStar.module.sensors import FU_INDEX
-from repo.uptechStar.module.watcher import build_watcher
+from repo.uptechStar.module.watcher import build_watcher_simple, build_watcher_full_ctrl
 
 
 class BattleBot(Bot):
@@ -130,30 +130,39 @@ class BattleBot(Bot):
                                                              action_player=self.player,
                                                              config_path=surrounding_inferrer_config)
 
+
         self.fence_inferrer = StandardFenceInferrer(sensor_hub=self.sensor_hub,
                                                     action_player=self.player,
                                                     config_path=fence_inferrer_config)
-        self._start_watcher = build_watcher(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
-                                            sensor_id=SIDES_SENSOR_ID,
-                                            max_line=START_MAX_LINE)
-        self._rear_watcher = build_watcher(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
-                                           sensor_id=EDGE_REAR_SENSOR_ID,
-                                           max_line=EDGE_MAX_LINE)
-        self._front_watcher = build_watcher(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
-                                            sensor_id=EDGE_FRONT_SENSOR_ID,
-                                            max_line=EDGE_MAX_LINE)
+        #TODO remember decouple the constant
+        self._normal_alter_watcher = build_watcher_full_ctrl(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
+                                                            sensor_id=(8,0,3),
+                                                            min_line=(1200,1200,480),
+                                                            max_line=(None,None,None))
+        self._start_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
+                                                   sensor_id=SIDES_SENSOR_ID,
+                                                   min_line=START_MIN_LINE)
+        self._rear_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
+                                                  sensor_id=EDGE_REAR_SENSOR_ID,
+                                                  max_line=EDGE_MAX_LINE)
+        self._front_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
+                                                   sensor_id=EDGE_FRONT_SENSOR_ID,
+                                                   max_line=EDGE_MAX_LINE)
 
     def wait_start(self) -> None:
-        tape = [new_ActionFrame(action_speed=8000, action_duration=600),
-                new_ActionFrame()]
-        self.screen.set_led_color(0, self.screen.COLOR_BROWN)
-        warnings.warn('##HALTING##')
-        while self._start_watcher():
-            """
-            HALTING
-            """
-        warnings.warn('!!DASH-TIME!!')
+        """
+        Wait for start
+        Returns:
+
+        """
+        tape = [
+            new_ActionFrame(breaker_func=self._start_watcher,
+                            action_duration=99999999),
+            new_ActionFrame(action_speed=8000, action_duration=600),
+            new_ActionFrame()]
+        warnings.warn('>>>>>>>>>>Waiting for start<<<<<<<')
         self.player.extend(tape)
+        warnings.warn(">>>>>>>>>Start<<<<<<<<")
 
     # region events
 
@@ -167,22 +176,65 @@ class BattleBot(Bot):
         :param normal_spead:
         :return:
         """
+        #TODO: may allow a greater speed
+        low_speed_action = new_ActionFrame(action_speed=int(normal_spead / 2))
+        normal_action = new_ActionFrame(action_speed=normal_spead,
+                                        action_duration=5,
+                                        breaker_func=self._normal_alter_watcher,
+                                        break_action=(low_speed_action,))
+
+
+        # TODO the camera is currently disabled, do remember implement it
+        def is_on_stage() -> bool:
+            # TODO: do remember implement this stage check
+            return True
+
+        def on_stage() -> None:
+            if self.edge_inferrer.react():
+                return
+            self.surrounding_inferrer.react()
+            self.screen.set_led_color(1, self.screen.COLOR_YELLOW)
+            if self._normal_alter_watcher():
+                self.player.append(low_speed_action)
+            else:
+                self.player.append(normal_action)
+
+        def off_stage() -> None:
+            self.fence_inferrer.react()
+            self.screen.set_led_color(1, self.screen.COLOR_GREEN)
+
+        while True:
+            on_stage() if is_on_stage() else off_stage()
+
+    def Battle_debug(self, normal_spead: int, team_color: str, use_cam: bool) -> None:
+        """
+        the main function
+        :param use_cam:
+        :param team_color:
+        :param normal_spead:
+        :return:
+        """
         normal_action = new_ActionFrame(action_speed=normal_spead)
+        self.screen.open()
+        self.screen.set_font_size(self.screen.FONT_12X16)
 
         def is_on_stage() -> bool:
             # TODO: do remember implement this stage check
             return True
 
         def on_stage() -> None:
-            self.tag_detector.tag_monitor_switch = True
-            self.edge_inferrer.react()
-            self.surrounding_inferrer.react()
-            self.screen.set_led_color(1, self.screen.COLOR_YELLOW)
+            status_code = self.edge_inferrer.react()
+            self.screen.fill_screen(self.screen.COLOR_BLACK)
+            self.screen.put_string(0, 0, f'{status_code}')
+            self.screen.refresh()
+            if status_code:
+                self.screen.set_led_color(1, self.screen.COLOR_RED)
 
+                return
+            self.screen.set_led_color(1, self.screen.COLOR_YELLOW)
             self.player.append(normal_action)
 
         def off_stage() -> None:
-            self.tag_detector.tag_monitor_switch = False
             self.fence_inferrer.react()
             self.screen.set_led_color(1, self.screen.COLOR_GREEN)
 
@@ -201,4 +253,4 @@ if __name__ == '__main__':
                     edge_inferrer_config='config/std_edge_inferrer_config.json',
                     surrounding_inferrer_config='config/std_surround_inferrer_config.json',
                     fence_inferrer_config='config/std_fence_inferrer_config.json')
-    bot.start_match(team_color='blue', normal_spead=3000, use_cam=True)
+    bot.start_match(team_color='blue', normal_spead=3000, use_cam=False)

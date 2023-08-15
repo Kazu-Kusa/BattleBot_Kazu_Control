@@ -3,7 +3,7 @@ from repo.uptechStar.module.actions import new_ActionFrame, ActionPlayer
 from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub
 from repo.uptechStar.module.watcher import default_edge_rear_watcher, default_edge_front_watcher, Watcher
-from repo.uptechStar.module.algrithm_tools import random_sign, random_enlarge_multiplier, random_float_multiplier
+from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplier_ll, float_multiplier_middle
 from typing import final, Tuple, Hashable, Any
 
 
@@ -31,12 +31,12 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
     def on_allay_box_encountered_at_front(self, basic_speed: int) -> ComplexAction:
         sign = random_sign()
         return [new_ActionFrame(action_speed=-basic_speed,
-                                action_speed_multiplier=random_float_multiplier(),
+                                action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 breaker_func=default_edge_rear_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
-                                action_speed_multiplier=random_enlarge_multiplier(),
+                                action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]
 
@@ -44,17 +44,17 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
     def on_enemy_box_encountered_at_front(self, basic_speed: int) -> ComplexAction:
         sign = random_sign()
         return [new_ActionFrame(action_speed=basic_speed,
-                                action_speed_multiplier=random_enlarge_multiplier(),
+                                action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=6000,
                                 breaker_func=default_edge_front_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=-basic_speed,
-                                action_speed_multiplier=random_float_multiplier(),
+                                action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 breaker_func=default_edge_rear_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
-                                action_speed_multiplier=random_enlarge_multiplier(),
+                                action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]
 
@@ -62,12 +62,12 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
     def on_enemy_car_encountered_at_front(self, basic_speed: int) -> ComplexAction:
         # TODO: dash til the edge, then fall back,should add a block skill(?)
         return [new_ActionFrame(action_speed=basic_speed,
-                                action_speed_multiplier=random_enlarge_multiplier(),
+                                action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=6000,
                                 breaker_func=default_edge_front_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=-basic_speed,
-                                action_speed_multiplier=random_float_multiplier(),
+                                action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 breaker_func=default_edge_rear_watcher),
                 new_ActionFrame()]
@@ -75,14 +75,14 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
     @final
     def on_object_encountered_at_left(self, basic_speed: int) -> ComplexAction:
         return [new_ActionFrame(action_speed=(-basic_speed, basic_speed),
-                                action_speed_multiplier=random_enlarge_multiplier(),
+                                action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]
 
     @final
     def on_object_encountered_at_right(self, basic_speed: int) -> ComplexAction:
         return [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
-                                action_speed_multiplier=random_enlarge_multiplier(),
+                                action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]
 
@@ -90,6 +90,6 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
     def on_object_encountered_at_behind(self, basic_speed: int) -> ComplexAction:
         sign = random_sign()
         return [new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
-                                action_speed_multiplier=random_enlarge_multiplier(),
+                                action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]

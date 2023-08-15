@@ -1,6 +1,6 @@
 {
-    "EdgeMaxBaseline": 1750,
-    "EdgeMinBaseline": 1150,
+    "EdgeMaxBaseline": 2150,
+    "EdgeMinBaseline": 1750,
     "StraightActionDuration": 200,
     "CurveActionDuration": 170
 }

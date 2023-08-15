@@ -22,9 +22,9 @@ class AbstractEdgeInferrer(InferrerBase):
         :param kwargs:
         :return:
         """
-        complex_action, status_code = reaction
-        self._player.override(complex_action(*args, **kwargs))
-
+        complex_action, status_code = reaction(*args, **kwargs)
+        self._player.override(complex_action)
+        self._player.play()
         return status_code
 
     # region methods
