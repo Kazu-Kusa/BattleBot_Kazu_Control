@@ -2,8 +2,8 @@ from typing import Sequence
 
 from modules.AbsEdgeInferrer import AbstractEdgeInferrer, ActionPack
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
-from repo.uptechStar.module.algrithm_tools import random_sign, shrink_multiplier_lll, float_multiplier_upper, \
-    shrink_multiplier_l, enlarge_multiplier_l
+from repo.uptechStar.module.algrithm_tools import random_sign, \
+    float_multiplier_upper, float_multiplier_lower, enlarge_multiplier_ll
 from repo.uptechStar.module.sensors import SensorHub, LocalFullUpdaterConstructor, FU_INDEX, FullUpdater
 from repo.uptechStar.module.watcher import Watcher, default_edge_rear_watcher, default_edge_front_watcher
 
@@ -74,7 +74,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         sign = random_sign()
         return [new_ActionFrame(action_speed=(-basic_speed, basic_speed),
                                 action_duration=getattr(self, self.CONFIG_CURVE_ACTION_DURATION_KEY),
-                                action_speed_multiplier=shrink_multiplier_lll()),
+                                action_speed_multiplier=float_multiplier_lower()),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=-basic_speed,
                                 action_duration=getattr(self, self.CONFIG_STRAIGHT_ACTION_DURATION_KEY),
@@ -83,14 +83,14 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(-sign * basic_speed, sign * basic_speed),
                                 action_duration=getattr(self, self.CONFIG_CURVE_ACTION_DURATION_KEY),
-                                action_speed_multiplier=shrink_multiplier_l()),
+                                action_speed_multiplier=float_multiplier_lower()),
                 new_ActionFrame()], self.DO_FL_RL_N_FR_STATUS_CODE
 
     def do_fl_n_rr_fr(self, basic_speed: int) -> ActionPack:
         sign = random_sign()
         return [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
                                 action_duration=getattr(self, self.CONFIG_CURVE_ACTION_DURATION_KEY),
-                                action_speed_multiplier=shrink_multiplier_lll()),
+                                action_speed_multiplier=float_multiplier_lower()),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=-basic_speed,
                                 action_duration=getattr(self, self.CONFIG_STRAIGHT_ACTION_DURATION_KEY),
@@ -100,13 +100,13 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                 new_ActionFrame(
                     action_speed=(-sign * basic_speed, sign * basic_speed),
                     action_duration=getattr(self, self.CONFIG_CURVE_ACTION_DURATION_KEY),
-                    action_speed_multiplier=shrink_multiplier_l()),
+                    action_speed_multiplier=float_multiplier_lower()),
                 new_ActionFrame()], self.DO_FL_N_RR_FR_STATUS_CODE
 
     def do_fl_rl_rr_n(self, basic_speed: int) -> ActionPack:
         return [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
                                 action_duration=getattr(self, self.CONFIG_CURVE_ACTION_DURATION_KEY),
-                                action_speed_multiplier=shrink_multiplier_lll()),
+                                action_speed_multiplier=float_multiplier_lower()),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=basic_speed,
                                 action_duration=getattr(self, self.CONFIG_STRAIGHT_ACTION_DURATION_KEY),
@@ -117,7 +117,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
     def do_n_rl_rr_fr(self, basic_speed: int) -> ActionPack:
         return [new_ActionFrame(action_speed=(-basic_speed, basic_speed),
                                 action_duration=getattr(self, self.CONFIG_CURVE_ACTION_DURATION_KEY),
-                                action_speed_multiplier=shrink_multiplier_lll()),
+                                action_speed_multiplier=float_multiplier_lower()),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=basic_speed,
                                 action_duration=getattr(self, self.CONFIG_STRAIGHT_ACTION_DURATION_KEY),
@@ -131,13 +131,13 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
     def do_fl_n_rr_n(self, basic_speed: int) -> ActionPack:
         return [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
                                 action_duration=getattr(self, self.CONFIG_CURVE_ACTION_DURATION_KEY),
-                                action_speed_multiplier=shrink_multiplier_lll()),
+                                action_speed_multiplier=float_multiplier_lower()),
                 new_ActionFrame()], self.DO_FL_N_RR_N_STATUS_CODE
 
     def do_n_rl_n_fr(self, basic_speed: int) -> ActionPack:
         return [new_ActionFrame(action_speed=(-basic_speed, basic_speed),
                                 action_duration=getattr(self, self.CONFIG_CURVE_ACTION_DURATION_KEY),
-                                action_speed_multiplier=shrink_multiplier_lll()),
+                                action_speed_multiplier=float_multiplier_lower()),
                 new_ActionFrame()], self.DO_N_RL_N_FR_STATUS_CODE
 
     def do_fl_n_n_fr(self, basic_speed: int) -> ActionPack:
@@ -150,8 +150,8 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                 new_ActionFrame(
                     action_speed=(-sign * basic_speed, sign * basic_speed),
                     action_duration=getattr(self, self.CONFIG_CURVE_ACTION_DURATION_KEY),
-                    action_speed_multiplier=shrink_multiplier_l(),
-                    action_duration_multiplier=enlarge_multiplier_l()),
+                    action_speed_multiplier=float_multiplier_lower(),
+                    action_duration_multiplier=enlarge_multiplier_ll()),
                 new_ActionFrame()], self.DO_FL_N_N_FR_STATUS_CODE
 
     def do_n_rl_rr_n(self, basic_speed: int) -> ActionPack:
@@ -194,7 +194,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(-basic_speed, basic_speed),
                                 action_duration=getattr(self, self.CONFIG_CURVE_ACTION_DURATION_KEY),
-                                action_speed_multiplier=shrink_multiplier_l()),
+                                action_speed_multiplier=float_multiplier_lower()),
                 new_ActionFrame()], self.DO_N_N_RR_N_STATUS_CODE
 
     def do_n_rl_n_n(self, basic_speed: int) -> ActionPack:
@@ -205,7 +205,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(basic_speed, -basic_speed),
                                 action_duration=getattr(self, self.CONFIG_CURVE_ACTION_DURATION_KEY),
-                                action_speed_multiplier=shrink_multiplier_l()),
+                                action_speed_multiplier=float_multiplier_lower()),
                 new_ActionFrame()], self.DO_N_RL_N_N_STATUS_CODE
 
     def do_n_n_n_fr(self, basic_speed: int) -> ActionPack:
@@ -216,7 +216,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(-basic_speed, basic_speed),
                                 action_duration=getattr(self, self.CONFIG_CURVE_ACTION_DURATION_KEY),
-                                action_speed_multiplier=shrink_multiplier_l()),
+                                action_speed_multiplier=float_multiplier_lower()),
                 new_ActionFrame()], self.DO_N_N_N_FR_STATUS_CODE
 
     def do_fl_n_n_n(self, basic_speed: int) -> ActionPack:
@@ -227,7 +227,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(basic_speed, -basic_speed),
                                 action_duration=getattr(self, self.CONFIG_CURVE_ACTION_DURATION_KEY),
-                                action_speed_multiplier=shrink_multiplier_l()),
+                                action_speed_multiplier=float_multiplier_lower()),
                 new_ActionFrame()], self.DO_FL_N_N_N_STATUS_CODE
 
     # endregion
