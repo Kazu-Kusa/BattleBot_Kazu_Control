@@ -1,4 +1,3 @@
-import time
 import warnings
 from typing import final
 
@@ -9,6 +8,7 @@ from modules.bot import Bot
 from repo.uptechStar.constant import EDGE_REAR_SENSOR_ID, EDGE_FRONT_SENSOR_ID, SIDES_SENSOR_ID, START_MIN_LINE, \
     EDGE_MAX_LINE
 from repo.uptechStar.module.actions import new_ActionFrame
+from repo.uptechStar.module.os_tools import CacheFILE
 from repo.uptechStar.module.sensors import FU_INDEX
 from repo.uptechStar.module.watcher import build_watcher_simple, build_watcher_full_ctrl
 
@@ -242,10 +242,10 @@ class BattleBot(Bot):
             on_stage() if is_on_stage() else off_stage()
 
     def interrupt_handler(self):
-        self.screen.set_led_color(0, self.screen.COLOR_WHITE)
         self.player.append(new_ActionFrame())
+        self.screen.set_led_color(0, self.screen.COLOR_WHITE)
+        CacheFILE.save_all_cache()
         warnings.warn('exiting')
-        time.sleep(1)
 
     @final
     def save_all_config(self):
