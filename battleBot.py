@@ -8,7 +8,6 @@ from modules.bot import Bot
 from repo.uptechStar.constant import EDGE_REAR_SENSOR_ID, EDGE_FRONT_SENSOR_ID, SIDES_SENSOR_ID, START_MIN_LINE, \
     EDGE_MAX_LINE
 from repo.uptechStar.module.actions import new_ActionFrame
-from repo.uptechStar.module.os_tools import CacheFILE
 from repo.uptechStar.module.sensors import FU_INDEX
 from repo.uptechStar.module.watcher import build_watcher_simple, build_watcher_full_ctrl
 
@@ -161,9 +160,9 @@ class BattleBot(Bot):
                             action_duration=99999999),
             new_ActionFrame(action_speed=8000, action_duration=600),
             new_ActionFrame()]
-        warnings.warn('>>>>>>>>>>Waiting for start<<<<<<<')
+        warnings.warn('\n>>>>>>>>>>Waiting for start<<<<<<<', stacklevel=4)
         self.player.extend(tape)
-        warnings.warn(">>>>>>>>>Start<<<<<<<<")
+        warnings.warn("\n>>>>>>>>>Start<<<<<<<<", stacklevel=4)
 
     # region events
 
@@ -244,8 +243,8 @@ class BattleBot(Bot):
     def interrupt_handler(self):
         self.player.append(new_ActionFrame())
         self.screen.set_led_color(0, self.screen.COLOR_WHITE)
-        CacheFILE.save_all_cache()
-        warnings.warn('exiting')
+
+        warnings.warn('\nexiting', stacklevel=4)
 
     @final
     def save_all_config(self):
@@ -261,5 +260,6 @@ if __name__ == '__main__':
                     surrounding_inferrer_config='config/std_surround_inferrer_config.json',
                     fence_inferrer_config='config/std_fence_inferrer_config.json')
     # bot.save_all_config()
-    bot.start_match(normal_spead=3000, team_color='blue', use_cam=False)
+    # bot.start_match(normal_spead=3000, team_color='blue', use_cam=False)
+    bot.Battle(3000, 'blue', True)
     # bot.Battle_debug(100, 'red', True)
