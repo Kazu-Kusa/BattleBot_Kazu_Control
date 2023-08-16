@@ -130,15 +130,15 @@ class BattleBot(Bot):
                                                              action_player=self.player,
                                                              config_path=surrounding_inferrer_config)
 
-
         self.fence_inferrer = StandardFenceInferrer(sensor_hub=self.sensor_hub,
                                                     action_player=self.player,
                                                     config_path=fence_inferrer_config)
-        #TODO remember decouple the constant
-        self._normal_alter_watcher = build_watcher_full_ctrl(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
-                                                            sensor_id=(8,0,3),
-                                                            min_line=(1200,1200,480),
-                                                            max_line=(None,None,None))
+        # TODO remember decouple the constant
+        self._normal_alter_watcher = build_watcher_full_ctrl(
+            sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
+            sensor_ids=(8, 0, 3),
+            min_lines=(1200, 1200, 480),
+            max_lines=(None, None, None))
         self._start_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
                                                    sensor_id=SIDES_SENSOR_ID,
                                                    min_line=START_MIN_LINE)
@@ -176,13 +176,12 @@ class BattleBot(Bot):
         :param normal_spead:
         :return:
         """
-        #TODO: may allow a greater speed
+        # TODO: may allow a greater speed
         low_speed_action = new_ActionFrame(action_speed=int(normal_spead / 2))
         normal_action = new_ActionFrame(action_speed=normal_spead,
                                         action_duration=5,
                                         breaker_func=self._normal_alter_watcher,
                                         break_action=(low_speed_action,))
-
 
         # TODO the camera is currently disabled, do remember implement it
         def is_on_stage() -> bool:
