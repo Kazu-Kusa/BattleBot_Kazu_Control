@@ -274,7 +274,7 @@ class MiscTest(unittest.TestCase):
 
 class ConstructorsTest(unittest.TestCase):
     def test_delta_watcher_constructor(self):
-        from repo.uptechStar.module.watcher import build_delta_watcher
+        from repo.uptechStar.module.watcher import build_delta_watcher_simple
         def gen() -> list:
             i = 0
             while True:
@@ -290,18 +290,18 @@ class ConstructorsTest(unittest.TestCase):
 
         print('test')
         # 创建一个 max_line 和 min_line 都存在的 watcher
-        watcher1 = build_delta_watcher(sensor_update, (0, 1), max_line=5, min_line=2, args=(1, 2))
+        watcher1 = build_delta_watcher_simple(sensor_update, (0, 1), max_line=5, min_line=2, args=(1, 2))
         print(watcher1())  # False
         print(watcher1())  # False
         # 创建一个 max_line 和 min_line 都存在的 watcher
 
         # 创建一个只有 min_line 的 watcher
-        watcher2 = build_delta_watcher(sensor_update, (0, 1), min_line=2, args=(3, 4))
+        watcher2 = build_delta_watcher_simple(sensor_update, (0, 1), min_line=2, args=(3, 4))
         print(watcher2())  # False
         print(watcher2())  # True
 
         # 创建一个只有 max_line 的 watcher
-        watcher3 = build_delta_watcher(sensor_update, (0, 1), max_line=5, args=(6, 7))
+        watcher3 = build_delta_watcher_simple(sensor_update, (0, 1), max_line=5, args=(6, 7))
         print(watcher3())  # True
         print(watcher3())  # False
 

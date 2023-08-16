@@ -1,5 +1,7 @@
 import time
+
 import warnings
+from typing import final
 
 from modules.EdgeInferrers import StandardEdgeInferrer
 from modules.FenceInferrers import StandardFenceInferrer
@@ -130,15 +132,15 @@ class BattleBot(Bot):
                                                              action_player=self.player,
                                                              config_path=surrounding_inferrer_config)
 
-
         self.fence_inferrer = StandardFenceInferrer(sensor_hub=self.sensor_hub,
                                                     action_player=self.player,
                                                     config_path=fence_inferrer_config)
-        #TODO remember decouple the constant
-        self._normal_alter_watcher = build_watcher_full_ctrl(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
-                                                            sensor_id=(8,0,3),
-                                                            min_line=(1200,1200,480),
-                                                            max_line=(None,None,None))
+        # TODO remember decouple the constant
+        self._normal_alter_watcher = build_watcher_full_ctrl(
+            sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
+            sensor_ids=(8, 0, 3),
+            min_lines=(1200, 1200, 480),
+            max_lines=(None, None, None))
         self._start_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
                                                    sensor_id=SIDES_SENSOR_ID,
                                                    min_line=START_MIN_LINE)
@@ -160,9 +162,9 @@ class BattleBot(Bot):
                             action_duration=99999999),
             new_ActionFrame(action_speed=8000, action_duration=600),
             new_ActionFrame()]
-        warnings.warn('>>>>>>>>>>Waiting for start<<<<<<<')
+        warnings.warn('\n>>>>>>>>>>Waiting for start<<<<<<<', stacklevel=4)
         self.player.extend(tape)
-        warnings.warn(">>>>>>>>>Start<<<<<<<<")
+        warnings.warn("\n>>>>>>>>>Start<<<<<<<<", stacklevel=4)
 
     # region events
 
@@ -176,13 +178,12 @@ class BattleBot(Bot):
         :param normal_spead:
         :return:
         """
-        #TODO: may allow a greater speed
+        # TODO: may allow a greater speed
         low_speed_action = new_ActionFrame(action_speed=int(normal_spead / 2))
         normal_action = new_ActionFrame(action_speed=normal_spead,
                                         action_duration=5,
                                         breaker_func=self._normal_alter_watcher,
                                         break_action=(low_speed_action,))
-
 
         # TODO the camera is currently disabled, do remember implement it
         def is_on_stage() -> bool:
@@ -242,10 +243,17 @@ class BattleBot(Bot):
             on_stage() if is_on_stage() else off_stage()
 
     def interrupt_handler(self):
-        self.screen.set_led_color(0, self.screen.COLOR_WHITE)
         self.player.append(new_ActionFrame())
-        warnings.warn('exiting')
-        time.sleep(1)
+        self.screen.set_led_color(0, self.screen.COLOR_WHITE)
+
+        warnings.warn('\nexiting', stacklevel=4)
+
+    @final
+    def save_all_config(self):
+        self.save_config()
+        self.edge_inferrer.save_config()
+        self.fence_inferrer.save_config()
+        self.surrounding_inferrer.save_config()
 
 
 if __name__ == '__main__':
@@ -253,4 +261,11 @@ if __name__ == '__main__':
                     edge_inferrer_config='config/std_edge_inferrer_config.json',
                     surrounding_inferrer_config='config/std_surround_inferrer_config.json',
                     fence_inferrer_config='config/std_fence_inferrer_config.json')
-    bot.start_match(team_color='blue', normal_spead=3000, use_cam=False)
+    # bot.save_all_config()
+    # bot.start_match(normal_spead=3000, team_color='blue', use_cam=False)
+    try:
+        bot.Battle(3200, 'blue', True)
+    # bot.Battle_debug(100, 'red', True)
+    except KeyboardInterrupt:
+        bot.player.append(new_ActionFrame())
+        time.sleep(1)
