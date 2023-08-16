@@ -1,3 +1,5 @@
+import time
+
 import warnings
 from typing import final
 
@@ -261,5 +263,9 @@ if __name__ == '__main__':
                     fence_inferrer_config='config/std_fence_inferrer_config.json')
     # bot.save_all_config()
     # bot.start_match(normal_spead=3000, team_color='blue', use_cam=False)
-    bot.Battle(3000, 'blue', True)
+    try:
+        bot.Battle(3200, 'blue', True)
     # bot.Battle_debug(100, 'red', True)
+    except KeyboardInterrupt:
+        bot.player.append(new_ActionFrame())
+        time.sleep(1)

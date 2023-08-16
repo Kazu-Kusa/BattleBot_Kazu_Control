@@ -7,13 +7,13 @@
       2150
     ],
     "EdgeMinBaseline": [
-      1750,
-      1750,
-      1750,
-      1750
+      1850,
+      1850,
+      1850,
+      1850
     ],
-    "StraightActionDuration": 200,
-    "CurveActionDuration": 170
+    "StraightActionDuration": 180,
+    "CurveActionDuration": 150
   },
   "SensorSection": {
     "SensorIds": [
@@ -24,6 +24,6 @@
     ]
   },
   "MotionSection": {
-    "BasicSpeed": 4000
+    "BasicSpeed": 5000
   }
 }
