@@ -1,5 +1,6 @@
 import time
 import warnings
+from typing import final
 
 from modules.EdgeInferrers import StandardEdgeInferrer
 from modules.FenceInferrers import StandardFenceInferrer
@@ -246,10 +247,18 @@ class BattleBot(Bot):
         warnings.warn('exiting')
         time.sleep(1)
 
+    @final
+    def save_all_config(self):
+        self.save_config()
+        self.edge_inferrer.save_config()
+        self.fence_inferrer.save_config()
+        self.surrounding_inferrer.save_config()
+
 
 if __name__ == '__main__':
     bot = BattleBot(base_config='config/std_base_config.json',
                     edge_inferrer_config='config/std_edge_inferrer_config.json',
                     surrounding_inferrer_config='config/std_surround_inferrer_config.json',
                     fence_inferrer_config='config/std_fence_inferrer_config.json')
+    # bot.save_all_config()
     bot.start_match(team_color='blue', normal_spead=3000, use_cam=False)
