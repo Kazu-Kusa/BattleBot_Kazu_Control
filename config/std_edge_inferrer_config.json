@@ -1,7 +1,17 @@
 {
   "InferSection": {
-    "EdgeMaxBaseline": 2150,
-    "EdgeMinBaseline": 1750,
+    "EdgeMaxBaseline": [
+      2150,
+      2150,
+      2250,
+      2150
+    ],
+    "EdgeMinBaseline": [
+      1750,
+      1750,
+      1750,
+      1750
+    ],
     "StraightActionDuration": 200,
     "CurveActionDuration": 170
   },

@@ -261,4 +261,5 @@ if __name__ == '__main__':
                     surrounding_inferrer_config='config/std_surround_inferrer_config.json',
                     fence_inferrer_config='config/std_fence_inferrer_config.json')
     # bot.save_all_config()
-    bot.start_match(team_color='blue', normal_spead=3000, use_cam=False)
+    bot.start_match(normal_spead=3000, team_color='blue', use_cam=False)
+    # bot.Battle_debug(100, 'red', True)

@@ -1,4 +1,4 @@
-from typing import Tuple, Sequence
+from typing import Sequence
 
 from modules.AbsEdgeInferrer import AbstractEdgeInferrer, ActionPack
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
@@ -46,9 +46,9 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
     def register_all_config(self):
         # TODO remember decouple the constant
         self.register_config(config_registry_path=self.CONFIG_EDGE_MAX_BASELINE_KEY,
-                             value=2150)
+                             value=[2150] * 4)
         self.register_config(config_registry_path=self.CONFIG_EDGE_MIN_BASELINE_KEY,
-                             value=1750)
+                             value=[1750] * 4)
         self.register_config(config_registry_path=self.CONFIG_STRAIGHT_ACTION_DURATION_KEY,
                              value=200)
         self.register_config(config_registry_path=self.CONFIG_CURVE_ACTION_DURATION_KEY,
@@ -240,11 +240,12 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
 
     # endregion
 
-    def infer(self, edge_sensors: Sequence[int]) -> Tuple[bool, bool, bool, bool]:
-        edge_min_baseline = getattr(self, self.CONFIG_EDGE_MIN_BASELINE_KEY)
-        edge_max_baseline = getattr(self, self.CONFIG_EDGE_MAX_BASELINE_KEY)
+    def infer(self, edge_sensors: Sequence[int]) -> tuple[bool, ...]:
+        min_baselines = getattr(self, self.CONFIG_EDGE_MIN_BASELINE_KEY)
+        max_baselines = getattr(self, self.CONFIG_EDGE_MAX_BASELINE_KEY)
 
-        return tuple(map(lambda x: edge_min_baseline < x < edge_max_baseline, edge_sensors))
+        return tuple(
+            map(lambda pack: pack[1] < pack[0] < pack[2], zip(edge_sensors, min_baselines, max_baselines)))
 
     def react(self) -> int:
         return self.exc_action(self.action_table.get(self.infer(self.updater())),
