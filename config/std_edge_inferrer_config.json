@@ -1,6 +1,19 @@
 {
+  "InferSection": {
     "EdgeMaxBaseline": 2150,
     "EdgeMinBaseline": 1750,
     "StraightActionDuration": 200,
     "CurveActionDuration": 170
+  },
+  "SensorSection": {
+    "SensorIds": [
+      6,
+      7,
+      1,
+      2
+    ]
+  },
+  "MotionSection": {
+    "BasicSpeed": 4000
+  }
 }
