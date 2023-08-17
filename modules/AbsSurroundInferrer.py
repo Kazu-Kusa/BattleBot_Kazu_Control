@@ -133,12 +133,32 @@ class AbstractSurroundInferrer(InferrerBase):
                              complex_action=self.on_allay_box_encountered_at_front)
 
     # region methods
+
+    # region Description
+    @abstractmethod
+    def on_nothing(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering nothing
+        :param basic_speed: the desired speed
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def on_neutral_box_encountered_at_front(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering neutral box
+        :param basic_speed: the desired speed
+        :return:
+        """
+        pass
+
     @abstractmethod
     def on_allay_box_encountered_at_front(self, basic_speed) -> ComplexAction:
         """
         the action that will be executed on the event when encountering allay box
         :param basic_speed: the desired speed the desired speed multiplier
-        :return:
+        :return: the desired speed
         """
         pass
 
@@ -146,7 +166,7 @@ class AbstractSurroundInferrer(InferrerBase):
     def on_enemy_box_encountered_at_front(self, basic_speed) -> ComplexAction:
         """
         the action that will be executed on the event when encountering enemy box
-        :param basic_speed:
+        :param basic_speed: the desired speed
         :return:
         """
         pass
@@ -154,16 +174,19 @@ class AbstractSurroundInferrer(InferrerBase):
     @abstractmethod
     def on_enemy_car_encountered_at_front(self, basic_speed) -> ComplexAction:
         """
-        the action that will be executed on the event when encountering enemy car
-        :param basic_speed:
+        the action that will be executed on the event when encountering an enemy car
+        :param basic_speed: the desired speed
         :return:
         """
         pass
 
+    # endregion
+
+    # region Surroundings Methods
     @abstractmethod
     def on_object_encountered_at_left(self, basic_speed) -> ComplexAction:
         """
-        the action that will be executed on the event when encountering object at left
+        the action that will be executed on the event when encountering an object at the left
         :param basic_speed:
         :return:
         """
@@ -172,7 +195,7 @@ class AbstractSurroundInferrer(InferrerBase):
     @abstractmethod
     def on_object_encountered_at_right(self, basic_speed) -> ComplexAction:
         """
-        the action that will be executed on the event when encountering object at right
+        the action that will be executed on the event when encountering an object at right
         :param basic_speed:
         :return:
         """
@@ -181,10 +204,332 @@ class AbstractSurroundInferrer(InferrerBase):
     @abstractmethod
     def on_object_encountered_at_behind(self, basic_speed) -> ComplexAction:
         """
-        the action that will be executed on the event when encountering object at behind
+        the action that will be executed on the event when encountering an object at behind
         :param basic_speed:
         :return:
         """
         pass
+
+    @abstractmethod
+    def on_objects_encountered_at_left_right(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering an object at left right
+        :param basic_speed:
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def on_objects_encountered_at_left_behind(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering an object at left behind
+        :param basic_speed:
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def on_objects_encountered_at_right_behind(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering an object at right behind
+        :param basic_speed:
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def on_objects_encountered_at_left_right_behind(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering an object at left right behind
+        :param basic_speed:
+        :return:
+        """
+        pass
+
+    # endregion
+
+    # region Neutral Box and Surroundings Methods
+    @abstractmethod
+    def on_neutral_box_encountered_at_front_with_left_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering neutral box and left object
+        :param basic_speed: the desired speed
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def on_neutral_box_encountered_at_front_with_right_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering neutral box and right object
+        :param basic_speed: the desired speed
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def on_neutral_box_encountered_at_front_with_behind_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering neutral box and behind object
+        :param basic_speed: the desired speed
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def on_neutral_box_encountered_at_front_with_left_right_objects(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering neutral box and left right objects
+        :param basic_speed: the desired speed
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def on_neutral_box_encountered_at_front_with_left_behind_objects(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering neutral box and left behind objects
+        :param basic_speed: the desired speed
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def on_neutral_box_encountered_at_front_with_right_behind_objects(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering neutral box and right behind objects
+        :param basic_speed: the desired speed
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def on_neutral_box_encountered_at_front_with_left_right_behind_objects(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering neutral box and left right behind objects
+        :param basic_speed: the desired speed
+        :return:
+        """
+        pass
+
+    # endregion
+
+    # region Allay Box and Surroundings Methods
+    @abstractmethod
+    def on_ally_box_encountered_at_front_with_left_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering allay box and left object
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    @abstractmethod
+    def on_ally_box_encountered_at_front_with_right_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering allay box and right object
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    @abstractmethod
+    def on_ally_box_encountered_at_front_with_behind_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering allay box and behind object
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    @abstractmethod
+    def on_ally_box_encountered_at_front_with_left_right_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering allay box and left right objects
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    @abstractmethod
+    def on_ally_box_encountered_at_front_with_left_behind_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering allay box and left behind objects
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    @abstractmethod
+    def on_ally_box_encountered_at_front_with_right_behind_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering allay box and right behind objects
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    @abstractmethod
+    def on_ally_box_encountered_at_front_with_left_right_behind_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering allay box and left right behind objects
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    # endregion
+
+    # region Enemy Box and Surroundings Methods
+    @abstractmethod
+    def on_enemy_box_encountered_at_front_with_left_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering enemy box and left object
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    @abstractmethod
+    def on_enemy_box_encountered_at_front_with_right_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering enemy box and right object
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    @abstractmethod
+    def on_enemy_box_encountered_at_front_with_behind_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering enemy box and behind object
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    @abstractmethod
+    def on_enemy_box_encountered_at_front_with_left_right_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering enemy box and left right objects
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    @abstractmethod
+    def on_enemy_box_encountered_at_front_with_left_behind_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering enemy box and left behind objects
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    @abstractmethod
+    def on_enemy_box_encountered_at_front_with_right_behind_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering enemy box and right behind objects
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    @abstractmethod
+    def on_enemy_box_encountered_at_front_with_left_right_behind_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering enemy box and left right behind objects
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    # endregion
+
+    # region Enemy Box and Surroundings Methods
+    @abstractmethod
+    def on_enemy_car_encountered_at_front_with_left_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering enemy car and left object
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    @abstractmethod
+    def on_enemy_car_encountered_at_front_with_right_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering enemy car and right object
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    @abstractmethod
+    def on_enemy_car_encountered_at_front_with_behind_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering enemy car and behind object
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    @abstractmethod
+    def on_enemy_car_encountered_at_front_with_left_right_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering enemy car and left right objects
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    @abstractmethod
+    def on_enemy_car_encountered_at_front_with_left_behind_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering enemy car and left behind objects
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    @abstractmethod
+    def on_enemy_car_encountered_at_front_with_right_behind_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering enemy car and right behind objects
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+
+    @abstractmethod
+    def on_enemy_car_encountered_at_front_with_left_right_behind_object(self, basic_speed) -> ComplexAction:
+        """
+        the action that will be executed on the event when encountering enemy car and left right behind objects
+        :param basic_speed: the desired speed
+        :return:
+
+        """
+        pass
+    # endregion
 
     # endregion
