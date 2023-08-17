@@ -10,6 +10,29 @@ from repo.uptechStar.module.watcher import default_edge_rear_watcher, default_ed
 
 
 class StandardSurroundInferrer(AbstractSurroundInferrer):
+    def on_objects_encountered_at_left_behind(self, basic_speed) -> ComplexAction:
+        """
+        will turn right and move forward, then turn back to observe the objects
+        :param basic_speed:
+        """
+        # TODO: suddenly find the necessity of the ActionFrame sequence inserting operations
+        return [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
+                                action_speed_multiplier=float_multiplier_upper(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=basic_speed,
+                                action_speed_multiplier=enlarge_multiplier_l(),
+                                action_duration_multiplier=enlarge_multiplier_l(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=default_edge_front_watcher),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=(-basic_speed, basic_speed),
+                                action_speed_multiplier=enlarge_multiplier_l(),
+                                action_duration_multiplier=enlarge_multiplier_l(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=default_edge_rear_watcher),
+                new_ActionFrame()]
+
     def on_objects_encountered_at_left_right(self, basic_speed) -> ComplexAction:
         """
         this action will fall back first and then randomly turn left or right
