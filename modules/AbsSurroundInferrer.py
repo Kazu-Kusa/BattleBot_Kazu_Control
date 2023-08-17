@@ -110,7 +110,7 @@ class AbstractSurroundInferrer(InferrerBase):
         raise NotImplementedError
 
     @abstractmethod
-    def infer(self, *args, **kwargs) -> Tuple[Hashable, ...]:
+    def infer(self, *args, **kwargs) -> int:
         raise NotImplementedError
 
     def exc_action(self, reaction: FlexActionFactory, basic_speed: int) -> None:
