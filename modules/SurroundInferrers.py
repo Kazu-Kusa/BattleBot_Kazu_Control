@@ -1,4 +1,4 @@
-from typing import final, Tuple, Hashable
+from typing import final
 
 from modules.AbsSurroundInferrer import AbstractSurroundInferrer
 from repo.uptechStar.module.actions import new_ActionFrame, ActionPlayer
@@ -10,9 +10,13 @@ from repo.uptechStar.module.watcher import default_edge_rear_watcher, default_ed
 
 class StandardSurroundInferrer(AbstractSurroundInferrer):
     CONFIG_MOTION_KEY = 'MotionSection'
-    CONFIG_BASIC_DURATION_KEY = f'{CONFIG_MOTION_KEY}BasicDuration'
-    CONFIG_BASIC_SPEED_KEY = f'{CONFIG_MOTION_KEY}BasicSpeed'
-    CONFIG_DASH_TIMEOUT_KEY = f'{CONFIG_MOTION_KEY}DashTimeout'
+    CONFIG_BASIC_DURATION_KEY = f'{CONFIG_MOTION_KEY}/BasicDuration'
+    CONFIG_BASIC_SPEED_KEY = f'{CONFIG_MOTION_KEY}/BasicSpeed'
+    CONFIG_DASH_TIMEOUT_KEY = f'{CONFIG_MOTION_KEY}/DashTimeout'
+
+    CONFIG_INFER_KEY = 'InferSection'
+    CONFIG_MIN_BASELINES_KEY = f'{CONFIG_INFER_KEY}/MinBaselines'
+    CONFIG_MAX_BASELINES_KEY = f'{CONFIG_INFER_KEY}/MaxBaselines'
 
     def react(self) -> int:
         status_code = self.infer()
@@ -21,7 +25,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         # fixme deal with this status code problem
         return status_code
 
-    def infer(self, *args, **kwargs) -> Tuple[Hashable, ...]:
+    def infer(self) -> int:
         raise NotImplementedError
 
     @final
