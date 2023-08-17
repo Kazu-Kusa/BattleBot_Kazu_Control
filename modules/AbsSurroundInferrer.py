@@ -119,18 +119,23 @@ class AbstractSurroundInferrer(InferrerBase):
 
     @final
     def _action_table_init(self):
-        self.register_action(case=self.KEY_BEHIND_OBJECT,
-                             complex_action=self.on_object_encountered_at_behind)
-        self.register_action(case=self.KEY_RIGHT_OBJECT,
-                             complex_action=self.on_object_encountered_at_right)
-        self.register_action(case=self.KEY_LEFT_OBJECT,
-                             complex_action=self.on_object_encountered_at_left)
+        self.register_action(case=self.KEY_NOTHING,
+                             complex_action=self.on_nothing)
         self.register_action(case=self.KEY_FRONT_ENEMY_CAR,
                              complex_action=self.on_enemy_car_encountered_at_front)
         self.register_action(case=self.KEY_FRONT_ENEMY_BOX,
                              complex_action=self.on_enemy_box_encountered_at_front)
         self.register_action(case=self.KEY_FRONT_ALLY_BOX,
                              complex_action=self.on_allay_box_encountered_at_front)
+
+        self.register_action(case=self.KEY_BEHIND_OBJECT,
+                             complex_action=self.on_object_encountered_at_behind)
+        self.register_action(case=self.KEY_RIGHT_OBJECT,
+                             complex_action=self.on_object_encountered_at_right)
+        self.register_action(case=self.KEY_LEFT_OBJECT,
+                             complex_action=self.on_object_encountered_at_left)
+        self.register_action(case=self.KEY_LEFT_RIGHT_OBJECTS,
+                             complex_action=self.on_objects_encountered_at_left_right)
 
     # region methods
 
