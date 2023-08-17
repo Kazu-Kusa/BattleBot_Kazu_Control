@@ -22,6 +22,9 @@ class AbstractSurroundInferrer(InferrerBase):
     KEY_FRONT_NEUTRAL_BOX = 6
 
     # TODO: currently, these cases has only covered the major ones,assuming robot was surrounded by one object at a time
+    @abstractmethod
+    def react(self) -> int:
+        raise NotImplementedError
 
     @abstractmethod
     def infer(self, *args, **kwargs) -> Tuple[Hashable, ...]:
