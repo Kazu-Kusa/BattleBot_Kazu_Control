@@ -264,8 +264,8 @@ if __name__ == '__main__':
     # bot.save_all_config()
     # bot.start_match(normal_spead=3000, team_color='blue', use_cam=False)
     try:
-        bot.Battle(3200, 'blue', True)
-    # bot.Battle_debug(100, 'red', True)
+        bot.Battle(4500, 'blue', True)
+        # bot.Battle_debug(100, 'red', True)
     except KeyboardInterrupt:
         bot.player.append(new_ActionFrame())
         time.sleep(1)
