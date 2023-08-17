@@ -1,12 +1,9 @@
-from abc import ABCMeta, abstractmethod
-from typing import final, Dict, List, Callable, Tuple, Optional, Hashable, Any
+from abc import abstractmethod
+from typing import final, Callable, Tuple, Hashable
 
-from repo.uptechStar.module.actions import ActionPlayer
-from repo.uptechStar.module.inferrer_base import InferrerBase, Reaction, ComplexAction
+from repo.uptechStar.module.inferrer_base import InferrerBase, ComplexAction
 
 FlexActionFactory = Callable[[int], ComplexAction]
-from repo.uptechStar.module.sensors import SensorHub
-from repo.uptechStar.module.watcher import Watcher, default_edge_front_watcher, default_edge_rear_watcher
 
 
 class AbstractSurroundInferrer(InferrerBase):
@@ -32,6 +29,7 @@ class AbstractSurroundInferrer(InferrerBase):
 
     def exc_action(self, reaction: FlexActionFactory, basic_speed: int) -> None:
         self._player.override(reaction(basic_speed))
+        self._player.play()
 
     @final
     def _action_table_init(self):
