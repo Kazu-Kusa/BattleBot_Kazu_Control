@@ -3,7 +3,7 @@ from typing import Sequence
 from modules.AbsEdgeInferrer import AbstractEdgeInferrer, ActionPack
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
 from repo.uptechStar.module.algrithm_tools import random_sign, \
-    float_multiplier_upper, float_multiplier_lower, enlarge_multiplier_ll
+    float_multiplier_upper, float_multiplier_lower, enlarge_multiplier_ll, enlarge_multiplier_l
 from repo.uptechStar.module.sensors import SensorHub, LocalFullUpdaterConstructor, FU_INDEX, FullUpdater
 from repo.uptechStar.module.watcher import Watcher, default_edge_rear_watcher, default_edge_front_watcher
 
@@ -144,13 +144,14 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         sign = random_sign()
         return [new_ActionFrame(action_speed=-basic_speed,
                                 action_duration=getattr(self, self.CONFIG_STRAIGHT_ACTION_DURATION_KEY),
-                                action_speed_multiplier=float_multiplier_upper(),
+                                action_duration_multiplier=enlarge_multiplier_ll(),
+                                action_speed_multiplier=enlarge_multiplier_l(),
                                 breaker_func=self._rear_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(
                     action_speed=(-sign * basic_speed, sign * basic_speed),
                     action_duration=getattr(self, self.CONFIG_CURVE_ACTION_DURATION_KEY),
-                    action_speed_multiplier=float_multiplier_lower(),
+                    action_speed_multiplier=enlarge_multiplier_l(),
                     action_duration_multiplier=enlarge_multiplier_ll()),
                 new_ActionFrame()], self.DO_FL_N_N_FR_STATUS_CODE
 
@@ -211,23 +212,25 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
     def do_n_n_n_fr(self, basic_speed: int) -> ActionPack:
         return [new_ActionFrame(action_speed=-basic_speed,
                                 action_duration=getattr(self, self.CONFIG_STRAIGHT_ACTION_DURATION_KEY),
-                                action_speed_multiplier=float_multiplier_upper(),
+                                action_duration_multiplier=enlarge_multiplier_ll(),
+                                action_speed_multiplier=enlarge_multiplier_l(),
                                 breaker_func=self._rear_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(-basic_speed, basic_speed),
                                 action_duration=getattr(self, self.CONFIG_CURVE_ACTION_DURATION_KEY),
-                                action_speed_multiplier=float_multiplier_lower()),
+                                action_speed_multiplier=enlarge_multiplier_l()),
                 new_ActionFrame()], self.DO_N_N_N_FR_STATUS_CODE
 
     def do_fl_n_n_n(self, basic_speed: int) -> ActionPack:
         return [new_ActionFrame(action_speed=-basic_speed,
                                 action_duration=getattr(self, self.CONFIG_STRAIGHT_ACTION_DURATION_KEY),
-                                action_speed_multiplier=float_multiplier_upper(),
+                                action_duration_multiplier=enlarge_multiplier_ll(),
+                                action_speed_multiplier=enlarge_multiplier_l(),
                                 breaker_func=self._rear_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(basic_speed, -basic_speed),
                                 action_duration=getattr(self, self.CONFIG_CURVE_ACTION_DURATION_KEY),
-                                action_speed_multiplier=float_multiplier_lower()),
+                                action_speed_multiplier=enlarge_multiplier_l()),
                 new_ActionFrame()], self.DO_FL_N_N_N_STATUS_CODE
 
     # endregion

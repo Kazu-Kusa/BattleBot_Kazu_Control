@@ -4,7 +4,7 @@
       2070,
       2150,
       2210,
-      2030
+      2050
     ],
     "EdgeMinBaseline": [
       1800,
@@ -24,6 +24,6 @@
     ]
   },
   "MotionSection": {
-    "BasicSpeed": 5000
+    "BasicSpeed": 5500
   }
 }
