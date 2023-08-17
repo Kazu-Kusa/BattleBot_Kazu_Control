@@ -1,25 +1,37 @@
+from typing import final, Tuple, Hashable
+
 from modules.AbsSurroundInferrer import AbstractSurroundInferrer
 from repo.uptechStar.module.actions import new_ActionFrame, ActionPlayer
+from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplier_ll, float_multiplier_middle
 from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub
 from repo.uptechStar.module.watcher import default_edge_rear_watcher, default_edge_front_watcher, Watcher
-from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplier_ll, float_multiplier_middle
-from typing import final, Tuple, Hashable, Any
 
 
 class StandardSurroundInferrer(AbstractSurroundInferrer):
-    def react(self, *args, **kwargs) -> Any:
-        pass
+    CONFIG_MOTION_KEY = 'MotionSection'
+    CONFIG_BASIC_DURATION_KEY = f'{CONFIG_MOTION_KEY}BasicDuration'
+    CONFIG_BASIC_SPEED_KEY = f'{CONFIG_MOTION_KEY}BasicSpeed'
+    CONFIG_DASH_TIMEOUT_KEY = f'{CONFIG_MOTION_KEY}DashTimeout'
+
+    def react(self) -> int:
+        status_code = self.infer()
+        self.exc_action(self.action_table.get(status_code),
+                        getattr(self, self.CONFIG_BASIC_SPEED_KEY))
+        # fixme deal with this status code problem
+        return status_code
 
     def infer(self, *args, **kwargs) -> Tuple[Hashable, ...]:
         raise NotImplementedError
 
-    CONFIG_BASIC_DURATION_KEY = 'BasicDuration'
-
     @final
     def register_all_config(self):
         self.register_config(config_registry_path=self.CONFIG_BASIC_DURATION_KEY,
-                             value=1500)
+                             value=400)
+        self.register_config(config_registry_path=self.CONFIG_BASIC_SPEED_KEY,
+                             value=5000)
+        self.register_config(config_registry_path=self.CONFIG_DASH_TIMEOUT_KEY,
+                             value=6000)
 
     def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str):
         super().__init__(sensor_hub=sensor_hub, player=action_player, config_path=config_path)
@@ -45,7 +57,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         sign = random_sign()
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_ll(),
-                                action_duration=6000,
+                                action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
                                 breaker_func=default_edge_front_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=-basic_speed,
@@ -63,7 +75,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         # TODO: dash til the edge, then fall back,should add a block skill(?)
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_ll(),
-                                action_duration=6000,
+                                action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
                                 breaker_func=default_edge_front_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=-basic_speed,
