@@ -2,13 +2,37 @@ from typing import final
 
 from modules.AbsSurroundInferrer import AbstractSurroundInferrer
 from repo.uptechStar.module.actions import new_ActionFrame, ActionPlayer
-from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplier_ll, float_multiplier_middle
+from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplier_ll, float_multiplier_middle, \
+    enlarge_multiplier_l
 from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub
 from repo.uptechStar.module.watcher import default_edge_rear_watcher, default_edge_front_watcher, Watcher
 
 
 class StandardSurroundInferrer(AbstractSurroundInferrer):
+    def on_neutral_box_encountered_at_front(self, basic_speed) -> ComplexAction:
+        """
+        similar to enemy car reaction, but with lower speed multiplier
+        """
+        sign = random_sign()
+        return [new_ActionFrame(action_speed=basic_speed,
+                                action_speed_multiplier=enlarge_multiplier_l(),
+                                action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
+                                breaker_func=default_edge_front_watcher),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=-basic_speed,
+                                action_speed_multiplier=float_multiplier_middle(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=default_edge_rear_watcher),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
+                                action_speed_multiplier=enlarge_multiplier_ll(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
+                new_ActionFrame()]
+
+    def on_nothing(self, basic_speed) -> ComplexAction:
+        return []
+
     CONFIG_MOTION_KEY = 'MotionSection'
     CONFIG_BASIC_DURATION_KEY = f'{CONFIG_MOTION_KEY}/BasicDuration'
     CONFIG_BASIC_SPEED_KEY = f'{CONFIG_MOTION_KEY}/BasicSpeed'
