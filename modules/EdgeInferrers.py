@@ -144,8 +144,8 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         sign = random_sign()
         return [new_ActionFrame(action_speed=-basic_speed,
                                 action_duration=getattr(self, self.CONFIG_STRAIGHT_ACTION_DURATION_KEY),
-                                action_duration_multiplier=enlarge_multiplier_ll(),
-                                action_speed_multiplier=enlarge_multiplier_l(),
+                                action_duration_multiplier=enlarge_multiplier_l(),
+                                action_speed_multiplier=float_multiplier_upper(),
                                 breaker_func=self._rear_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(
@@ -212,8 +212,8 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
     def do_n_n_n_fr(self, basic_speed: int) -> ActionPack:
         return [new_ActionFrame(action_speed=-basic_speed,
                                 action_duration=getattr(self, self.CONFIG_STRAIGHT_ACTION_DURATION_KEY),
-                                action_duration_multiplier=enlarge_multiplier_ll(),
-                                action_speed_multiplier=enlarge_multiplier_l(),
+                                action_duration_multiplier=enlarge_multiplier_l(),
+                                action_speed_multiplier=float_multiplier_upper(),
                                 breaker_func=self._rear_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(-basic_speed, basic_speed),
@@ -224,8 +224,8 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
     def do_fl_n_n_n(self, basic_speed: int) -> ActionPack:
         return [new_ActionFrame(action_speed=-basic_speed,
                                 action_duration=getattr(self, self.CONFIG_STRAIGHT_ACTION_DURATION_KEY),
-                                action_duration_multiplier=enlarge_multiplier_ll(),
-                                action_speed_multiplier=enlarge_multiplier_l(),
+                                action_duration_multiplier=enlarge_multiplier_l(),
+                                action_speed_multiplier=float_multiplier_upper(),
                                 breaker_func=self._rear_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(basic_speed, -basic_speed),
