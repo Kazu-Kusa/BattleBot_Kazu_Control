@@ -119,6 +119,7 @@ class AbstractSurroundInferrer(InferrerBase):
 
     @final
     def _action_table_init(self):
+        # region BASIC KEYS
         self.register_action(case=self.KEY_NOTHING,
                              complex_action=self.on_nothing)
         self.register_action(case=self.KEY_FRONT_ENEMY_CAR,
@@ -127,7 +128,9 @@ class AbstractSurroundInferrer(InferrerBase):
                              complex_action=self.on_enemy_box_encountered_at_front)
         self.register_action(case=self.KEY_FRONT_ALLY_BOX,
                              complex_action=self.on_allay_box_encountered_at_front)
+        # endregion
 
+        # region SURROUNDING KEYS
         self.register_action(case=self.KEY_BEHIND_OBJECT,
                              complex_action=self.on_object_encountered_at_behind)
         self.register_action(case=self.KEY_RIGHT_OBJECT,
@@ -136,6 +139,84 @@ class AbstractSurroundInferrer(InferrerBase):
                              complex_action=self.on_object_encountered_at_left)
         self.register_action(case=self.KEY_LEFT_RIGHT_OBJECTS,
                              complex_action=self.on_objects_encountered_at_left_right)
+        self.register_action(case=self.KEY_LEFT_BEHIND_OBJECTS,
+                             complex_action=self.on_objects_encountered_at_left_behind)
+        self.register_action(case=self.KEY_RIGHT_BEHIND_OBJECTS,
+                             complex_action=self.on_objects_encountered_at_right_behind)
+        self.register_action(case=self.KEY_LEFT_RIGHT_BEHIND_OBJECTS,
+                             complex_action=self.on_objects_encountered_at_left_right_behind)
+        # endregion
+
+        # region ALLY BOX AND SURROUNDINGS
+
+        self.register_action(case=self.KEY_FRONT_ALLY_BOX_LEFT_OBJECT,
+                             complex_action=self.on_ally_box_encountered_at_front_with_left_object)
+        self.register_action(case=self.KEY_FRONT_ALLY_BOX_RIGHT_OBJECT,
+                             complex_action=self.on_ally_box_encountered_at_front_with_right_object)
+        self.register_action(case=self.KEY_FRONT_ALLY_BOX_BEHIND_OBJECT,
+                             complex_action=self.on_ally_box_encountered_at_front_with_behind_object)
+        self.register_action(case=self.KEY_FRONT_ALLY_BOX_LEFT_RIGHT_OBJECTS,
+                             complex_action=self.on_ally_box_encountered_at_front_with_left_right_object)
+        self.register_action(case=self.KEY_FRONT_ALLY_BOX_LEFT_BEHIND_OBJECTS,
+                             complex_action=self.on_ally_box_encountered_at_front_with_left_behind_object)
+        self.register_action(case=self.KEY_FRONT_ALLY_BOX_RIGHT_BEHIND_OBJECTS,
+                             complex_action=self.on_ally_box_encountered_at_front_with_right_behind_object)
+        self.register_action(case=self.KEY_FRONT_ALLY_BOX_LEFT_RIGHT_BEHIND_OBJECTS,
+                             complex_action=self.on_ally_box_encountered_at_front_with_left_right_behind_object)
+        # endregion
+
+        # region ENEMY BOX AND SURROUNDINGS
+
+        self.register_action(case=self.KEY_FRONT_ENEMY_BOX_LEFT_OBJECT,
+                             complex_action=self.on_enemy_box_encountered_at_front_with_left_object)
+        self.register_action(case=self.KEY_FRONT_ENEMY_BOX_RIGHT_OBJECT,
+                             complex_action=self.on_enemy_box_encountered_at_front_with_right_object)
+        self.register_action(case=self.KEY_FRONT_ENEMY_BOX_BEHIND_OBJECT,
+                             complex_action=self.on_enemy_box_encountered_at_front_with_behind_object)
+        self.register_action(case=self.KEY_FRONT_ENEMY_BOX_LEFT_RIGHT_OBJECTS,
+                             complex_action=self.on_enemy_box_encountered_at_front_with_left_right_object)
+        self.register_action(case=self.KEY_FRONT_ENEMY_BOX_LEFT_BEHIND_OBJECTS,
+                             complex_action=self.on_enemy_box_encountered_at_front_with_left_behind_object)
+        self.register_action(case=self.KEY_FRONT_ENEMY_BOX_RIGHT_BEHIND_OBJECTS,
+                             complex_action=self.on_enemy_box_encountered_at_front_with_right_behind_object)
+        self.register_action(case=self.KEY_FRONT_ENEMY_BOX_LEFT_RIGHT_BEHIND_OBJECTS,
+                             complex_action=self.on_enemy_box_encountered_at_front_with_left_right_behind_object)
+        # endregion
+
+        # region NEUTRAL BOX AND SURROUNDINGS
+
+        self.register_action(case=self.KEY_FRONT_NEUTRAL_BOX_LEFT_OBJECT,
+                             complex_action=self.on_neutral_box_encountered_at_front_with_left_object)
+        self.register_action(case=self.KEY_FRONT_NEUTRAL_BOX_RIGHT_OBJECT,
+                             complex_action=self.on_neutral_box_encountered_at_front_with_right_object)
+        self.register_action(case=self.KEY_FRONT_NEUTRAL_BOX_BEHIND_OBJECT,
+                             complex_action=self.on_neutral_box_encountered_at_front_with_behind_object)
+        self.register_action(case=self.KEY_FRONT_NEUTRAL_BOX_LEFT_RIGHT_OBJECTS,
+                             complex_action=self.on_neutral_box_encountered_at_front_with_left_right_objects)
+        self.register_action(case=self.KEY_FRONT_NEUTRAL_BOX_LEFT_BEHIND_OBJECTS,
+                             complex_action=self.on_neutral_box_encountered_at_front_with_left_behind_objects)
+        self.register_action(case=self.KEY_FRONT_NEUTRAL_BOX_RIGHT_BEHIND_OBJECTS,
+                             complex_action=self.on_neutral_box_encountered_at_front_with_right_behind_objects)
+        self.register_action(case=self.KEY_FRONT_NEUTRAL_BOX_LEFT_RIGHT_BEHIND_OBJECTS,
+                             complex_action=self.on_neutral_box_encountered_at_front_with_left_right_behind_objects)
+        # endregion
+
+        # region ENEMY CAR AND SURROUNDINGS
+        self.register_action(case=self.KEY_FRONT_ENEMY_CAR_LEFT_OBJECT,
+                             complex_action=self.on_enemy_car_encountered_at_front_with_left_object)
+        self.register_action(case=self.KEY_FRONT_ENEMY_CAR_RIGHT_OBJECT,
+                             complex_action=self.on_enemy_car_encountered_at_front_with_right_object)
+        self.register_action(case=self.KEY_FRONT_ENEMY_CAR_BEHIND_OBJECT,
+                             complex_action=self.on_enemy_car_encountered_at_front_with_behind_object)
+        self.register_action(case=self.KEY_FRONT_ENEMY_CAR_LEFT_RIGHT_OBJECTS,
+                             complex_action=self.on_enemy_car_encountered_at_front_with_left_right_object)
+        self.register_action(case=self.KEY_FRONT_ENEMY_CAR_LEFT_BEHIND_OBJECTS,
+                             complex_action=self.on_enemy_car_encountered_at_front_with_left_behind_object)
+        self.register_action(case=self.KEY_FRONT_ENEMY_CAR_RIGHT_BEHIND_OBJECTS,
+                             complex_action=self.on_enemy_car_encountered_at_front_with_right_behind_object)
+        self.register_action(case=self.KEY_FRONT_ENEMY_CAR_LEFT_RIGHT_BEHIND_OBJECTS,
+                             complex_action=self.on_enemy_car_encountered_at_front_with_left_right_behind_object)
+        # endregion
 
     # region methods
 
