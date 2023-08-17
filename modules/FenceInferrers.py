@@ -16,11 +16,13 @@ OFF_STAGE_DASH_SPEED = -8000
 class StandardFenceInferrer(AbstractFenceInferrer):
     def react(self, *args, **kwargs) -> Any:
         pass
-
-    CONFIG_BASIC_DURATION_KEY = 'BasicDuration'
-    CONFIG_OFF_STAGE_DASH_DURATION_KEY = 'OffStageDashDuration'
-    CONFIG_OFF_STAGE_DASH_SPEED_KEY = 'OffStageDashSpeed'
-
+    CONFIG_MOTION_KEY = 'MotionSection'
+    CONFIG_BASIC_DURATION_KEY = f'{CONFIG_MOTION_KEY}/BasicDuration'
+    CONFIG_OFF_STAGE_DASH_DURATION_KEY = f'{CONFIG_MOTION_KEY}/OffStageDashDuration'
+    CONFIG_OFF_STAGE_DASH_SPEED_KEY = f'{CONFIG_MOTION_KEY}/OffStageDashSpeed'
+    CONFIG_FENCE_INFER_KEY = 'InferSection'
+    CONFIG_FENCE_MAX_BASE_LINE_KEY = f"{CONFIG_FENCE_INFER_KEY}/FenceMaxBaseline"
+    CONFIG_FENCE_MIN_BASE_LINE_KEY = f'{CONFIG_FENCE_INFER_KEY}/FenceMinBaseline'
     def register_all_config(self):
         self.register_config(config_registry_path=self.CONFIG_BASIC_DURATION_KEY,
                              value=BASIC_DURATION)
