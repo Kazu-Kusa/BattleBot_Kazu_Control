@@ -3,13 +3,30 @@ from typing import final
 from modules.AbsSurroundInferrer import AbstractSurroundInferrer
 from repo.uptechStar.module.actions import new_ActionFrame, ActionPlayer
 from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplier_ll, float_multiplier_middle, \
-    enlarge_multiplier_l
+    enlarge_multiplier_l, float_multiplier_upper
 from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub
 from repo.uptechStar.module.watcher import default_edge_rear_watcher, default_edge_front_watcher, Watcher
 
 
 class StandardSurroundInferrer(AbstractSurroundInferrer):
+    def on_objects_encountered_at_left_right(self, basic_speed) -> ComplexAction:
+        """
+        this action will fall back first and then randomly turn left or right
+        :param basic_speed: The basic speed of the robot.
+        """
+        sign = random_sign()
+        return [new_ActionFrame(action_speed=-basic_speed,
+                                action_speed_multiplier=enlarge_multiplier_l(),
+                                action_duration_multiplier=enlarge_multiplier_ll(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=default_edge_rear_watcher),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
+                                action_speed_multiplier=float_multiplier_upper(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
+                new_ActionFrame()]
+
     def on_neutral_box_encountered_at_front(self, basic_speed) -> ComplexAction:
         """
         similar to enemy car reaction, but with lower speed multiplier
