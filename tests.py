@@ -168,6 +168,54 @@ class ScreenTest(unittest.TestCase):
         # pad.put_string(0, 0, "Screen Test")
 
 
+class CacheTest(unittest.TestCase):
+
+    @staticmethod
+    def test_local_function_serialization():
+        import dill
+
+        def function_factory(a):
+            def my_function(x):
+                return a * x
+
+            return my_function
+
+        # 创建本地函数
+        my_function = function_factory(2)
+
+        # 将本地函数保存到dill文件
+        with open('function.dill', 'wb') as file:
+            dill.dump(my_function, file)
+
+        # 从dill文件加载本地函数
+        with open('function.dill', 'rb') as file:
+            loaded_function = dill.load(file)
+
+        # 调用加载回来的本地函数
+        result = loaded_function(5)
+        print(result)  # 输出：10
+
+    def test_function_serialization(self):
+        import pickle
+
+        s = 3
+
+        def my_function(x):
+            return x ** s
+
+        # 将函数对象保存到pickle文件
+        with open('function.pickle', 'wb') as file:
+            pickle.dump(my_function, file)
+
+        # 从pickle文件加载函数对象
+        with open('function.pickle', 'rb') as file:
+            loaded_function = pickle.load(file)
+
+        # 调用加载回来的函数对象
+        result = loaded_function(5)
+        print(result)  # 输出：25
+
+
 class MiscTest(unittest.TestCase):
     @staticmethod
     def test_indexing_performance():
