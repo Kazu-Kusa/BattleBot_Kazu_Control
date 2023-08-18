@@ -9,13 +9,14 @@ from repo.uptechStar.module.sensors import SensorHub
 from repo.uptechStar.module.watcher import default_edge_rear_watcher, default_edge_front_watcher, Watcher
 
 
+# TODO: use the newly developed action frame insert play to imp this class
 class StandardSurroundInferrer(AbstractSurroundInferrer):
     def on_objects_encountered_at_left_behind(self, basic_speed) -> ComplexAction:
         """
         will turn right and move forward, then turn back to observe the objects
         :param basic_speed:
         """
-        # TODO: suddenly find the necessity of the ActionFrame sequence inserting operations
+
         return [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
                                 action_speed_multiplier=float_multiplier_upper(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
@@ -24,13 +25,13 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 action_speed_multiplier=enlarge_multiplier_l(),
                                 action_duration_multiplier=enlarge_multiplier_l(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=default_edge_front_watcher),
+                                breaker_func=self._front_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(-basic_speed, basic_speed),
                                 action_speed_multiplier=enlarge_multiplier_l(),
                                 action_duration_multiplier=enlarge_multiplier_l(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=default_edge_rear_watcher),
+                                breaker_func=self._rear_watcher),
                 new_ActionFrame()]
 
     def on_objects_encountered_at_left_right(self, basic_speed) -> ComplexAction:
@@ -43,7 +44,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 action_speed_multiplier=enlarge_multiplier_l(),
                                 action_duration_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=default_edge_rear_watcher),
+                                breaker_func=self._rear_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
                                 action_speed_multiplier=float_multiplier_upper(),
@@ -58,12 +59,12 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_l(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
-                                breaker_func=default_edge_front_watcher),
+                                breaker_func=self._front_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=-basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=default_edge_rear_watcher),
+                                breaker_func=self._rear_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
                                 action_speed_multiplier=enlarge_multiplier_ll(),
@@ -118,7 +119,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         return [new_ActionFrame(action_speed=-basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=default_edge_rear_watcher),
+                                breaker_func=self._rear_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
                                 action_speed_multiplier=enlarge_multiplier_ll(),
@@ -131,12 +132,12 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
-                                breaker_func=default_edge_front_watcher),
+                                breaker_func=self._front_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=-basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=default_edge_rear_watcher),
+                                breaker_func=self._rear_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
                                 action_speed_multiplier=enlarge_multiplier_ll(),
@@ -149,12 +150,12 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
-                                breaker_func=default_edge_front_watcher),
+                                breaker_func=self._front_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=-basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=default_edge_rear_watcher),
+                                breaker_func=self._rear_watcher),
                 new_ActionFrame()]
 
     @final
