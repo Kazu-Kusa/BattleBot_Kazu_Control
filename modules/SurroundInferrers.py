@@ -11,6 +11,174 @@ from repo.uptechStar.module.watcher import default_edge_rear_watcher, default_ed
 
 # TODO: use the newly developed action frame insert play to imp this class
 class StandardSurroundInferrer(AbstractSurroundInferrer):
+
+    def on_objects_encountered_at_right_behind(self, basic_speed) -> ComplexAction:
+        # 在右后方遇到物体，向右转然后检测
+        pass
+
+    def on_neutral_box_encountered_at_front_with_left_object(self, basic_speed) -> ComplexAction:
+        # 在前遇到中立箱子，左方有物体，希望更快地前进,有中断
+        return [new_ActionFrame(action_speed=basic_speed,
+                                action_speed_multiplier=float_multiplier_upper(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=self._front_watcher),
+                new_ActionFrame()
+                ]
+
+    def on_neutral_box_encountered_at_front_with_right_object(self, basic_speed) -> ComplexAction:
+        # 在前遇到中立箱子，右方有物体，希望更快地前进,有中断
+        return [new_ActionFrame(action_speed=basic_speed,
+                                action_speed_multiplier=float_multiplier_upper(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=self._front_watcher),
+                new_ActionFrame()
+                ]
+
+    def on_neutral_box_encountered_at_front_with_behind_object(self, basic_speed) -> ComplexAction:
+        # 在前遇到中立箱子，后方有物品，我希望先左转或右转后,后退（有中断）
+        single = random_sign()
+        return [new_ActionFrame(action_speed=(single * basic_speed, -single * basic_speed),
+                                action_speed_multiplier=float_multiplier_middle(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=-basic_speed,
+                                action_speed_multiplier=float_multiplier_middle(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=self._front_watcher),
+                new_ActionFrame()
+                ]
+
+    def on_neutral_box_encountered_at_front_with_left_right_objects(self, basic_speed) -> ComplexAction:
+        # 在前遇到中立箱子，左右方有物体，希望更快地前进,有中断
+        return [new_ActionFrame(action_speed=basic_speed,
+                                action_speed_multiplier=float_multiplier_upper(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=self._front_watcher),
+                new_ActionFrame()
+                ]
+
+    def on_neutral_box_encountered_at_front_with_left_behind_objects(self, basic_speed) -> ComplexAction:
+        # 在前遇到中立箱子，左方后方有物体，希望左转后进行后退(有中断)
+        return [new_ActionFrame(action_speed=(-basic_speed, basic_speed),
+                                action_speed_multiplier=float_multiplier_middle(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY), ),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=-basic_speed,
+                                action_speed_multiplier=float_multiplier_middle(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=self._front_watcher),
+                new_ActionFrame()
+                ]
+        pass
+
+    def on_neutral_box_encountered_at_front_with_right_behind_objects(self, basic_speed) -> ComplexAction:
+        # 在前遇到中立箱子，右方后方有物体，希望右转后进行后退(有中断)
+        return [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
+                                action_speed_multiplier=float_multiplier_middle(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=-basic_speed,
+                                action_speed_multiplier=float_multiplier_middle(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=self._front_watcher),
+                new_ActionFrame()
+                ]
+
+    def on_neutral_box_encountered_at_front_with_left_right_behind_objects(self, basic_speed) -> ComplexAction:
+        # 在前遇到中立箱子，左右方后方有物体，希望前进(有中断)后，左或右转后，进行后退(有中断)
+        single = random_sign()
+        return [new_ActionFrame(action_speed=basic_speed,
+                                action_speed_multiplier=float_multiplier_middle(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=self._front_watcher),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=(-single * basic_speed, single * basic_speed),
+                                action_speed_multiplier=float_multiplier_middle(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=-basic_speed,
+                                action_speed_multiplier=float_multiplier_middle(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=self._front_watcher),
+                new_ActionFrame()
+                ]
+        pass
+
+    def on_ally_box_encountered_at_front_with_left_object(self, basic_speed) -> ComplexAction:
+        # 在前遇到友方箱子，左方有物体，希望更快地后退(有中断)后，进行左右转（防止长时间检测到友方的箱子）
+        single = random_sign()
+        return [new_ActionFrame(action_speed=-basic_speed,
+                                action_speed_multiplier=float_multiplier_middle(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=self._front_watcher),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=(-single * basic_speed, single * basic_speed),
+                                action_speed_multiplier=float_multiplier_middle(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
+                new_ActionFrame()
+                ]
+        pass
+
+    def on_ally_box_encountered_at_front_with_right_object(self, basic_speed) -> ComplexAction:
+        pass
+
+    def on_ally_box_encountered_at_front_with_behind_object(self, basic_speed) -> ComplexAction:
+        pass
+
+    def on_ally_box_encountered_at_front_with_left_right_object(self, basic_speed) -> ComplexAction:
+        pass
+
+    def on_ally_box_encountered_at_front_with_left_behind_object(self, basic_speed) -> ComplexAction:
+        pass
+
+    def on_ally_box_encountered_at_front_with_right_behind_object(self, basic_speed) -> ComplexAction:
+        pass
+
+    def on_ally_box_encountered_at_front_with_left_right_behind_object(self, basic_speed) -> ComplexAction:
+        pass
+
+    def on_enemy_box_encountered_at_front_with_left_object(self, basic_speed) -> ComplexAction:
+        pass
+
+    def on_enemy_box_encountered_at_front_with_right_object(self, basic_speed) -> ComplexAction:
+        pass
+
+    def on_enemy_box_encountered_at_front_with_behind_object(self, basic_speed) -> ComplexAction:
+        pass
+
+    def on_enemy_box_encountered_at_front_with_left_right_object(self, basic_speed) -> ComplexAction:
+        pass
+
+    def on_enemy_box_encountered_at_front_with_left_behind_object(self, basic_speed) -> ComplexAction:
+        pass
+
+    def on_enemy_box_encountered_at_front_with_right_behind_object(self, basic_speed) -> ComplexAction:
+        pass
+
+    def on_enemy_box_encountered_at_front_with_left_right_behind_object(self, basic_speed) -> ComplexAction:
+        pass
+
+    def on_enemy_car_encountered_at_front_with_left_object(self, basic_speed) -> ComplexAction:
+        pass
+
+    def on_enemy_car_encountered_at_front_with_right_object(self, basic_speed) -> ComplexAction:
+        pass
+
+    def on_enemy_car_encountered_at_front_with_behind_object(self, basic_speed) -> ComplexAction:
+        pass
+
+    def on_enemy_car_encountered_at_front_with_left_right_object(self, basic_speed) -> ComplexAction:
+        pass
+
+    def on_enemy_car_encountered_at_front_with_left_behind_object(self, basic_speed) -> ComplexAction:
+        pass
+
+    def on_enemy_car_encountered_at_front_with_right_behind_object(self, basic_speed) -> ComplexAction:
+        pass
+
+    def on_enemy_car_encountered_at_front_with_left_right_behind_object(self, basic_speed) -> ComplexAction:
+        pass
+
     def on_objects_encountered_at_left_behind(self, basic_speed) -> ComplexAction:
         """
         will turn right and move forward, then turn back to observe the objects,
