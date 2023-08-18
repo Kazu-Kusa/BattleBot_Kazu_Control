@@ -11,6 +11,7 @@ from repo.uptechStar.module.watcher import default_edge_rear_watcher, default_ed
 
 class StandardSurroundInferrer(AbstractSurroundInferrer):
     def on_enemy_car_encountered_at_front_with_left_object(self, basic_speed) -> ComplexAction:
+        #当前面有车左边有障碍物时，撞下对面的车然后后退至安全位置
         sign = random_sign()
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_l(),
@@ -23,8 +24,11 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 breaker_func=self._rear_watcher),
                 new_ActionFrame()]
     def on_enemy_car_encountered_at_front_with_right_object(self, basic_speed) -> ComplexAction:
+        #当前面有车右边有障碍物时，撞下对面的车然后后退至安全位置
         sign = random_sign()
-        return [new_ActionFrame(action_speed=-basic_speed,
+
+        sign = random_sign()
+        return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_l(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
                                 breaker_func=self._front_watcher),
@@ -35,6 +39,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 breaker_func=self._rear_watcher),
                 new_ActionFrame()]
     def on_enemy_car_encountered_at_front_with_behind_object(self, basic_speed) -> ComplexAction:
+        #当前面有车后边有障碍物时，撞下对面的车然后随机转向至后对边缘
         sign = random_sign()
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_ll(),
@@ -47,6 +52,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                 new_ActionFrame()
                 ]
     def on_enemy_car_encountered_at_front_with_left_right_object(self, basic_speed) -> ComplexAction:
+        #当前面有车左右有障碍物时，撞下对面的车然后后退至安全位置
         sign = random_sign()
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_ll(),
@@ -59,6 +65,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 breaker_func=default_edge_rear_watcher),
                 new_ActionFrame()]
     def on_enemy_car_encountered_at_front_with_left_behind_object(self, basic_speed) -> ComplexAction:
+        #当前面有车左后有障碍物时，撞下对面的车然后右转，再前进至安全位置
         sign = random_sign()
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_ll(),
@@ -76,6 +83,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 breaker_func=default_edge_front_watcher),
                 new_ActionFrame()]
     def on_enemy_car_encountered_at_front_with_right_behind_object(self, basic_speed) -> ComplexAction:
+        #当前面有车右后有障碍物时，撞下对面的车然后左转，再前进至安全位置
         sign = random_sign()
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_ll(),
@@ -93,6 +101,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 breaker_func=default_edge_front_watcher),
                 new_ActionFrame()]
     def on_enemy_car_encountered_at_front_with_left_right_behind_object(self, basic_speed) -> ComplexAction:
+        #当前面有车左右后有障碍物时，撞下对面的车然后随机转向，再前进至安全位置
         sign = random_sign()
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_ll(),
@@ -109,7 +118,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 breaker_func=default_edge_front_watcher),
                 new_ActionFrame()]
 
-    def on_enemy_car_encountered_at_front_with_right_behind_object(self, basic_speed) -> ComplexAction:
+
     CONFIG_MOTION_KEY = 'MotionSection'
     CONFIG_BASIC_DURATION_KEY = f'{CONFIG_MOTION_KEY}/BasicDuration'
     CONFIG_BASIC_SPEED_KEY = f'{CONFIG_MOTION_KEY}/BasicSpeed'
