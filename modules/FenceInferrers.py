@@ -1,10 +1,11 @@
+from typing import final, Tuple, Sequence, Union, Hashable, Any
+
 from modules.AbsFenceInferrer import AbstractFenceInferrer
-from repo.uptechStar.module.actions import ActionPlayer, ActionFrame, new_ActionFrame
+from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
+from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplier_ll, float_multiplier_middle
 from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub
-from repo.uptechStar.module.watcher import default_edge_rear_watcher, default_edge_front_watcher, Watcher
-from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplier_ll, float_multiplier_middle
-from typing import final, Dict, List, Callable, Tuple, Optional, Sequence, Union, Hashable, Any
+from repo.uptechStar.module.watcher import default_edge_rear_watcher, Watcher
 
 BASIC_DURATION = 200
 
@@ -16,6 +17,7 @@ OFF_STAGE_DASH_SPEED = -8000
 class StandardFenceInferrer(AbstractFenceInferrer):
     def react(self, *args, **kwargs) -> Any:
         pass
+
     CONFIG_MOTION_KEY = 'MotionSection'
     CONFIG_BASIC_DURATION_KEY = f'{CONFIG_MOTION_KEY}/BasicDuration'
     CONFIG_OFF_STAGE_DASH_DURATION_KEY = f'{CONFIG_MOTION_KEY}/OffStageDashDuration'
@@ -23,6 +25,7 @@ class StandardFenceInferrer(AbstractFenceInferrer):
     CONFIG_FENCE_INFER_KEY = 'InferSection'
     CONFIG_FENCE_MAX_BASE_LINE_KEY = f"{CONFIG_FENCE_INFER_KEY}/FenceMaxBaseline"
     CONFIG_FENCE_MIN_BASE_LINE_KEY = f'{CONFIG_FENCE_INFER_KEY}/FenceMinBaseline'
+
     def register_all_config(self):
         self.register_config(config_registry_path=self.CONFIG_BASIC_DURATION_KEY,
                              value=BASIC_DURATION)
