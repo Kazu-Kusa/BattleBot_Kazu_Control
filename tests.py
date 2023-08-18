@@ -217,6 +217,36 @@ class CacheTest(unittest.TestCase):
 
 
 class MiscTest(unittest.TestCase):
+
+    @staticmethod
+    def test_list_reverse_operation():
+        from time import perf_counter_ns
+
+        my_tuple = tuple(range(10))
+        print(my_tuple[::-1])
+
+        print('--------------------------------')
+        # 测试my_tuple[::-1]
+        start_time = perf_counter_ns()
+        reversed_tuple = my_tuple[::-1]
+        end_time = perf_counter_ns()
+        time_taken_slice = end_time - start_time
+        print(f"使用切片操作耗时：{time_taken_slice / 1000} 秒")
+
+        # 测试reverse()
+        my_list = list(range(10))
+        start_time = perf_counter_ns()
+        my_list.reverse()
+        end_time = perf_counter_ns()
+        time_taken_reverse = end_time - start_time
+        print(f"使用reverse()耗时：{time_taken_reverse / 1000} 秒")
+
+        # 比较性能
+        if time_taken_slice < time_taken_reverse:
+            print("切片操作更快")
+        else:
+            print("reverse()更快")
+
     @staticmethod
     def test_indexing_performance():
         from time import perf_counter_ns
