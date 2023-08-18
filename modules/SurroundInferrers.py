@@ -101,6 +101,11 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         self.register_config(config_registry_path=self.CONFIG_DASH_TIMEOUT_KEY,
                              value=6000)
 
+        self.register_config(config_registry_path=self.CONFIG_MIN_BASELINES_KEY,
+                             value=1300)
+        self.register_config(config_registry_path=self.CONFIG_MAX_BASELINES_KEY,
+                             value=1900)
+
     def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str):
         super().__init__(sensor_hub=sensor_hub, player=action_player, config_path=config_path)
 
