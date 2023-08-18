@@ -13,7 +13,8 @@ from repo.uptechStar.module.watcher import default_edge_rear_watcher, default_ed
 class StandardSurroundInferrer(AbstractSurroundInferrer):
     def on_objects_encountered_at_left_behind(self, basic_speed) -> ComplexAction:
         """
-        will turn right and move forward, then turn back to observe the objects
+        will turn right and move forward, then turn back to observe the objects,
+        will exit the chain action on encountering the edge when moving forward
         :param basic_speed:
         """
 
@@ -25,13 +26,14 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 action_speed_multiplier=enlarge_multiplier_l(),
                                 action_duration_multiplier=enlarge_multiplier_l(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._front_watcher),
+                                breaker_func=self._front_watcher,
+                                break_action=(new_ActionFrame(),)),
+                # in the default, break action overrides frames below
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(-basic_speed, basic_speed),
                                 action_speed_multiplier=enlarge_multiplier_l(),
                                 action_duration_multiplier=enlarge_multiplier_l(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._rear_watcher),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]
 
     def on_objects_encountered_at_left_right(self, basic_speed) -> ComplexAction:
@@ -44,7 +46,8 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 action_speed_multiplier=enlarge_multiplier_l(),
                                 action_duration_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._rear_watcher),
+                                breaker_func=self._rear_watcher,
+                                break_action=(new_ActionFrame(),)),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
                                 action_speed_multiplier=float_multiplier_upper(),
@@ -55,6 +58,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         """
         similar to enemy car reaction, but with lower speed multiplier
         """
+        # TODO: use break action to improve performance
         sign = random_sign()
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_l(),
