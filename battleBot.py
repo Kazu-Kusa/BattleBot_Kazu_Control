@@ -1,5 +1,4 @@
 import time
-
 import warnings
 from typing import final
 
@@ -9,7 +8,7 @@ from modules.SurroundInferrers import StandardSurroundInferrer
 from modules.bot import Bot
 from repo.uptechStar.constant import EDGE_REAR_SENSOR_ID, EDGE_FRONT_SENSOR_ID, SIDES_SENSOR_ID, START_MIN_LINE, \
     EDGE_MAX_LINE
-from repo.uptechStar.module.actions import new_ActionFrame
+from repo.uptechStar.module.actions import new_ActionFrame, ActionFrame
 from repo.uptechStar.module.sensors import FU_INDEX
 from repo.uptechStar.module.watcher import build_watcher_simple, build_watcher_full_ctrl
 
@@ -268,4 +267,5 @@ if __name__ == '__main__':
         # bot.Battle_debug(100, 'red', True)
     except KeyboardInterrupt:
         bot.player.append(new_ActionFrame())
+        ActionFrame.save_cache()
         time.sleep(1)
