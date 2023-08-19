@@ -3,7 +3,7 @@ from typing import final
 from modules.AbsSurroundInferrer import AbstractSurroundInferrer
 from repo.uptechStar.module.actions import new_ActionFrame, ActionPlayer
 from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplier_ll, float_multiplier_middle, \
-    enlarge_multiplier_l, shrink_multiplier_l, shrink_multiplier_ll
+    enlarge_multiplier_l, shrink_multiplier_ll
 from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub
 from repo.uptechStar.module.watcher import default_edge_rear_watcher, default_edge_front_watcher, Watcher
@@ -12,7 +12,6 @@ from repo.uptechStar.module.watcher import default_edge_rear_watcher, default_ed
 class StandardSurroundInferrer(AbstractSurroundInferrer):
     def on_enemy_car_encountered_at_front_with_left_object(self, basic_speed) -> ComplexAction:
         # 当前面有车左边有障碍物时，撞下对面的车然后后退至安全位置
-        sign = random_sign()
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_l(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
@@ -26,7 +25,6 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
 
     def on_enemy_car_encountered_at_front_with_right_object(self, basic_speed) -> ComplexAction:
         # 当前面有车右边有障碍物时，撞下对面的车然后后退至安全位置
-        sign = random_sign()
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_l(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
@@ -47,14 +45,13 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 breaker_func=self._front_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
-                                action_speed_multiplier=enlarge_multiplier_ll(),
+                                action_speed_multiplier=enlarge_multiplier_l(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()
                 ]
 
     def on_enemy_car_encountered_at_front_with_left_right_object(self, basic_speed) -> ComplexAction:
         # 当前面有车左右有障碍物时，撞下对面的车然后后退至安全位置
-        sign = random_sign()
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
@@ -68,7 +65,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
 
     def on_enemy_car_encountered_at_front_with_left_behind_object(self, basic_speed) -> ComplexAction:
         # 当前面有车左后有障碍物时，撞下对面的车然后右转，再前进至安全位置
-        sign = random_sign()
+
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
@@ -76,8 +73,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(basic_speed, - basic_speed),
                                 action_speed_multiplier=shrink_multiplier_ll(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._rear_watcher),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
@@ -87,21 +83,20 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
 
     def on_enemy_car_encountered_at_front_with_right_behind_object(self, basic_speed) -> ComplexAction:
         # 当前面有车右后有障碍物时，撞下对面的车然后左转，再前进至安全位置
-        sign = random_sign()
+
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
-                                breaker_func=default_edge_front_watcher),
+                                breaker_func=self._front_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(-basic_speed, basic_speed),
                                 action_speed_multiplier=shrink_multiplier_ll(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=default_edge_rear_watcher),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
-                                breaker_func=default_edge_front_watcher),
+                                breaker_func=self._front_watcher),
                 new_ActionFrame()]
 
     def on_enemy_car_encountered_at_front_with_left_right_behind_object(self, basic_speed) -> ComplexAction:
@@ -110,16 +105,15 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
-                                breaker_func=default_edge_rear_watcher),
+                                breaker_func=self._front_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
                                 action_speed_multiplier=shrink_multiplier_ll(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=default_edge_front_watcher),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=default_edge_front_watcher),
+                                breaker_func=self._front_watcher),
                 new_ActionFrame()]
 
     CONFIG_MOTION_KEY = 'MotionSection'
