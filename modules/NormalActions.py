@@ -1,11 +1,29 @@
 from abc import abstractmethod
-from random import choices
-from typing import final
+from random import choices, choice
+from typing import final, Tuple
 
-from repo.uptechStar.module.actions import ActionPlayer
+from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
+from repo.uptechStar.module.algrithm_tools import float_multiplier_middle, float_multiplier_lower, random_sign, \
+    float_multiplier_upper, enlarge_multiplier_l, shrink_multiplier_l
 from repo.uptechStar.module.inferrer_base import InferrerBase, FlexActionFactory, ComplexAction
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX
-from repo.uptechStar.module.watcher import Watcher, build_watcher_simple
+from repo.uptechStar.module.watcher import Watcher, default_edge_front_watcher, \
+    default_edge_rear_watcher, build_watcher_full_ctrl
+
+
+def rand_drift(speed: int) -> Tuple[int, int, int, int]:
+    """
+    随机漂移生成器
+    Args:
+        speed:
+
+    Returns:
+
+    """
+    return choice([(speed, speed, speed, 0),
+                   (speed, speed, 0, speed),
+                   (speed, 0, speed, speed),
+                   (0, speed, speed, speed), ])
 
 
 class AbstractNormalActions(InferrerBase):
@@ -62,6 +80,11 @@ class NormalActions(AbstractNormalActions):
     CONFIG_PLAIN_MOVE_KEY = "PlainMove"
     CONFIG_PLAIN_MOVE_WEIGHT_KEY = f'{CONFIG_PLAIN_MOVE_KEY}/Weight'
 
+    CONFIG_WATCHER_KEY = "Watcher"
+    CONFIG_WATCHER_IDS_KEY = f'{CONFIG_WATCHER_KEY}/Ids'
+    CONFIG_WATCHER_MAX_BASELINE_KEY = f'{CONFIG_WATCHER_KEY}/MaxBaseline'
+    CONFIG_WATCHER_MIN_BASELINE_KEY = f'{CONFIG_WATCHER_KEY}/MinBaseline'
+
     KEY_SCAN = 1
     KEY_SNAKE = 2
     KEY_DRIFTING = 3
@@ -87,6 +110,10 @@ class NormalActions(AbstractNormalActions):
 
         self.register_config(self.CONFIG_PLAIN_MOVE_WEIGHT_KEY, 1)
 
+        self.register_config(self.CONFIG_WATCHER_IDS_KEY, (8, 0, 5, 3))
+        self.register_config(self.CONFIG_WATCHER_MAX_BASELINE_KEY, 1900)
+        self.register_config(self.CONFIG_WATCHER_MIN_BASELINE_KEY, 1500)
+
     def _action_table_init(self):
         self.register_action(self.KEY_SCAN, self.scan)
         self.register_action(self.KEY_SNAKE, self.snake)
@@ -97,10 +124,14 @@ class NormalActions(AbstractNormalActions):
     def __init__(self, player: ActionPlayer, sensor_hub: SensorHub, config_path: str):
         super().__init__(sensor_hub, player, config_path)
         self._infer_body = self._make_infer_body()
-        self.view: Watcher = build_watcher_simple(sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
-                                                  sensor_id=(8, 0, 5, 3),
-                                                  min_line=getattr(self, self.CONFIG_MOTION_MIN_LINE_KEY))
-        self.surrounding_watcher: Watcher = None
+        # TODO: consider use edge sensors to assist the judge
+        self._surrounding_watcher: Watcher = build_watcher_full_ctrl(
+            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
+            sensor_ids=getattr(self, self.CONFIG_WATCHER_IDS_KEY),
+            min_lines=getattr(self, self.CONFIG_WATCHER_MIN_BASELINE_KEY),
+            max_lines=getattr(self, self.CONFIG_WATCHER_MAX_BASELINE_KEY))
+        self._rear_watcher: Watcher = default_edge_rear_watcher
+        self._front_watcher: Watcher = default_edge_front_watcher
 
     def _make_infer_body(self):
         action_keys = [
@@ -127,16 +158,94 @@ class NormalActions(AbstractNormalActions):
         return infer_body
 
     def scan(self, basic_speed: int) -> ComplexAction:
-        return []
+        """
+        Scan like a radar
+        Args:
+            basic_speed:
+
+        Returns:
+
+        """
+        scanning_speed = getattr(self, self.CONFIG_SCANNING_SPEED_KEY)
+        sign = random_sign()
+        return [new_ActionFrame(action_speed=(sign * scanning_speed, -sign * scanning_speed),
+                                action_duration=getattr(self, self.CONFIG_SCANNING_DURATION_KEY),
+                                breaker_func=self._surrounding_watcher,
+                                break_action=(new_ActionFrame(),)),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
+                                action_speed_multiplier=enlarge_multiplier_l(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                action_duration_multiplier=shrink_multiplier_l()),
+                new_ActionFrame()] * getattr(self, self.CONFIG_SCAN_CYCLES_KEY)
 
     def snake(self, basic_speed: int) -> ComplexAction:
-        return []
+        """
+        snake motion
+        Args:
+            basic_speed:
+
+        Returns:
+
+        """
+        return [new_ActionFrame(action_speed=(0, basic_speed, basic_speed, basic_speed),
+                                action_speed_multiplier=float_multiplier_lower(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                action_duration_multiplier=enlarge_multiplier_l()),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=(basic_speed, basic_speed, basic_speed, 0),
+                                action_speed_multiplier=float_multiplier_lower(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                action_duration_multiplier=enlarge_multiplier_l()),
+                new_ActionFrame()] * getattr(self, self.CONFIG_SNAKE_CYCLES_KEY)
 
     def drifting(self, basic_speed: int) -> ComplexAction:
-        return []
+        """
+        random drift, left or right
+        Args:
+            basic_speed:
+
+        Returns:
+
+        """
+        return [new_ActionFrame(action_speed=rand_drift(basic_speed),
+                                action_speed_multiplier=enlarge_multiplier_l(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                action_duration_multiplier=float_multiplier_middle(),
+                                breaker_func=self._front_watcher, ),
+                new_ActionFrame()] * getattr(self, self.CONFIG_DRIFTING_CYCLES_KEY)
 
     def turn(self, basic_speed: int) -> ComplexAction:
-        return []
+        """
+        random turn left or right
+        Args:
+            basic_speed:
+
+        Returns:
+
+        """
+        sign = random_sign()
+        return [new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
+                                action_speed_multiplier=float_multiplier_upper(),
+                                duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
+                new_ActionFrame()]
 
     def plain_move(self, basic_speed: int) -> ComplexAction:
-        return []
+        """
+        Simply moving forward with breaker, if breaker is activated, backwards a little, finally stop
+        Args:
+            basic_speed:
+
+        Returns:
+
+        """
+        return [new_ActionFrame(action_speed=basic_speed,
+                                action_speed_multiplier=float_multiplier_middle(),
+                                duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=self._front_watcher,
+                                break_action=(new_ActionFrame(action_speed=basic_speed,
+                                                              action_speed_multiplier=float_multiplier_lower(),
+                                                              duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                                              breaker_func=self._rear_watcher),),
+                                is_override_action=False),
+                new_ActionFrame()]
