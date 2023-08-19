@@ -1,25 +1,40 @@
+import random
+from typing import Tuple, Hashable, Any
+
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
 from repo.uptechStar.module.algrithm_tools import random_sign
 from repo.uptechStar.module.inferrer_base import InferrerBase
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX
 from repo.uptechStar.module.watcher import Watcher, build_watcher_simple
-import random
 
 ACTION_REVOLVE = (100, 100, 0, 100)
 
 ACTION_SPEED = (-7000, -7000, 0, -7000)
 
 
-class NormalActions(InferrerBase):
+class AbstractNormalActions(InferrerBase):
+
+    def exc_action(self, *args, **kwargs) -> Any:
+        pass
+
+    def react(self, *args, **kwargs) -> Any:
+        pass
+
+    def infer(self, *args, **kwargs) -> Tuple[Hashable, ...]:
+        pass
+
+
+class NormalActions(AbstractNormalActions):
+    CONFIG_MOTION_KEY = "MotionSection"
+    CONFIG_MOTION_MIN_LINE_KEY = f"{CONFIG_MOTION_KEY}/MinLine"
+    CONFIG_MOTION_REVOLVE_TIME_KEY = f"{CONFIG_MOTION_KEY}/Revolve"
+    CONFIG_MOTION_SPEED_TIME_KEY = f"{CONFIG_MOTION_KEY}/Speed"
+
     def _action_table_init(self):
         self.register_action()
 
-    CONFIG_MOTION_KEY = "MotionSection"
     # TODO 未进行测试的界限值
-    CONFIG_MOTION_MIN_LINE_KEY = f"{CONFIG_MOTION_KEY}/MinLine"
     # TODO 未进行测试的超时时间界限值
-    CONFIG_MOTION_REVOLVE_TIME_KEY = f"{CONFIG_MOTION_KEY}/Revolve"
-    CONFIG_MOTION_SPEED_TIME_KEY = f"{CONFIG_MOTION_KEY}/Speed"
     # TODO 某个未测定的数字
     random_factor_speed = random.randint(2000, 4000)
 
