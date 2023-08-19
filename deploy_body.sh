@@ -272,9 +272,9 @@ function build_ch34_demo() {
     mkdir "$DRIVER_REPO_PATH/$DEMO_SRC/$BUILD_DIR" || True
     gcc *.c -o app -l$(basename $DEMO_SRC)
 }
-install_ch34x_driver
-build_ch34_demo demo/ch341
-build_ch34_demo demo/ch347
+#install_ch34x_driver
+#build_ch34_demo demo/ch341
+#build_ch34_demo demo/ch347
 
 sudo chmod -R 777 $TEMP_DIR_PATH
 
