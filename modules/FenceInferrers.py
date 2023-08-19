@@ -26,7 +26,6 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()
                 ]
-        pass
 
     def on_front_behind_to_fence(self, basic_speed) -> ComplexAction:
         # 在前方和后方向上遇到围栏，我希望前进一段距离
@@ -35,7 +34,6 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame
                 ]
-        pass
 
     def on_front_left_right_to_fence(self, basic_speed) -> ComplexAction:
         # 在前方和左右方向上遇到围栏，我希望随机向某一个方向转向
@@ -45,7 +43,6 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()
                 ]
-        pass
 
     def on_front_left_behind_to_fence(self, basic_speed) -> ComplexAction:
         # 在前后方和左方向上遇到围栏，我希望向右转向
@@ -53,7 +50,6 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                                 action_speed_multiplier=float_multiplier_lower(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]
-        pass
 
     def on_front_right_behind_to_fence(self, basic_speed) -> ComplexAction:
         # 在前后方和右方向上遇到围栏，我希望向左转向
@@ -61,7 +57,6 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                                 action_speed_multiplier=float_multiplier_lower(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]
-        pass
 
     def on_left_right_behind_to_fence(self, basic_speed) -> ComplexAction:
         # 在左右方和后方向上遇到围栏，我希望前进一段距离后随机转向
@@ -75,7 +70,6 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()
                 ]
-        pass
 
     def on_no_fence(self, basic_speed) -> ComplexAction:
         # 在没有围栏的情况下，我希望随机前进或者后退一段距离
@@ -84,7 +78,6 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]
-        pass
 
     def on_front_left_right_behind_to_fence(self, basic_speed) -> ComplexAction:
         # 在前后方和左右方向上遇到围栏，我希望随机转向
@@ -94,10 +87,9 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()
                 ]
-        pass
 
     def react(self, *args, **kwargs) -> Any:
-        pass
+        raise NotImplementedError
 
     def register_all_config(self):
         self.register_config(config_registry_path=self.CONFIG_BASIC_DURATION_KEY,
