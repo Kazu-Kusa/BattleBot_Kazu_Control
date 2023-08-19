@@ -4,6 +4,7 @@ from typing import final
 
 from modules.EdgeInferrers import StandardEdgeInferrer
 from modules.FenceInferrers import StandardFenceInferrer
+from modules.NormalActions import NormalActions
 from modules.SurroundInferrers import StandardSurroundInferrer
 from modules.bot import Bot
 from repo.uptechStar.constant import EDGE_REAR_SENSOR_ID, EDGE_FRONT_SENSOR_ID, SIDES_SENSOR_ID, START_MIN_LINE, \
@@ -121,7 +122,8 @@ class BattleBot(Bot):
     def __init__(self, base_config: str,
                  edge_inferrer_config: str,
                  surrounding_inferrer_config: str,
-                 fence_inferrer_config: str):
+                 fence_inferrer_config: str,
+                 normal_actions_config: str):
         super().__init__(config_path=base_config)
 
         self.edge_inferrer = StandardEdgeInferrer(sensor_hub=self.sensor_hub,
@@ -129,11 +131,15 @@ class BattleBot(Bot):
                                                   config_path=edge_inferrer_config)
         self.surrounding_inferrer = StandardSurroundInferrer(sensor_hub=self.sensor_hub,
                                                              action_player=self.player,
-                                                             config_path=surrounding_inferrer_config)
+                                                             config_path=surrounding_inferrer_config,
+                                                             tag_detector=self.tag_detector)
 
         self.fence_inferrer = StandardFenceInferrer(sensor_hub=self.sensor_hub,
                                                     action_player=self.player,
                                                     config_path=fence_inferrer_config)
+        self.normal_actions = NormalActions(sensor_hub=self.sensor_hub,
+                                            player=self.player,
+                                            config_path=normal_actions_config)
         # TODO remember decouple the constant
         self._normal_alter_watcher = build_watcher_full_ctrl(
             sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
@@ -177,12 +183,8 @@ class BattleBot(Bot):
         :param normal_spead:
         :return:
         """
+
         # TODO: may allow a greater speed
-        low_speed_action = new_ActionFrame(action_speed=int(normal_spead / 2))
-        normal_action = new_ActionFrame(action_speed=normal_spead,
-                                        action_duration=5,
-                                        breaker_func=self._normal_alter_watcher,
-                                        break_action=(low_speed_action,))
 
         # TODO the camera is currently disabled, do remember implement it
         def is_on_stage() -> bool:
@@ -192,12 +194,9 @@ class BattleBot(Bot):
         def on_stage() -> None:
             if self.edge_inferrer.react():
                 return
-            self.surrounding_inferrer.react()
-            self.screen.set_led_color(1, self.screen.COLOR_YELLOW)
-            if self._normal_alter_watcher():
-                self.player.append(low_speed_action)
-            else:
-                self.player.append(normal_action)
+            if self.surrounding_inferrer.react():
+                return
+            self.normal_actions.react()
 
         def off_stage() -> None:
             self.fence_inferrer.react()
@@ -214,7 +213,6 @@ class BattleBot(Bot):
         :param normal_spead:
         :return:
         """
-        normal_action = new_ActionFrame(action_speed=normal_spead)
         self.screen.open()
         self.screen.set_font_size(self.screen.FONT_12X16)
 
@@ -228,11 +226,10 @@ class BattleBot(Bot):
             self.screen.put_string(0, 0, f'{status_code}')
             self.screen.refresh()
             if status_code:
-                self.screen.set_led_color(1, self.screen.COLOR_RED)
-
                 return
-            self.screen.set_led_color(1, self.screen.COLOR_YELLOW)
-            self.player.append(normal_action)
+            if self.surrounding_inferrer.react():
+                return
+            self.normal_actions.react()
 
         def off_stage() -> None:
             self.fence_inferrer.react()
@@ -259,7 +256,8 @@ if __name__ == '__main__':
     bot = BattleBot(base_config='config/std_base_config.json',
                     edge_inferrer_config='config/std_edge_inferrer_config.json',
                     surrounding_inferrer_config='config/std_surround_inferrer_config.json',
-                    fence_inferrer_config='config/std_fence_inferrer_config.json')
+                    fence_inferrer_config='config/std_fence_inferrer_config.json',
+                    normal_actions_config='config/std_normal_actions_config.json')
     # bot.save_all_config()
     # bot.start_match(normal_spead=3000, team_color='blue', use_cam=False)
     try:

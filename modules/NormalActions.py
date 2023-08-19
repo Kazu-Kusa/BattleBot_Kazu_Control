@@ -110,7 +110,7 @@ class NormalActions(AbstractNormalActions):
 
         self.register_config(self.CONFIG_PLAIN_MOVE_WEIGHT_KEY, 1)
 
-        self.register_config(self.CONFIG_WATCHER_IDS_KEY, (8, 0, 5, 3))
+        self.register_config(self.CONFIG_WATCHER_IDS_KEY, [8, 0, 5, 3])
         self.register_config(self.CONFIG_WATCHER_MAX_BASELINE_KEY, 1900)
         self.register_config(self.CONFIG_WATCHER_MIN_BASELINE_KEY, 1500)
 
