@@ -1,4 +1,4 @@
-from typing import final
+from typing import final, Optional
 
 from modules.AbsSurroundInferrer import AbstractSurroundInferrer
 from repo.uptechStar.module.actions import new_ActionFrame, ActionPlayer
@@ -6,12 +6,14 @@ from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplie
     enlarge_multiplier_l, float_multiplier_upper, shrink_multiplier_ll
 from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub
+from repo.uptechStar.module.tagdetector import TagDetector
 from repo.uptechStar.module.watcher import default_edge_rear_watcher, default_edge_front_watcher, Watcher
 
 
 # TODO: use the newly developed action frame insert play to imp this class
 class StandardSurroundInferrer(AbstractSurroundInferrer):
 
+    # region Methods
     def on_objects_encountered_at_left_right_behind(self, basic_speed) -> ComplexAction:
         # 在左右后方遇到物体，我希望更快的前进
         return [new_ActionFrame(action_speed=basic_speed,
@@ -441,12 +443,16 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 breaker_func=self._front_watcher),
                 new_ActionFrame()]
 
+    # endregion
+
     CONFIG_MOTION_KEY = 'MotionSection'
     CONFIG_BASIC_DURATION_KEY = f'{CONFIG_MOTION_KEY}/BasicDuration'
     CONFIG_BASIC_SPEED_KEY = f'{CONFIG_MOTION_KEY}/BasicSpeed'
     CONFIG_DASH_TIMEOUT_KEY = f'{CONFIG_MOTION_KEY}/DashTimeout'
 
     CONFIG_INFER_KEY = 'InferSection'
+    CONFIG_FRONT_OBJECT_TABLE_KEY = f'{CONFIG_INFER_KEY}/FrontObjectTable'
+    CONFIG_SENSOR_IDS_KEY = f'{CONFIG_INFER_KEY}/SensorIds'
     CONFIG_MIN_BASELINES_KEY = f'{CONFIG_INFER_KEY}/MinBaselines'
     CONFIG_MAX_BASELINES_KEY = f'{CONFIG_INFER_KEY}/MaxBaselines'
 
@@ -458,7 +464,15 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         return status_code
 
     def infer(self) -> int:
-        raise NotImplementedError
+        """
+        Infer the status code of the robot.
+
+        Returns:
+
+        Note:
+            This function is imp by the local function
+        """
+        return self._status_infer()
 
     @final
     def register_all_config(self):
@@ -469,16 +483,65 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         self.register_config(config_registry_path=self.CONFIG_DASH_TIMEOUT_KEY,
                              value=6000)
 
+        self.register_config(config_registry_path=self.CONFIG_FRONT_OBJECT_TABLE_KEY,
+                             value={[-1, True]: 400, [-1, False]: 0,
+                                    [1, True]: 100, [1, False]: 100,
+                                    [2, True]: 300, [2, False]: 300,
+                                    [3, True]: 200, [3, False]: 200})
+        # the inferring currently only support four sensors;
+        # each in the list is corresponding to [front,behind,left,right]
+        self.register_config(config_registry_path=self.CONFIG_SENSOR_IDS_KEY,
+                             value=[3, 5, 8, 0])
         self.register_config(config_registry_path=self.CONFIG_MIN_BASELINES_KEY,
-                             value=1300)
+                             value=[1300] * 4)
         self.register_config(config_registry_path=self.CONFIG_MAX_BASELINES_KEY,
-                             value=1900)
+                             value=[1900] * 4)
 
-    def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str):
+    def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str,
+                 tag_detector: Optional[TagDetector]):
         super().__init__(sensor_hub=sensor_hub, player=action_player, config_path=config_path)
+        self._tag_detector = tag_detector
 
         self._rear_watcher: Watcher = default_edge_rear_watcher
         self._front_watcher: Watcher = default_edge_front_watcher
+        self._status_infer = self._make_infer_body()
+
+    def _make_infer_body(self):
+        """
+        make an infer_body with all variables bound locally, which can bring a better performance
+        Returns:
+
+        """
+        tag_detector = self._tag_detector
+        sensor_ids = getattr(self, self.CONFIG_SENSOR_IDS_KEY)
+        behind_left_right_weights = (
+            getattr(self, self.KEY_BEHIND_OBJECT),
+            getattr(self, self.KEY_LEFT_OBJECT),
+            getattr(self, self.KEY_RIGHT_OBJECT)
+        )
+        min_baselines = getattr(self, self.CONFIG_MIN_BASELINES_KEY)
+        max_baselines = getattr(self, self.CONFIG_MAX_BASELINES_KEY)
+        front_object_table = getattr(self, self.CONFIG_FRONT_OBJECT_TABLE_KEY)
+        updater = self._sensors.on_board_adc_updater[0]
+
+        def status_infer() -> int:
+            """
+
+            Returns: the status code of surroundings.
+
+            """
+            updated_data = updater()  # use updater to get updated sensor data
+            status_bools = tuple(
+                min_baseline < updated_data[sensor_id] < max_baseline for min_baseline, sensor_id, max_baseline in
+                zip(min_baselines, sensor_ids, max_baselines))  # calc for the three-direction status,behind,left,right
+            # calc for the surrounding status code except front
+            left_right_behind_status = sum(x * y for x, y in zip(status_bools[1:], behind_left_right_weights))
+            # use front sensors and tag to search the corresponding status code
+            front_object_status = front_object_table.get([tag_detector.tag_id, status_bools[0]])
+            # TODO: should add a tag-follow feature, because the tag may not be at the very front of the robot.
+            return left_right_behind_status + front_object_status
+
+        return status_infer
 
     @final
     def on_allay_box_encountered_at_front(self, basic_speed: int) -> ComplexAction:
