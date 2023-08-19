@@ -23,7 +23,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
 
     def on_objects_encountered_at_right_behind(self, basic_speed) -> ComplexAction:
         # 在右方后方遇到物体，我希望差速左前进（有中断）
-        return [new_ActionFrame(action_speed=(basic_speed * enlarge_multiplier_l(), basic_speed),
+        return [new_ActionFrame(action_speed=(basic_speed , basic_speed* enlarge_multiplier_l()),
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 breaker_func=self._front_watcher),
@@ -112,7 +112,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                 new_ActionFrame(action_speed=-basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._front_watcher),
+                                breaker_func=self._rear_watcher),
                 new_ActionFrame()
                 ]
 
@@ -121,7 +121,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         return [new_ActionFrame(action_speed=(-basic_speed * enlarge_multiplier_l(), -basic_speed),
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._front_watcher),
+                                breaker_func=self._rear_watcher),
                 new_ActionFrame(),
                 ]
 
@@ -130,7 +130,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         return [new_ActionFrame(action_speed=(-basic_speed, -basic_speed * enlarge_multiplier_l()),
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._front_watcher),
+                                breaker_func=self._rear_watcher),
                 new_ActionFrame(),
                 ]
 
@@ -139,7 +139,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         return [new_ActionFrame(action_speed=(-basic_speed, -basic_speed, -basic_speed, 0),
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._front_watcher),
+                                breaker_func=self._rear_watcher),
                 new_ActionFrame(),
                 ]
 
@@ -149,7 +149,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         return [new_ActionFrame(action_speed=-basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._front_watcher),
+                                breaker_func=self._rear_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(-single * basic_speed, single * basic_speed),
                                 action_speed_multiplier=float_multiplier_middle(),
@@ -162,7 +162,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         return [new_ActionFrame(action_speed=(-basic_speed, -basic_speed, -basic_speed, 0),
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._front_watcher),
+                                breaker_func=self._rear_watcher),
                 new_ActionFrame(),
                 ]
 
@@ -171,7 +171,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         return [new_ActionFrame(action_speed=(0, -basic_speed, -basic_speed, -basic_speed),
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._front_watcher),
+                                breaker_func=self._rear_watcher),
                 new_ActionFrame(),
                 ]
 
@@ -180,7 +180,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         return [new_ActionFrame(action_speed=-basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._front_watcher),
+                                breaker_func=self._rear_watcher),
                 new_ActionFrame()
                 ]
 
@@ -189,14 +189,14 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._front_watcher),
+                                breaker_func=self._rear_watcher),
                 new_ActionFrame()]
 
     def on_enemy_box_encountered_at_front_with_right_object(self, basic_speed) -> ComplexAction:
         # 在前遇到敌方箱子，右方有物体，希望前进(有中断)
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
                                 breaker_func=self._front_watcher),
                 new_ActionFrame()]
 
@@ -210,7 +210,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                 new_ActionFrame(action_speed=-basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._front_watcher),
+                                breaker_func=self._rear_watcher),
                 new_ActionFrame()
                 ]
 
@@ -218,7 +218,8 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         # 在前遇到敌方箱子，左方右方有物体，希望进行后退(有中断)
         return [new_ActionFrame(action_speed=-basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=self._rear_watcher),
                 new_ActionFrame(),
                 ]
 
@@ -236,7 +237,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                 new_ActionFrame(action_speed=-basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._front_watcher),
+                                breaker_func=self._rear_watcher),
                 new_ActionFrame()
                 ]
 
@@ -254,7 +255,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                 new_ActionFrame(action_speed=-basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._front_watcher),
+                                breaker_func=self._rear_watcher),
                 new_ActionFrame()
                 ]
 
