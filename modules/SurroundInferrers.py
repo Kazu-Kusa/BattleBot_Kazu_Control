@@ -189,7 +189,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._rear_watcher),
+                                breaker_func=self._front_watcher),
                 new_ActionFrame()]
 
     def on_enemy_box_encountered_at_front_with_right_object(self, basic_speed) -> ComplexAction:
