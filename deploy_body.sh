@@ -208,7 +208,7 @@ else
     if test -e "./$FILE_NAME"; then
         echo "llvm-project已经存在"
     else
-        wget $LLVM_URL -O
+        wget $LLVM_URL
     fi
     sudo apt install pv -y
     sudo chmod 777 "$FILE_NAME"
