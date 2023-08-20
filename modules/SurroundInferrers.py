@@ -484,10 +484,10 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                              value=6000)
 
         self.register_config(config_registry_path=self.CONFIG_FRONT_OBJECT_TABLE_KEY,
-                             value={[-1, True]: 400, [-1, False]: 0,
-                                    [1, True]: 100, [1, False]: 100,
-                                    [2, True]: 300, [2, False]: 300,
-                                    [3, True]: 200, [3, False]: 200})
+                             value={f'{-1}/{True}': 400, f'{-1}/{False}': 0,
+                                    f'{1}/{True}': 100, f'{1}/{False}': 100,
+                                    f'{2}/{True}': 300, f'{2}/{False}': 300,
+                                    f'{3}/{True}': 200, f'{3}/{False}': 200})
         # the inferring currently only support four sensors;
         # each in the list is corresponding to [front,behind,left,right]
         self.register_config(config_registry_path=self.CONFIG_SENSOR_IDS_KEY,
@@ -515,9 +515,9 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         tag_detector = self._tag_detector
         sensor_ids = getattr(self, self.CONFIG_SENSOR_IDS_KEY)
         behind_left_right_weights = (
-            getattr(self, self.KEY_BEHIND_OBJECT),
-            getattr(self, self.KEY_LEFT_OBJECT),
-            getattr(self, self.KEY_RIGHT_OBJECT)
+            self.KEY_BEHIND_OBJECT,
+            self.KEY_LEFT_OBJECT,
+            self.KEY_RIGHT_OBJECT
         )
         min_baselines = getattr(self, self.CONFIG_MIN_BASELINES_KEY)
         max_baselines = getattr(self, self.CONFIG_MAX_BASELINES_KEY)
@@ -537,7 +537,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
             # calc for the surrounding status code except front
             left_right_behind_status = sum(x * y for x, y in zip(status_bools[1:], behind_left_right_weights))
             # use front sensors and tag to search the corresponding status code
-            front_object_status = front_object_table.get([tag_detector.tag_id, status_bools[0]])
+            front_object_status = front_object_table.get(f'{tag_detector.tag_id}/{status_bools[0]}')
             # TODO: should add a tag-follow feature, because the tag may not be at the very front of the robot.
             return left_right_behind_status + front_object_status
 
