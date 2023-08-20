@@ -7,8 +7,7 @@ from modules.FenceInferrers import StandardFenceInferrer
 from modules.NormalActions import NormalActions
 from modules.SurroundInferrers import StandardSurroundInferrer
 from modules.bot import Bot
-from repo.uptechStar.constant import EDGE_REAR_SENSOR_ID, EDGE_FRONT_SENSOR_ID, SIDES_SENSOR_ID, START_MIN_LINE, \
-    EDGE_MAX_LINE
+from repo.uptechStar.constant import SIDES_SENSOR_ID, START_MIN_LINE
 from repo.uptechStar.module.actions import new_ActionFrame, ActionFrame
 from repo.uptechStar.module.sensors import FU_INDEX
 from repo.uptechStar.module.watcher import build_watcher_simple, build_watcher_full_ctrl
@@ -48,30 +47,8 @@ class BattleBot(Bot):
 
     # endregion
 
-    # region Driver
-    CONFIG_DRIVER_KEY = "Driver"
-    CONFIG_PRE_COMPILE_CMD_KEY = f'{CONFIG_DRIVER_KEY}/PreCompileCmd'
-    CONFIG_DRIVER_DEBUG_MODE_KEY = f'{CONFIG_DRIVER_KEY}/DriverDebugMode'
-    CONFIG_MOTOR_IDS_KEY = f'{CONFIG_DRIVER_KEY}/MotorIds'
-    CONFIG_MOTOR_DIRS_KEY = f'{CONFIG_DRIVER_KEY}/MotorDirs'
-    CONFIG_HANG_TIME_MAX_ERROR_KEY = f'{CONFIG_DRIVER_KEY}/HangTimeMaxError'
-    CONFIG_DRIVER_SERIAL_PORT_KEY = f'{CONFIG_DRIVER_KEY}/DriverSerialPort'
     # endregion
-
-    # region Camera
-    CONFIG_CAMERA_KEY = "Camera"
-    CONFIG_TAG_GROUP_KEY = f'{CONFIG_CAMERA_KEY}/TagGroup'
-    CONFIG_CAMERA_ID_KEY = f'{CONFIG_CAMERA_KEY}/CameraId'
-    # endregion
-
-    # region Infer
-    CONFIG_INFER_KEY = "Infer"
-    CONFIG_DEFAULT_EDGE_BASELINE_KEY = f'{CONFIG_INFER_KEY}/DefaultEdgeBaseline'
-    CONFIG_DEFAULT_NORMAL_BASELINE_KEY = f'{CONFIG_INFER_KEY}/DefaultNormalBaseline'
-    CONFIG_DEFAULT_GRAYS_BASELINE_KEY = f'{CONFIG_INFER_KEY}/DefaultGraysBaseline'
-
-    # endregion
-    def register_all_config(self):
+    def register_all_children_config(self):
         # region OB config
         self.register_config(self.CONFIG_EDGE_FL_KEY, 6)
         self.register_config(self.CONFIG_EDGE_FR_KEY, 2)
@@ -97,26 +74,6 @@ class BattleBot(Bot):
         # region IO
         self.register_config(self.CONFIG_GRAY_L_KEY, 7)
         self.register_config(self.CONFIG_GRAY_R_KEY, 6)
-        # endregion
-
-        # region Driver
-        self.register_config(self.CONFIG_PRE_COMPILE_CMD_KEY, True)
-        self.register_config(self.CONFIG_DRIVER_DEBUG_MODE_KEY, False)
-        self.register_config(self.CONFIG_MOTOR_IDS_KEY, [4, 3, 1, 2])
-        self.register_config(self.CONFIG_MOTOR_DIRS_KEY, [-1, -1, 1, 1])
-        self.register_config(self.CONFIG_HANG_TIME_MAX_ERROR_KEY, 50)
-        self.register_config(self.CONFIG_DRIVER_SERIAL_PORT_KEY, None)
-        # endregion
-
-        # region Camera
-        self.register_config(self.CONFIG_TAG_GROUP_KEY, "tag36h11")
-        self.register_config(self.CONFIG_CAMERA_ID_KEY, 0)
-        # endregion
-
-        # region Infer
-        self.register_config(self.CONFIG_DEFAULT_EDGE_BASELINE_KEY, 1750)
-        self.register_config(self.CONFIG_DEFAULT_NORMAL_BASELINE_KEY, 1000)
-        self.register_config(self.CONFIG_DEFAULT_GRAYS_BASELINE_KEY, 1)
         # endregion
 
     def __init__(self, base_config: str,
@@ -149,12 +106,6 @@ class BattleBot(Bot):
         self._start_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
                                                    sensor_id=SIDES_SENSOR_ID,
                                                    min_line=START_MIN_LINE)
-        self._rear_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
-                                                  sensor_id=EDGE_REAR_SENSOR_ID,
-                                                  max_line=EDGE_MAX_LINE)
-        self._front_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
-                                                   sensor_id=EDGE_FRONT_SENSOR_ID,
-                                                   max_line=EDGE_MAX_LINE)
 
     def wait_start(self) -> None:
         """
@@ -165,7 +116,8 @@ class BattleBot(Bot):
         tape = [
             new_ActionFrame(breaker_func=self._start_watcher,
                             action_duration=99999999),
-            new_ActionFrame(action_speed=8000, action_duration=600),
+            new_ActionFrame(action_speed=getattr(self, self.CONFIG_MOTION_START_SPEED_KEY),
+                            action_duration=getattr(self, self.CONFIG_MOTION_START_DURATION_KEY)),
             new_ActionFrame()]
         warnings.warn('\n>>>>>>>>>>Waiting for start<<<<<<<', stacklevel=4)
         self.player.extend(tape)
@@ -175,18 +127,10 @@ class BattleBot(Bot):
 
     # endregion
 
-    def Battle(self, normal_spead: int, team_color: str, use_cam: bool) -> None:
-        """
-        the main function
-        :param use_cam:
-        :param team_color:
-        :param normal_spead:
-        :return:
-        """
+    def Battle(self) -> None:
 
         # TODO: may allow a greater speed
 
-        # TODO the camera is currently disabled, do remember implement it
         def is_on_stage() -> bool:
             # TODO: do remember implement this stage check
             return True
@@ -261,7 +205,7 @@ if __name__ == '__main__':
     # bot.save_all_config()
     # bot.start_match(normal_spead=3000, team_color='blue', use_cam=False)
     try:
-        bot.Battle(4500, 'blue', True)
+        bot.Battle()
         # bot.Battle_debug(100, 'red', True)
     except KeyboardInterrupt:
         bot.player.append(new_ActionFrame())
