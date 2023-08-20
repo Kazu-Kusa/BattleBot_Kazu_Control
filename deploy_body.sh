@@ -180,7 +180,7 @@ config_file="/boot/config.txt"
 arm_freq="arm_freq=2000"
 over_voltage="over_voltage=10"
 core_freq="core_freq=750"
-arm_64bit="0"
+arm_64bit="arm_64bit=0"
 echo "-超频配置参数-"
 echo "ARM主频设置为'$arm_freq'Mhz，默认1500Mhz，推荐范围<=2147Mhz"
 check_and_append_string "$config_file" "$arm_freq"
@@ -208,7 +208,7 @@ else
     if test -e "./$FILE_NAME"; then
         echo "llvm-project已经存在"
     else
-        wget $LLVM_URL -O
+        wget $LLVM_URL
     fi
     sudo apt install pv -y
     sudo chmod 777 "$FILE_NAME"
@@ -272,12 +272,13 @@ function build_ch34_demo() {
     mkdir "$DRIVER_REPO_PATH/$DEMO_SRC/$BUILD_DIR" || True
     gcc *.c -o app -l$(basename $DEMO_SRC)
 }
-install_ch34x_driver
-build_ch34_demo demo/ch341
-build_ch34_demo demo/ch347
+#install_ch34x_driver
+#build_ch34_demo demo/ch341
+#build_ch34_demo demo/ch347
 
 sudo chmod -R 777 $TEMP_DIR_PATH
 
 
 
-
+OPENCV_LIB="export LD_PRELOAD=/usr/lib/arm-linux-gnueabihf/libatomic.so.1"
+sh -c "echo $OPENCV_LIB >> ~/.bashrc"

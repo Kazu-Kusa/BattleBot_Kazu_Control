@@ -1,15 +1,14 @@
 import time
-
 import warnings
 from typing import final
 
 from modules.EdgeInferrers import StandardEdgeInferrer
 from modules.FenceInferrers import StandardFenceInferrer
+from modules.NormalActions import NormalActions
 from modules.SurroundInferrers import StandardSurroundInferrer
 from modules.bot import Bot
-from repo.uptechStar.constant import EDGE_REAR_SENSOR_ID, EDGE_FRONT_SENSOR_ID, SIDES_SENSOR_ID, START_MIN_LINE, \
-    EDGE_MAX_LINE
-from repo.uptechStar.module.actions import new_ActionFrame
+from repo.uptechStar.constant import SIDES_SENSOR_ID, START_MIN_LINE
+from repo.uptechStar.module.actions import new_ActionFrame, ActionFrame
 from repo.uptechStar.module.sensors import FU_INDEX
 from repo.uptechStar.module.watcher import build_watcher_simple, build_watcher_full_ctrl
 
@@ -48,30 +47,8 @@ class BattleBot(Bot):
 
     # endregion
 
-    # region Driver
-    CONFIG_DRIVER_KEY = "Driver"
-    CONFIG_PRE_COMPILE_CMD_KEY = f'{CONFIG_DRIVER_KEY}/PreCompileCmd'
-    CONFIG_DRIVER_DEBUG_MODE_KEY = f'{CONFIG_DRIVER_KEY}/DriverDebugMode'
-    CONFIG_MOTOR_IDS_KEY = f'{CONFIG_DRIVER_KEY}/MotorIds'
-    CONFIG_MOTOR_DIRS_KEY = f'{CONFIG_DRIVER_KEY}/MotorDirs'
-    CONFIG_HANG_TIME_MAX_ERROR_KEY = f'{CONFIG_DRIVER_KEY}/HangTimeMaxError'
-    CONFIG_DRIVER_SERIAL_PORT_KEY = f'{CONFIG_DRIVER_KEY}/DriverSerialPort'
     # endregion
-
-    # region Camera
-    CONFIG_CAMERA_KEY = "Camera"
-    CONFIG_TAG_GROUP_KEY = f'{CONFIG_CAMERA_KEY}/TagGroup'
-    CONFIG_CAMERA_ID_KEY = f'{CONFIG_CAMERA_KEY}/CameraId'
-    # endregion
-
-    # region Infer
-    CONFIG_INFER_KEY = "Infer"
-    CONFIG_DEFAULT_EDGE_BASELINE_KEY = f'{CONFIG_INFER_KEY}/DefaultEdgeBaseline'
-    CONFIG_DEFAULT_NORMAL_BASELINE_KEY = f'{CONFIG_INFER_KEY}/DefaultNormalBaseline'
-    CONFIG_DEFAULT_GRAYS_BASELINE_KEY = f'{CONFIG_INFER_KEY}/DefaultGraysBaseline'
-
-    # endregion
-    def register_all_config(self):
+    def register_all_children_config(self):
         # region OB config
         self.register_config(self.CONFIG_EDGE_FL_KEY, 6)
         self.register_config(self.CONFIG_EDGE_FR_KEY, 2)
@@ -99,30 +76,11 @@ class BattleBot(Bot):
         self.register_config(self.CONFIG_GRAY_R_KEY, 6)
         # endregion
 
-        # region Driver
-        self.register_config(self.CONFIG_PRE_COMPILE_CMD_KEY, True)
-        self.register_config(self.CONFIG_DRIVER_DEBUG_MODE_KEY, False)
-        self.register_config(self.CONFIG_MOTOR_IDS_KEY, [4, 3, 1, 2])
-        self.register_config(self.CONFIG_MOTOR_DIRS_KEY, [-1, -1, 1, 1])
-        self.register_config(self.CONFIG_HANG_TIME_MAX_ERROR_KEY, 50)
-        self.register_config(self.CONFIG_DRIVER_SERIAL_PORT_KEY, None)
-        # endregion
-
-        # region Camera
-        self.register_config(self.CONFIG_TAG_GROUP_KEY, "tag36h11")
-        self.register_config(self.CONFIG_CAMERA_ID_KEY, 0)
-        # endregion
-
-        # region Infer
-        self.register_config(self.CONFIG_DEFAULT_EDGE_BASELINE_KEY, 1750)
-        self.register_config(self.CONFIG_DEFAULT_NORMAL_BASELINE_KEY, 1000)
-        self.register_config(self.CONFIG_DEFAULT_GRAYS_BASELINE_KEY, 1)
-        # endregion
-
     def __init__(self, base_config: str,
                  edge_inferrer_config: str,
                  surrounding_inferrer_config: str,
-                 fence_inferrer_config: str):
+                 fence_inferrer_config: str,
+                 normal_actions_config: str):
         super().__init__(config_path=base_config)
 
         self.edge_inferrer = StandardEdgeInferrer(sensor_hub=self.sensor_hub,
@@ -130,11 +88,15 @@ class BattleBot(Bot):
                                                   config_path=edge_inferrer_config)
         self.surrounding_inferrer = StandardSurroundInferrer(sensor_hub=self.sensor_hub,
                                                              action_player=self.player,
-                                                             config_path=surrounding_inferrer_config)
+                                                             config_path=surrounding_inferrer_config,
+                                                             tag_detector=self.tag_detector)
 
         self.fence_inferrer = StandardFenceInferrer(sensor_hub=self.sensor_hub,
                                                     action_player=self.player,
                                                     config_path=fence_inferrer_config)
+        self.normal_actions = NormalActions(sensor_hub=self.sensor_hub,
+                                            player=self.player,
+                                            config_path=normal_actions_config)
         # TODO remember decouple the constant
         self._normal_alter_watcher = build_watcher_full_ctrl(
             sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
@@ -144,12 +106,6 @@ class BattleBot(Bot):
         self._start_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
                                                    sensor_id=SIDES_SENSOR_ID,
                                                    min_line=START_MIN_LINE)
-        self._rear_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
-                                                  sensor_id=EDGE_REAR_SENSOR_ID,
-                                                  max_line=EDGE_MAX_LINE)
-        self._front_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
-                                                   sensor_id=EDGE_FRONT_SENSOR_ID,
-                                                   max_line=EDGE_MAX_LINE)
 
     def wait_start(self) -> None:
         """
@@ -160,7 +116,8 @@ class BattleBot(Bot):
         tape = [
             new_ActionFrame(breaker_func=self._start_watcher,
                             action_duration=99999999),
-            new_ActionFrame(action_speed=8000, action_duration=600),
+            new_ActionFrame(action_speed=getattr(self, self.CONFIG_MOTION_START_SPEED_KEY),
+                            action_duration=getattr(self, self.CONFIG_MOTION_START_DURATION_KEY)),
             new_ActionFrame()]
         warnings.warn('\n>>>>>>>>>>Waiting for start<<<<<<<', stacklevel=4)
         self.player.extend(tape)
@@ -170,22 +127,10 @@ class BattleBot(Bot):
 
     # endregion
 
-    def Battle(self, normal_spead: int, team_color: str, use_cam: bool) -> None:
-        """
-        the main function
-        :param use_cam:
-        :param team_color:
-        :param normal_spead:
-        :return:
-        """
-        # TODO: may allow a greater speed
-        low_speed_action = new_ActionFrame(action_speed=int(normal_spead / 2))
-        normal_action = new_ActionFrame(action_speed=normal_spead,
-                                        action_duration=5,
-                                        breaker_func=self._normal_alter_watcher,
-                                        break_action=(low_speed_action,))
+    def Battle(self) -> None:
 
-        # TODO the camera is currently disabled, do remember implement it
+        # TODO: may allow a greater speed
+
         def is_on_stage() -> bool:
             # TODO: do remember implement this stage check
             return True
@@ -193,12 +138,9 @@ class BattleBot(Bot):
         def on_stage() -> None:
             if self.edge_inferrer.react():
                 return
-            self.surrounding_inferrer.react()
-            self.screen.set_led_color(1, self.screen.COLOR_YELLOW)
-            if self._normal_alter_watcher():
-                self.player.append(low_speed_action)
-            else:
-                self.player.append(normal_action)
+            if self.surrounding_inferrer.react():
+                return
+            self.normal_actions.react()
 
         def off_stage() -> None:
             self.fence_inferrer.react()
@@ -215,7 +157,6 @@ class BattleBot(Bot):
         :param normal_spead:
         :return:
         """
-        normal_action = new_ActionFrame(action_speed=normal_spead)
         self.screen.open()
         self.screen.set_font_size(self.screen.FONT_12X16)
 
@@ -229,11 +170,10 @@ class BattleBot(Bot):
             self.screen.put_string(0, 0, f'{status_code}')
             self.screen.refresh()
             if status_code:
-                self.screen.set_led_color(1, self.screen.COLOR_RED)
-
                 return
-            self.screen.set_led_color(1, self.screen.COLOR_YELLOW)
-            self.player.append(normal_action)
+            if self.surrounding_inferrer.react():
+                return
+            self.normal_actions.react()
 
         def off_stage() -> None:
             self.fence_inferrer.react()
@@ -260,12 +200,14 @@ if __name__ == '__main__':
     bot = BattleBot(base_config='config/std_base_config.json',
                     edge_inferrer_config='config/std_edge_inferrer_config.json',
                     surrounding_inferrer_config='config/std_surround_inferrer_config.json',
-                    fence_inferrer_config='config/std_fence_inferrer_config.json')
+                    fence_inferrer_config='config/std_fence_inferrer_config.json',
+                    normal_actions_config='config/std_normal_actions_config.json')
     # bot.save_all_config()
     # bot.start_match(normal_spead=3000, team_color='blue', use_cam=False)
     try:
-        bot.Battle(4500, 'blue', True)
+        bot.Battle()
         # bot.Battle_debug(100, 'red', True)
     except KeyboardInterrupt:
         bot.player.append(new_ActionFrame())
+        ActionFrame.save_cache()
         time.sleep(1)

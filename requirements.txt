@@ -4,5 +4,5 @@ pyapriltags==3.3.0.3
 Cython==3.0.0
 opencv-python-headless==4.8.0.74
 numba==0.57.1
-numpy==1.24.0
+numpy~=1.25.2
 dill==0.3.7

@@ -1,9 +1,7 @@
 from abc import abstractmethod
-from typing import final, Callable
+from typing import final
 
-from repo.uptechStar.module.inferrer_base import InferrerBase, ComplexAction
-
-FlexActionFactory = Callable[[int], ComplexAction]
+from repo.uptechStar.module.inferrer_base import InferrerBase, ComplexAction, FlexActionFactory
 
 
 class AbstractSurroundInferrer(InferrerBase):
@@ -110,7 +108,7 @@ class AbstractSurroundInferrer(InferrerBase):
         raise NotImplementedError
 
     @abstractmethod
-    def infer(self, *args, **kwargs) -> int:
+    def infer(self) -> int:
         raise NotImplementedError
 
     def exc_action(self, reaction: FlexActionFactory, basic_speed: int) -> None:
