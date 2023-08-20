@@ -4,7 +4,7 @@ from typing import final, Tuple
 
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
 from repo.uptechStar.module.algrithm_tools import float_multiplier_middle, float_multiplier_lower, random_sign, \
-    float_multiplier_upper, enlarge_multiplier_l, shrink_multiplier_l
+    float_multiplier_upper, enlarge_multiplier_l, shrink_multiplier_l, enlarge_multiplier_ll, shrink_multiplier_lll
 from repo.uptechStar.module.inferrer_base import InferrerBase, FlexActionFactory, ComplexAction
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX
 from repo.uptechStar.module.watcher import Watcher, default_edge_front_watcher, \
@@ -173,7 +173,7 @@ class NormalActions(AbstractNormalActions):
                                 breaker_func=self._surrounding_watcher,
                                 break_action=(new_ActionFrame(),)),
                 new_ActionFrame(),
-                new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
+                new_ActionFrame(action_speed=(-sign * basic_speed, sign * basic_speed),
                                 action_speed_multiplier=enlarge_multiplier_l(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 action_duration_multiplier=shrink_multiplier_l()),
@@ -188,15 +188,18 @@ class NormalActions(AbstractNormalActions):
         Returns:
 
         """
+        basic_duration = getattr(self, self.CONFIG_BASIC_DURATION_KEY)
         return [new_ActionFrame(action_speed=(0, basic_speed, basic_speed, basic_speed),
                                 action_speed_multiplier=float_multiplier_lower(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                action_duration_multiplier=enlarge_multiplier_l()),
+                                action_duration=basic_duration,
+                                action_duration_multiplier=enlarge_multiplier_ll(),
+                                breaker_func=self._front_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(basic_speed, basic_speed, basic_speed, 0),
                                 action_speed_multiplier=float_multiplier_lower(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                action_duration_multiplier=enlarge_multiplier_l()),
+                                action_duration=basic_duration,
+                                action_duration_multiplier=enlarge_multiplier_ll(),
+                                breaker_func=self._front_watcher),
                 new_ActionFrame()] * getattr(self, self.CONFIG_SNAKE_CYCLES_KEY)
 
     def drifting(self, basic_speed: int) -> ComplexAction:
@@ -209,7 +212,7 @@ class NormalActions(AbstractNormalActions):
 
         """
         return [new_ActionFrame(action_speed=rand_drift(basic_speed),
-                                action_speed_multiplier=enlarge_multiplier_l(),
+                                action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 action_duration_multiplier=float_multiplier_middle(),
                                 breaker_func=self._front_watcher, ),
@@ -242,6 +245,7 @@ class NormalActions(AbstractNormalActions):
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                action_duration_multiplier=shrink_multiplier_lll(),
                                 breaker_func=self._front_watcher,
                                 break_action=(new_ActionFrame(action_speed=basic_speed,
                                                               action_speed_multiplier=float_multiplier_lower(),
