@@ -190,13 +190,13 @@ class NormalActions(AbstractNormalActions):
         """
         basic_duration = getattr(self, self.CONFIG_BASIC_DURATION_KEY)
         return [new_ActionFrame(action_speed=(0, basic_speed, basic_speed, basic_speed),
-                                action_speed_multiplier=float_multiplier_lower(),
+                                action_speed_multiplier=float_multiplier_upper(),
                                 action_duration=basic_duration,
                                 action_duration_multiplier=enlarge_multiplier_ll(),
                                 breaker_func=self._front_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(basic_speed, basic_speed, basic_speed, 0),
-                                action_speed_multiplier=float_multiplier_lower(),
+                                action_speed_multiplier=float_multiplier_upper(),
                                 action_duration=basic_duration,
                                 action_duration_multiplier=enlarge_multiplier_ll(),
                                 breaker_func=self._front_watcher),
