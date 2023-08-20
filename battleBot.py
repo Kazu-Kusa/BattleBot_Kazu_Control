@@ -194,6 +194,7 @@ class BattleBot(Bot):
         self.edge_inferrer.save_config()
         self.fence_inferrer.save_config()
         self.surrounding_inferrer.save_config()
+        self.normal_actions.save_config()
 
 
 if __name__ == '__main__':
