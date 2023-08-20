@@ -1,5 +1,3 @@
-from typing import Tuple, Sequence, Union, Hashable, Any
-
 from modules.AbsFenceInferrer import AbstractFenceInferrer
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
 from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplier_ll, float_multiplier_middle, \
@@ -12,6 +10,7 @@ from repo.uptechStar.module.watcher import default_edge_rear_watcher, Watcher
 class StandardFenceInferrer(AbstractFenceInferrer):
     CONFIG_MOTION_KEY = 'MotionSection'
     CONFIG_BASIC_DURATION_KEY = f'{CONFIG_MOTION_KEY}/BasicDuration'
+    CONFIG_BASIC_SPEED_KEY = f'{CONFIG_MOTION_KEY}/BasicSpeed'
     CONFIG_OFF_STAGE_DASH_DURATION_KEY = f'{CONFIG_MOTION_KEY}/OffStageDashDuration'
     CONFIG_OFF_STAGE_DASH_SPEED_KEY = f'{CONFIG_MOTION_KEY}/OffStageDashSpeed'
     CONFIG_FENCE_INFER_KEY = 'InferSection'
@@ -88,29 +87,38 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                 new_ActionFrame()
                 ]
 
-    def react(self, *args, **kwargs) -> Any:
-        raise NotImplementedError
+    def react(self) -> int:
+        status_code = self.infer()
+        self.exc_action(self.action_table.get(status_code),
+                        getattr(self, self.CONFIG_BASIC_SPEED_KEY))
+        return status_code
 
     def register_all_config(self):
         self.register_config(config_registry_path=self.CONFIG_BASIC_DURATION_KEY,
                              value=200)
+        self.register_config(config_registry_path=self.CONFIG_BASIC_SPEED_KEY,
+                             value=2500)
         self.register_config(config_registry_path=self.CONFIG_OFF_STAGE_DASH_DURATION_KEY,
                              value=600)
         self.register_config(config_registry_path=self.CONFIG_OFF_STAGE_DASH_SPEED_KEY,
                              value=-8000)
 
         self.register_config(config_registry_path=self.CONFIG_FENCE_MAX_BASE_LINE_KEY,
-                             value=1900)
+                             value=[1900] * 4)
         self.register_config(config_registry_path=self.CONFIG_FENCE_MIN_BASE_LINE_KEY,
-                             value=1500)
+                             value=[1500] * 4)
 
     def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str):
         super().__init__(sensor_hub=sensor_hub, player=action_player, config_path=config_path)
 
+        def infer_body() -> int:
+            pass
+
+        self._infer_body = infer_body
         self._rear_watcher: Watcher = default_edge_rear_watcher
 
-    def infer(self, sensors_data: Sequence[Union[float, int]]) -> Tuple[Hashable, ...]:
-        raise NotImplementedError
+    def infer(self) -> int:
+        return self._infer_body()
 
     # region methods
 
