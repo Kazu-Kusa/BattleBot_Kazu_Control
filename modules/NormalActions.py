@@ -111,8 +111,8 @@ class NormalActions(AbstractNormalActions):
         self.register_config(self.CONFIG_PLAIN_MOVE_WEIGHT_KEY, 1)
 
         self.register_config(self.CONFIG_WATCHER_IDS_KEY, [8, 0, 5, 3])
-        self.register_config(self.CONFIG_WATCHER_MAX_BASELINE_KEY, 1900)
-        self.register_config(self.CONFIG_WATCHER_MIN_BASELINE_KEY, 1500)
+        self.register_config(self.CONFIG_WATCHER_MAX_BASELINE_KEY, [1900] * 4)
+        self.register_config(self.CONFIG_WATCHER_MIN_BASELINE_KEY, [1500] * 4)
 
     def _action_table_init(self):
         self.register_action(self.KEY_SCAN, self.scan)
@@ -227,7 +227,7 @@ class NormalActions(AbstractNormalActions):
         sign = random_sign()
         return [new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
                                 action_speed_multiplier=float_multiplier_upper(),
-                                duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]
 
     def plain_move(self, basic_speed: int) -> ComplexAction:
@@ -241,11 +241,12 @@ class NormalActions(AbstractNormalActions):
         """
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
-                                duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 breaker_func=self._front_watcher,
                                 break_action=(new_ActionFrame(action_speed=basic_speed,
                                                               action_speed_multiplier=float_multiplier_lower(),
-                                                              duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                                              action_duration=getattr(self,
+                                                                                      self.CONFIG_BASIC_DURATION_KEY),
                                                               breaker_func=self._rear_watcher),),
                                 is_override_action=False),
                 new_ActionFrame()]
