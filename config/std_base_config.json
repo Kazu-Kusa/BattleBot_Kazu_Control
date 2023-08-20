@@ -1,55 +1,52 @@
 {
-    "Sensor": {
-        "OnBoardAdc": {
-            "Fl": 6,
-            "Fr": 2,
-            "Rl": 7,
-            "Rr": 1,
-            "L1": 8,
-            "R1": 0,
-            "Fb": 5,
-            "Rb": 3
-        },
-        "ExpansionAdc": {
-            "L3": 0,
-            "L4": 1,
-            "L2": 2,
-            "Ftl": 3,
-            "R3": 4,
-            "R4": 5,
-            "R2": 6,
-            "Ftr": 7
-        },
-        "OnBoardIo": {
-            "GrayL": 7,
-            "GrayR": 6
-        }
+  "Device": {
+    "Screen": {
+      "Init": false
     },
-    "Driver": {
-        "PreCompileCmd": true,
-        "DriverDebugMode": false,
-        "MotorIds": [
-            4,
-            3,
-            1,
-            2
-        ],
-        "MotorDirs": [
-            -1,
-            -1,
-            1,
-            1
-        ],
-        "HangTimeMaxError": 50,
-        "DriverSerialPort": null
+    "Detector": {
+      "CameraId": 0,
+      "CameraResolutionMultiplier": 0.4,
+      "StartDetectTag": false
     },
-    "Camera": {
-        "TagGroup": "tag36h11",
-        "CameraId": 0
+    "OnBoardSensors": {
+      "Debug": false
     },
-    "Infer": {
-        "DefaultEdgeBaseline": 1750,
-        "DefaultNormalBaseline": 1000,
-        "DefaultGraysBaseline": 1
+    "I2CExpansionSensors": {
+      "SCLPin": 6,
+      "SDAPin": 7,
+      "Speed": 100,
+      "TargetAddr": 36,
+      "RegisterAddr": 16
     }
+  },
+  "MotionSection": {
+    "StartSpeed": 7000,
+    "StartDuration": 600
+  },
+  "Sensor": {
+    "OnBoardAdc": {
+      "Fl": 6,
+      "Fr": 2,
+      "Rl": 7,
+      "Rr": 1,
+      "L1": 8,
+      "R1": 0,
+      "Fb": 5,
+      "Rb": 3
+    },
+    "ExpansionAdc": {
+      "L3": 0,
+      "L4": 1,
+      "L2": 2,
+      "Ftl": 3,
+      "R3": 4,
+      "R4": 5,
+      "R2": 6,
+      "Ftr": 7
+    },
+    "OnBoardIo": {
+      "GrayL": 7,
+      "GrayR": 6
+    }
+  }
 }

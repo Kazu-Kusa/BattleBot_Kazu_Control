@@ -1,1 +1,46 @@
-{}
+{
+  "MotionSection": {
+    "BasicSpeed": 3600,
+    "BasicDuration": 500
+  },
+  "Scan": {
+    "Weight": 1,
+    "ScanningSpeed": 500,
+    "ScanningDuration": 3500,
+    "ScanCycles": 1
+  },
+  "Snake": {
+    "Weight": 1,
+    "SnakeCycles": 3
+  },
+  "Drifting": {
+    "Weight": 1,
+    "DriftingCycles": 1
+  },
+  "Turn": {
+    "Weight": 1
+  },
+  "PlainMove": {
+    "Weight": 3
+  },
+  "Watcher": {
+    "Ids": [
+      8,
+      0,
+      5,
+      3
+    ],
+    "MaxBaseline": [
+      1900,
+      1900,
+      1900,
+      1900
+    ],
+    "MinBaseline": [
+      1500,
+      1500,
+      1500,
+      1500
+    ]
+  }
+}
