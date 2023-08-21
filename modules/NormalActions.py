@@ -140,23 +140,23 @@ class NormalActions(AbstractNormalActions):
             min_lines=getattr(self, self.CONFIG_WATCHER_MIN_BASELINE_KEY),
             max_lines=getattr(self, self.CONFIG_WATCHER_MAX_BASELINE_KEY))
 
-        edge_sensors_id = getattr(self, self.CONFIG_EDGE_WATCHER_IDS_KEY)
+        edge_sensor_ids = getattr(self, self.CONFIG_EDGE_WATCHER_IDS_KEY)
         edge_min_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY)
         edge_max_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY)
         self._full_edge_watcher: Watcher = build_watcher_full_ctrl(
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
-            sensor_ids=edge_sensors_id,
+            sensor_ids=edge_sensor_ids,
             min_lines=edge_min_lines,
             max_lines=edge_max_lines
         )
         self._rear_watcher: Watcher = build_watcher_full_ctrl(
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
-            sensor_ids=[edge_sensors_id[1], edge_sensors_id[2]],
+            sensor_ids=[edge_sensor_ids[1], edge_sensor_ids[2]],
             min_lines=[edge_min_lines[1], edge_min_lines[2]],
             max_lines=[edge_max_lines[1], edge_max_lines[2]])
         self._front_watcher: Watcher = build_watcher_full_ctrl(
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
-            sensor_ids=[edge_sensors_id[0], edge_sensors_id[3]],
+            sensor_ids=[edge_sensor_ids[0], edge_sensor_ids[3]],
             min_lines=[edge_min_lines[0], edge_min_lines[3]],
             max_lines=[edge_max_lines[0], edge_max_lines[3]])
 
