@@ -4,11 +4,11 @@ from typing import final, Tuple
 
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
 from repo.uptechStar.module.algrithm_tools import float_multiplier_middle, float_multiplier_lower, random_sign, \
-    float_multiplier_upper, enlarge_multiplier_l, shrink_multiplier_l
+    float_multiplier_upper, shrink_multiplier_l, enlarge_multiplier_ll, shrink_multiplier_lll, \
+    enlarge_multiplier_lll
 from repo.uptechStar.module.inferrer_base import InferrerBase, FlexActionFactory, ComplexAction
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX
-from repo.uptechStar.module.watcher import Watcher, default_edge_front_watcher, \
-    default_edge_rear_watcher, build_watcher_full_ctrl
+from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl
 
 
 def rand_drift(speed: int) -> Tuple[int, int, int, int]:
@@ -85,6 +85,11 @@ class NormalActions(AbstractNormalActions):
     CONFIG_WATCHER_MAX_BASELINE_KEY = f'{CONFIG_WATCHER_KEY}/MaxBaseline'
     CONFIG_WATCHER_MIN_BASELINE_KEY = f'{CONFIG_WATCHER_KEY}/MinBaseline'
 
+    CONFIG_EDGE_WATCHER_KEY = "EdgeWatcher"
+    CONFIG_EDGE_WATCHER_IDS_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/Ids'
+    CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MaxBaseline'
+    CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MinBaseline'
+
     KEY_SCAN = 1
     KEY_SNAKE = 2
     KEY_DRIFTING = 3
@@ -114,6 +119,10 @@ class NormalActions(AbstractNormalActions):
         self.register_config(self.CONFIG_WATCHER_MAX_BASELINE_KEY, [1900] * 4)
         self.register_config(self.CONFIG_WATCHER_MIN_BASELINE_KEY, [1500] * 4)
 
+        self.register_config(self.CONFIG_EDGE_WATCHER_IDS_KEY, [6, 7, 1, 2])
+        self.register_config(self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY, [2070, 2150, 2210, 2050])
+        self.register_config(self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY, [1550, 1550, 1550, 1550])
+
     def _action_table_init(self):
         self.register_action(self.KEY_SCAN, self.scan)
         self.register_action(self.KEY_SNAKE, self.snake)
@@ -130,8 +139,26 @@ class NormalActions(AbstractNormalActions):
             sensor_ids=getattr(self, self.CONFIG_WATCHER_IDS_KEY),
             min_lines=getattr(self, self.CONFIG_WATCHER_MIN_BASELINE_KEY),
             max_lines=getattr(self, self.CONFIG_WATCHER_MAX_BASELINE_KEY))
-        self._rear_watcher: Watcher = default_edge_rear_watcher
-        self._front_watcher: Watcher = default_edge_front_watcher
+
+        edge_sensor_ids = getattr(self, self.CONFIG_EDGE_WATCHER_IDS_KEY)
+        edge_min_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY)
+        edge_max_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY)
+        self._full_edge_watcher: Watcher = build_watcher_full_ctrl(
+            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
+            sensor_ids=edge_sensor_ids,
+            min_lines=edge_min_lines,
+            max_lines=edge_max_lines
+        )
+        self._rear_watcher: Watcher = build_watcher_full_ctrl(
+            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
+            sensor_ids=[edge_sensor_ids[1], edge_sensor_ids[2]],
+            min_lines=[edge_min_lines[1], edge_min_lines[2]],
+            max_lines=[edge_max_lines[1], edge_max_lines[2]])
+        self._front_watcher: Watcher = build_watcher_full_ctrl(
+            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
+            sensor_ids=[edge_sensor_ids[0], edge_sensor_ids[3]],
+            min_lines=[edge_min_lines[0], edge_min_lines[3]],
+            max_lines=[edge_max_lines[0], edge_max_lines[3]])
 
     def _make_infer_body(self):
         action_keys = [
@@ -173,7 +200,7 @@ class NormalActions(AbstractNormalActions):
                                 breaker_func=self._surrounding_watcher,
                                 break_action=(new_ActionFrame(),)),
                 new_ActionFrame(),
-                new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
+                new_ActionFrame(action_speed=(-sign * basic_speed, sign * basic_speed),
                                 action_speed_multiplier=enlarge_multiplier_l(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 action_duration_multiplier=shrink_multiplier_l()),
@@ -188,15 +215,18 @@ class NormalActions(AbstractNormalActions):
         Returns:
 
         """
+        basic_duration = getattr(self, self.CONFIG_BASIC_DURATION_KEY)
         return [new_ActionFrame(action_speed=(0, basic_speed, basic_speed, basic_speed),
-                                action_speed_multiplier=float_multiplier_lower(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                action_duration_multiplier=enlarge_multiplier_l()),
+                                action_speed_multiplier=float_multiplier_upper(),
+                                action_duration=basic_duration,
+                                action_duration_multiplier=enlarge_multiplier_ll(),
+                                breaker_func=self._front_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(basic_speed, basic_speed, basic_speed, 0),
-                                action_speed_multiplier=float_multiplier_lower(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                action_duration_multiplier=enlarge_multiplier_l()),
+                                action_speed_multiplier=float_multiplier_upper(),
+                                action_duration=basic_duration,
+                                action_duration_multiplier=enlarge_multiplier_ll(),
+                                breaker_func=self._front_watcher),
                 new_ActionFrame()] * getattr(self, self.CONFIG_SNAKE_CYCLES_KEY)
 
     def drifting(self, basic_speed: int) -> ComplexAction:
@@ -209,7 +239,7 @@ class NormalActions(AbstractNormalActions):
 
         """
         return [new_ActionFrame(action_speed=rand_drift(basic_speed),
-                                action_speed_multiplier=enlarge_multiplier_l(),
+                                action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 action_duration_multiplier=float_multiplier_middle(),
                                 breaker_func=self._front_watcher, ),
@@ -242,6 +272,7 @@ class NormalActions(AbstractNormalActions):
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                action_duration_multiplier=shrink_multiplier_lll(),
                                 breaker_func=self._front_watcher,
                                 break_action=(new_ActionFrame(action_speed=basic_speed,
                                                               action_speed_multiplier=float_multiplier_lower(),

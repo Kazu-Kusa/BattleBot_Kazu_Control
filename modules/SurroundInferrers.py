@@ -5,9 +5,10 @@ from repo.uptechStar.module.actions import new_ActionFrame, ActionPlayer
 from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplier_ll, float_multiplier_middle, \
     enlarge_multiplier_l, float_multiplier_upper, shrink_multiplier_ll
 from repo.uptechStar.module.inferrer_base import ComplexAction
-from repo.uptechStar.module.sensors import SensorHub
+from repo.uptechStar.module.sensors import SensorHub, FU_INDEX
 from repo.uptechStar.module.tagdetector import TagDetector
-from repo.uptechStar.module.watcher import default_edge_rear_watcher, default_edge_front_watcher, Watcher
+from repo.uptechStar.module.watcher import Watcher, \
+    build_watcher_full_ctrl
 
 
 # TODO: use the newly developed action frame insert play to imp this class
@@ -456,6 +457,11 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
     CONFIG_MIN_BASELINES_KEY = f'{CONFIG_INFER_KEY}/MinBaselines'
     CONFIG_MAX_BASELINES_KEY = f'{CONFIG_INFER_KEY}/MaxBaselines'
 
+    CONFIG_EDGE_WATCHER_KEY = "EdgeWatcher"
+    CONFIG_EDGE_WATCHER_IDS_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/Ids'
+    CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MaxBaseline'
+    CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MinBaseline'
+
     def react(self) -> int:
         status_code = self.infer()
         self.exc_action(self.action_table.get(status_code),
@@ -497,13 +503,33 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         self.register_config(config_registry_path=self.CONFIG_MAX_BASELINES_KEY,
                              value=[1900] * 4)
 
+        self.register_config(self.CONFIG_EDGE_WATCHER_IDS_KEY, [6, 7, 1, 2])
+        self.register_config(self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY, [2070, 2150, 2210, 2050])
+        self.register_config(self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY, [1550, 1550, 1550, 1550])
+
     def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str,
                  tag_detector: Optional[TagDetector]):
         super().__init__(sensor_hub=sensor_hub, player=action_player, config_path=config_path)
         self._tag_detector = tag_detector
-
-        self._rear_watcher: Watcher = default_edge_rear_watcher
-        self._front_watcher: Watcher = default_edge_front_watcher
+        edge_sensor_ids = getattr(self, self.CONFIG_EDGE_WATCHER_IDS_KEY)
+        edge_min_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY)
+        edge_max_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY)
+        self._full_edge_watcher: Watcher = build_watcher_full_ctrl(
+            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
+            sensor_ids=edge_sensor_ids,
+            min_lines=edge_min_lines,
+            max_lines=edge_max_lines
+        )
+        self._rear_watcher: Watcher = build_watcher_full_ctrl(
+            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
+            sensor_ids=[edge_sensor_ids[1], edge_sensor_ids[2]],
+            min_lines=[edge_min_lines[1], edge_min_lines[2]],
+            max_lines=[edge_max_lines[1], edge_max_lines[2]])
+        self._front_watcher: Watcher = build_watcher_full_ctrl(
+            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
+            sensor_ids=[edge_sensor_ids[0], edge_sensor_ids[3]],
+            min_lines=[edge_min_lines[0], edge_min_lines[3]],
+            max_lines=[edge_max_lines[0], edge_max_lines[3]])
         self._status_infer = self._make_infer_body()
 
     def _make_infer_body(self):

@@ -5,7 +5,7 @@
     },
     "Detector": {
       "CameraId": 0,
-      "CameraResolutionMultiplier": 0.4,
+      "CameraResolutionMultiplier": 0.3,
       "StartDetectTag": false
     },
     "OnBoardSensors": {

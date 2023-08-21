@@ -1,7 +1,7 @@
 from abc import abstractmethod
-from typing import Tuple, Hashable, Sequence, Union, Any
+from typing import final
 
-from repo.uptechStar.module.inferrer_base import InferrerBase, Reaction, ComplexAction
+from repo.uptechStar.module.inferrer_base import InferrerBase, ComplexAction, FlexActionFactory
 
 
 class AbstractFenceInferrer(InferrerBase):
@@ -210,8 +210,10 @@ class AbstractFenceInferrer(InferrerBase):
     # endregion
 
     @abstractmethod
-    def infer(self, sensors_data: Sequence[Union[float, int]]) -> Tuple[Hashable, ...]:
+    def infer(self) -> int:
         raise NotImplementedError
 
-    def exc_action(self, reaction: Reaction, *args, **kwargs) -> Any:
-        self._player.override(reaction(*args, **kwargs))
+    @final
+    def exc_action(self, reaction: FlexActionFactory, basic_speed) -> None:
+        self._player.override(reaction(basic_speed))
+        self._player.play()

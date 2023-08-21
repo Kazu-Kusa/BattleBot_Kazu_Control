@@ -1,22 +1,26 @@
-from typing import Tuple, Sequence, Union, Hashable, Any
-
 from modules.AbsFenceInferrer import AbstractFenceInferrer
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
 from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplier_ll, float_multiplier_middle, \
     float_multiplier_lower
 from repo.uptechStar.module.inferrer_base import ComplexAction
-from repo.uptechStar.module.sensors import SensorHub
-from repo.uptechStar.module.watcher import default_edge_rear_watcher, Watcher
+from repo.uptechStar.module.sensors import SensorHub, FU_INDEX
+from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl
 
 
 class StandardFenceInferrer(AbstractFenceInferrer):
     CONFIG_MOTION_KEY = 'MotionSection'
     CONFIG_BASIC_DURATION_KEY = f'{CONFIG_MOTION_KEY}/BasicDuration'
+    CONFIG_BASIC_SPEED_KEY = f'{CONFIG_MOTION_KEY}/BasicSpeed'
     CONFIG_OFF_STAGE_DASH_DURATION_KEY = f'{CONFIG_MOTION_KEY}/OffStageDashDuration'
     CONFIG_OFF_STAGE_DASH_SPEED_KEY = f'{CONFIG_MOTION_KEY}/OffStageDashSpeed'
     CONFIG_FENCE_INFER_KEY = 'InferSection'
     CONFIG_FENCE_MAX_BASE_LINE_KEY = f"{CONFIG_FENCE_INFER_KEY}/FenceMaxBaseline"
     CONFIG_FENCE_MIN_BASE_LINE_KEY = f'{CONFIG_FENCE_INFER_KEY}/FenceMinBaseline'
+
+    CONFIG_EDGE_WATCHER_KEY = "EdgeWatcher"
+    CONFIG_EDGE_WATCHER_IDS_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/Ids'
+    CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MaxBaseline'
+    CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MinBaseline'
 
     def on_left_right_to_fence(self, basic_speed) -> ComplexAction:
         # 在左方和右方向上遇到围栏，我希望随机转向
@@ -88,29 +92,60 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                 new_ActionFrame()
                 ]
 
-    def react(self, *args, **kwargs) -> Any:
-        raise NotImplementedError
+    def react(self) -> int:
+        status_code = self.infer()
+        self.exc_action(self.action_table.get(status_code),
+                        getattr(self, self.CONFIG_BASIC_SPEED_KEY))
+        return status_code
 
     def register_all_config(self):
         self.register_config(config_registry_path=self.CONFIG_BASIC_DURATION_KEY,
                              value=200)
+        self.register_config(config_registry_path=self.CONFIG_BASIC_SPEED_KEY,
+                             value=2500)
         self.register_config(config_registry_path=self.CONFIG_OFF_STAGE_DASH_DURATION_KEY,
                              value=600)
         self.register_config(config_registry_path=self.CONFIG_OFF_STAGE_DASH_SPEED_KEY,
                              value=-8000)
 
         self.register_config(config_registry_path=self.CONFIG_FENCE_MAX_BASE_LINE_KEY,
-                             value=1900)
+                             value=[1900] * 4)
         self.register_config(config_registry_path=self.CONFIG_FENCE_MIN_BASE_LINE_KEY,
-                             value=1500)
+                             value=[1500] * 4)
+        self.register_config(self.CONFIG_EDGE_WATCHER_IDS_KEY, [6, 7, 1, 2])
+        self.register_config(self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY, [2070, 2150, 2210, 2050])
+        self.register_config(self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY, [1550, 1550, 1550, 1550])
 
     def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str):
         super().__init__(sensor_hub=sensor_hub, player=action_player, config_path=config_path)
 
-        self._rear_watcher: Watcher = default_edge_rear_watcher
+        def infer_body() -> int:
+            pass
 
-    def infer(self, sensors_data: Sequence[Union[float, int]]) -> Tuple[Hashable, ...]:
-        raise NotImplementedError
+        self._infer_body = infer_body
+
+        edge_sensor_ids = getattr(self, self.CONFIG_EDGE_WATCHER_IDS_KEY)
+        edge_min_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY)
+        edge_max_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY)
+        self._full_edge_watcher: Watcher = build_watcher_full_ctrl(
+            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
+            sensor_ids=edge_sensor_ids,
+            min_lines=edge_min_lines,
+            max_lines=edge_max_lines
+        )
+        self._rear_watcher: Watcher = build_watcher_full_ctrl(
+            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
+            sensor_ids=[edge_sensor_ids[1], edge_sensor_ids[2]],
+            min_lines=[edge_min_lines[1], edge_min_lines[2]],
+            max_lines=[edge_max_lines[1], edge_max_lines[2]])
+        self._front_watcher: Watcher = build_watcher_full_ctrl(
+            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
+            sensor_ids=[edge_sensor_ids[0], edge_sensor_ids[3]],
+            min_lines=[edge_min_lines[0], edge_min_lines[3]],
+            max_lines=[edge_max_lines[0], edge_max_lines[3]])
+
+    def infer(self) -> int:
+        return self._infer_body()
 
     # region methods
 
