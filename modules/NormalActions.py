@@ -1,12 +1,12 @@
-from abc import abstractmethod
 from random import choices, choice
-from typing import final, Tuple
+from typing import Tuple
 
+from AbstractNormalActions import AbstractNormalActions
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
 from repo.uptechStar.module.algrithm_tools import float_multiplier_middle, float_multiplier_lower, random_sign, \
-    float_multiplier_upper, shrink_multiplier_l, enlarge_multiplier_ll, shrink_multiplier_lll, \
+    float_multiplier_upper, enlarge_multiplier_ll, shrink_multiplier_lll, \
     enlarge_multiplier_lll
-from repo.uptechStar.module.inferrer_base import InferrerBase, FlexActionFactory, ComplexAction
+from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX
 from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl, build_delta_watcher_full_ctrl
 
@@ -24,39 +24,6 @@ def rand_drift(speed: int) -> Tuple[int, int, int, int]:
                    (speed, speed, 0, speed),
                    (speed, 0, speed, speed),
                    (0, speed, speed, speed), ])
-
-
-class AbstractNormalActions(InferrerBase):
-    CONFIG_MOTION_KEY = 'MotionSection'
-    CONFIG_BASIC_SPEED_KEY = f'{CONFIG_MOTION_KEY}/BasicSpeed'
-    CONFIG_BASIC_DURATION_KEY = f'{CONFIG_MOTION_KEY}/BasicDuration'
-
-    @final
-    def register_all_config(self):
-        self.register_config(self.CONFIG_BASIC_SPEED_KEY, 3600)
-        self.register_config(self.CONFIG_BASIC_DURATION_KEY, 500)
-        self.register_all_children_config()
-
-    @abstractmethod
-    def register_all_children_config(self):
-        """
-        Register all children configs
-        Returns:
-
-        """
-
-    @final
-    def exc_action(self, reaction: FlexActionFactory, basic_speed: int) -> None:
-        self._player.override(reaction(basic_speed))
-        self._player.play()
-
-    @final
-    def react(self) -> None:
-        self.exc_action(self.action_table.get(self.infer()), getattr(self, self.CONFIG_BASIC_SPEED_KEY))
-
-    @abstractmethod
-    def infer(self) -> int:
-        raise NotImplementedError
 
 
 class NormalActions(AbstractNormalActions):
@@ -202,7 +169,7 @@ class NormalActions(AbstractNormalActions):
             Returns: the key that corresponds to the action
 
             """
-            return choices(action_keys, weights)[0]
+            return choices(action_keys, weights=weights)[0]
 
         return infer_body
 
@@ -223,9 +190,9 @@ class NormalActions(AbstractNormalActions):
                                 break_action=(new_ActionFrame(),)),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(-sign * basic_speed, sign * basic_speed),
-                                action_speed_multiplier=enlarge_multiplier_lll(),
+                                action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                action_duration_multiplier=shrink_multiplier_l()),
+                                action_duration_multiplier=enlarge_multiplier_lll()),
                 new_ActionFrame()] * getattr(self, self.CONFIG_SCAN_CYCLES_KEY)
 
     def snake(self, basic_speed: int) -> ComplexAction:
@@ -239,13 +206,13 @@ class NormalActions(AbstractNormalActions):
         """
         basic_duration = getattr(self, self.CONFIG_BASIC_DURATION_KEY)
         return [new_ActionFrame(action_speed=(0, basic_speed, basic_speed, basic_speed),
-                                action_speed_multiplier=float_multiplier_upper(),
+                                action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=basic_duration,
                                 action_duration_multiplier=enlarge_multiplier_ll(),
                                 breaker_func=self._front_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(basic_speed, basic_speed, basic_speed, 0),
-                                action_speed_multiplier=float_multiplier_upper(),
+                                action_speed_multiplier=enlarge_multiplier_lll(),
                                 action_duration=basic_duration,
                                 action_duration_multiplier=enlarge_multiplier_ll(),
                                 breaker_func=self._front_watcher),
