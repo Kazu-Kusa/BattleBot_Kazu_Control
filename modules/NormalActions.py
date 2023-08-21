@@ -141,7 +141,7 @@ class NormalActions(AbstractNormalActions):
         self.register_action(self.KEY_DRIFTING, self.drifting)
         self.register_action(self.KEY_TURN, self.turn)
         self.register_action(self.KEY_PLAIN_MOVE, self.plain_move)
-        self.register_action(self.KEY_DRIFTING, self.idle)
+        self.register_action(self.KEY_IDLE, self.idle)
 
     def __init__(self, player: ActionPlayer, sensor_hub: SensorHub, config_path: str):
         super().__init__(sensor_hub, player, config_path)
