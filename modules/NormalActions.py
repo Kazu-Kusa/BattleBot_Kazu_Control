@@ -8,8 +8,7 @@ from repo.uptechStar.module.algrithm_tools import float_multiplier_middle, float
     enlarge_multiplier_lll
 from repo.uptechStar.module.inferrer_base import InferrerBase, FlexActionFactory, ComplexAction
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX
-from repo.uptechStar.module.watcher import Watcher, default_edge_front_watcher, \
-    default_edge_rear_watcher, build_watcher_full_ctrl
+from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl
 
 
 def rand_drift(speed: int) -> Tuple[int, int, int, int]:
@@ -89,6 +88,11 @@ class NormalActions(AbstractNormalActions):
     CONFIG_WATCHER_MAX_BASELINE_KEY = f'{CONFIG_WATCHER_KEY}/MaxBaseline'
     CONFIG_WATCHER_MIN_BASELINE_KEY = f'{CONFIG_WATCHER_KEY}/MinBaseline'
 
+    CONFIG_EDGE_WATCHER_KEY = "EdgeWatcher"
+    CONFIG_EDGE_WATCHER_IDS_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/Ids'
+    CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MaxBaseline'
+    CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MinBaseline'
+
     KEY_SCAN = 1
     KEY_SNAKE = 2
     KEY_DRIFTING = 3
@@ -119,6 +123,10 @@ class NormalActions(AbstractNormalActions):
         self.register_config(self.CONFIG_WATCHER_MAX_BASELINE_KEY, [1900] * 4)
         self.register_config(self.CONFIG_WATCHER_MIN_BASELINE_KEY, [1500] * 4)
 
+        self.register_config(self.CONFIG_EDGE_WATCHER_IDS_KEY, [6, 7, 1, 2])
+        self.register_config(self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY, [2070, 2150, 2210, 2050])
+        self.register_config(self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY, [1550, 1550, 1550, 1550])
+
     def _action_table_init(self):
         self.register_action(self.KEY_SCAN, self.scan)
         self.register_action(self.KEY_SNAKE, self.snake)
@@ -136,8 +144,25 @@ class NormalActions(AbstractNormalActions):
             min_lines=getattr(self, self.CONFIG_WATCHER_MIN_BASELINE_KEY),
             max_lines=getattr(self, self.CONFIG_WATCHER_MAX_BASELINE_KEY))
 
-        self._rear_watcher: Watcher = default_edge_rear_watcher
-        self._front_watcher: Watcher = default_edge_front_watcher
+        edge_sensor_ids = getattr(self, self.CONFIG_EDGE_WATCHER_IDS_KEY)
+        edge_min_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY)
+        edge_max_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY)
+        self._full_edge_watcher: Watcher = build_watcher_full_ctrl(
+            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
+            sensor_ids=edge_sensor_ids,
+            min_lines=edge_min_lines,
+            max_lines=edge_max_lines
+        )
+        self._rear_watcher: Watcher = build_watcher_full_ctrl(
+            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
+            sensor_ids=[edge_sensor_ids[1], edge_sensor_ids[2]],
+            min_lines=[edge_min_lines[1], edge_min_lines[2]],
+            max_lines=[edge_max_lines[1], edge_max_lines[2]])
+        self._front_watcher: Watcher = build_watcher_full_ctrl(
+            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
+            sensor_ids=[edge_sensor_ids[0], edge_sensor_ids[3]],
+            min_lines=[edge_min_lines[0], edge_min_lines[3]],
+            max_lines=[edge_max_lines[0], edge_max_lines[3]])
 
     def _make_infer_body(self):
         action_keys = [

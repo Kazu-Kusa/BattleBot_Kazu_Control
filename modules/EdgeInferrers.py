@@ -5,7 +5,7 @@ from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
 from repo.uptechStar.module.algrithm_tools import random_sign, \
     float_multiplier_upper, float_multiplier_lower, enlarge_multiplier_ll, enlarge_multiplier_l
 from repo.uptechStar.module.sensors import SensorHub, LocalFullUpdaterConstructor, FU_INDEX, FullUpdater
-from repo.uptechStar.module.watcher import Watcher, default_edge_rear_watcher, default_edge_front_watcher
+from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl
 
 
 # TODO use multiplier generator
@@ -61,12 +61,29 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
 
     def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str):
         super().__init__(sensor_hub=sensor_hub, player=action_player, config_path=config_path)
+        edge_sensor_ids = getattr(self, self.CONFIG_SENSOR_IDS_KEY)
+        edge_min_lines = getattr(self, self.CONFIG_EDGE_MIN_BASELINE_KEY)
+        edge_max_lines = getattr(self, self.CONFIG_EDGE_MAX_BASELINE_KEY)
         self.updater: FullUpdater = LocalFullUpdaterConstructor.from_full_updater(
             sensor_hub.on_board_adc_updater[FU_INDEX],
-            getattr(self, self.CONFIG_SENSOR_IDS_KEY)
+            edge_sensor_ids
         )
-        self._rear_watcher: Watcher = default_edge_rear_watcher
-        self._front_watcher: Watcher = default_edge_front_watcher
+        self._full_edge_watcher: Watcher = build_watcher_full_ctrl(
+            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
+            sensor_ids=edge_sensor_ids,
+            min_lines=edge_min_lines,
+            max_lines=edge_max_lines
+        )
+        self._rear_watcher: Watcher = build_watcher_full_ctrl(
+            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
+            sensor_ids=[edge_sensor_ids[1], edge_sensor_ids[2]],
+            min_lines=[edge_min_lines[1], edge_min_lines[2]],
+            max_lines=[edge_max_lines[1], edge_max_lines[2]])
+        self._front_watcher: Watcher = build_watcher_full_ctrl(
+            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
+            sensor_ids=[edge_sensor_ids[0], edge_sensor_ids[3]],
+            min_lines=[edge_min_lines[0], edge_min_lines[3]],
+            max_lines=[edge_max_lines[0], edge_max_lines[3]])
 
     # region tapes
     # region 3 sides float case
