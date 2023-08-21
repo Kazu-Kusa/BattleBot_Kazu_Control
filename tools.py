@@ -1,20 +1,32 @@
-import copy
-import time
-import warnings
+import cv2
 
-from repo.uptechStar.module.onboardsensors import OnBoardSensors
+from repo.uptechStar.module.camra import Camera
+from repo.uptechStar.module.tagdetector import TagDetector
 
-a = OnBoardSensors()
-print(a.adc_all_channels()[0])
-result = []
-warnings.warn('ascasv')
-time.sleep(10)
-end = time.time() + 5
-while time.time() < end:
-    result.append(copy.deepcopy(a.adc_all_channels()))
-print('a')
+c = Camera()
+c.set_cam_resolution(resolution_multiplier=0.4)
+width = c._camera.get(cv2.CAP_PROP_FRAME_WIDTH)
+height = c._camera.get(cv2.CAP_PROP_FRAME_HEIGHT)
+print(width)
+print(height)
+a = TagDetector(c, 'blue')
 
-for i in result:
-    print(list(i))
-print('asc')
-print(len(result))
+a.tag_monitor_switch = True
+c.update_frame()
+cv2.imwrite('test.jpg', c.latest_frame)
+c.update_frame()
+color = cv2.cvtColor(c.latest_frame, cv2.COLOR_BGR2GRAY)
+cv2.imwrite('test1.jpg', color)
+
+# from apriltag import Detector, DetectorOptions
+#
+# a = DetectorOptions()
+# d = Detector()
+# print(d.detect(color))
+# print('saved')
+while True:
+    print(a.tag_id)
+
+# cap = cv2.VideoCapture(0)
+# _, img = cap.read()
+# cv2.imwrite('test.jpg', img)
