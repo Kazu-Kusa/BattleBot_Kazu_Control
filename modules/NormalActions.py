@@ -8,7 +8,7 @@ from repo.uptechStar.module.algrithm_tools import float_multiplier_middle, float
     enlarge_multiplier_lll
 from repo.uptechStar.module.inferrer_base import InferrerBase, FlexActionFactory, ComplexAction
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX
-from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl
+from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl, build_delta_watcher_full_ctrl
 
 
 def rand_drift(speed: int) -> Tuple[int, int, int, int]:
@@ -82,6 +82,9 @@ class NormalActions(AbstractNormalActions):
 
     CONFIG_IDLE_KEY = 'Idle'
     CONFIG_IDLE_WEIGHT_KEY = f'{CONFIG_IDLE_KEY}/Weight'
+    CONFIG_IDLE_IDS_KEY = f'{CONFIG_IDLE_KEY}/Ids'
+    CONFIG_IDLE_MIN_BASELINE_KEY = f'{CONFIG_IDLE_KEY}/MinBaseline'
+    CONFIG_IDLE_MAX_BASELINE_KEY = f'{CONFIG_IDLE_KEY}/MaxBaseline'
 
     CONFIG_WATCHER_KEY = "Watcher"
     CONFIG_WATCHER_IDS_KEY = f'{CONFIG_WATCHER_KEY}/Ids'
@@ -119,6 +122,11 @@ class NormalActions(AbstractNormalActions):
 
         self.register_config(self.CONFIG_PLAIN_MOVE_WEIGHT_KEY, 1)
 
+        self.register_config(self.CONFIG_IDLE_IDS_KEY, list(range(8)))
+        self.register_config(self.CONFIG_IDLE_WEIGHT_KEY, 1)
+        self.register_config(self.CONFIG_IDLE_MIN_BASELINE_KEY, [None] * 8)
+        self.register_config(self.CONFIG_IDLE_MAX_BASELINE_KEY, [150] * 8)
+
         self.register_config(self.CONFIG_WATCHER_IDS_KEY, [8, 0, 5, 3])
         self.register_config(self.CONFIG_WATCHER_MAX_BASELINE_KEY, [1900] * 4)
         self.register_config(self.CONFIG_WATCHER_MIN_BASELINE_KEY, [1500] * 4)
@@ -134,6 +142,7 @@ class NormalActions(AbstractNormalActions):
         self.register_action(self.KEY_TURN, self.turn)
         self.register_action(self.KEY_PLAIN_MOVE, self.plain_move)
         self.register_action(self.KEY_DRIFTING, self.idle)
+
     def __init__(self, player: ActionPlayer, sensor_hub: SensorHub, config_path: str):
         super().__init__(sensor_hub, player, config_path)
         self._infer_body = self._make_infer_body()
@@ -164,19 +173,28 @@ class NormalActions(AbstractNormalActions):
             min_lines=[edge_min_lines[0], edge_min_lines[3]],
             max_lines=[edge_max_lines[0], edge_max_lines[3]])
 
+        self._idle_watcher: Watcher = build_delta_watcher_full_ctrl(
+            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
+            sensor_ids=getattr(self, self.CONFIG_IDLE_IDS_KEY),
+            max_lines=getattr(self, self.CONFIG_IDLE_MAX_BASELINE_KEY),
+            min_lines=getattr(self, self.CONFIG_IDLE_MIN_BASELINE_KEY)
+        )
+
     def _make_infer_body(self):
         action_keys = [
             self.KEY_SCAN,
             self.KEY_SNAKE,
             self.KEY_DRIFTING,
             self.KEY_TURN,
-            self.KEY_PLAIN_MOVE]
+            self.KEY_PLAIN_MOVE,
+            self.KEY_IDLE]
         weights = [
             getattr(self, self.CONFIG_SCAN_WEIGHT_KEY),
             getattr(self, self.CONFIG_SNAKE_WEIGHT_KEY),
             getattr(self, self.CONFIG_DRIFTING_WEIGHT_KEY),
             getattr(self, self.CONFIG_TURN_WEIGHT_KEY),
-            getattr(self, self.CONFIG_PLAIN_MOVE_WEIGHT_KEY)]
+            getattr(self, self.CONFIG_PLAIN_MOVE_WEIGHT_KEY),
+            getattr(self, self.CONFIG_IDLE_WEIGHT_KEY)]
 
         def infer_body() -> int:
             """
@@ -287,3 +305,24 @@ class NormalActions(AbstractNormalActions):
                 new_ActionFrame()]
 
     def idle(self, basic_speed: int) -> ComplexAction:
+        """
+        Idle checking all sensors
+        Args:
+            basic_speed:
+
+        Returns:
+
+        """
+        sign = random_sign()
+        return [new_ActionFrame(action_speed=0,
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                action_duration_multiplier=enlarge_multiplier_lll(),
+                                breaker_func=self._idle_watcher,
+                                break_action=(new_ActionFrame(
+                                    action_speed=(sign * basic_speed, -sign * basic_speed),
+                                    action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                    action_speed_multiplier=enlarge_multiplier_lll(),
+
+                                ), new_ActionFrame())
+
+                                )]
