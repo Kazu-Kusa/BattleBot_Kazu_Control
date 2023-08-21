@@ -81,6 +81,9 @@ class NormalActions(AbstractNormalActions):
     CONFIG_PLAIN_MOVE_KEY = "PlainMove"
     CONFIG_PLAIN_MOVE_WEIGHT_KEY = f'{CONFIG_PLAIN_MOVE_KEY}/Weight'
 
+    CONFIG_IDLE_KEY = 'Idle'
+    CONFIG_IDLE_WEIGHT_KEY = f'{CONFIG_IDLE_KEY}/Weight'
+
     CONFIG_WATCHER_KEY = "Watcher"
     CONFIG_WATCHER_IDS_KEY = f'{CONFIG_WATCHER_KEY}/Ids'
     CONFIG_WATCHER_MAX_BASELINE_KEY = f'{CONFIG_WATCHER_KEY}/MaxBaseline'
@@ -91,6 +94,7 @@ class NormalActions(AbstractNormalActions):
     KEY_DRIFTING = 3
     KEY_TURN = 4
     KEY_PLAIN_MOVE = 5
+    KEY_IDLE = 6
 
     def infer(self) -> int:
         return self._infer_body()
@@ -121,7 +125,7 @@ class NormalActions(AbstractNormalActions):
         self.register_action(self.KEY_DRIFTING, self.drifting)
         self.register_action(self.KEY_TURN, self.turn)
         self.register_action(self.KEY_PLAIN_MOVE, self.plain_move)
-
+        self.register_action(self.KEY_DRIFTING, self.idle)
     def __init__(self, player: ActionPlayer, sensor_hub: SensorHub, config_path: str):
         super().__init__(sensor_hub, player, config_path)
         self._infer_body = self._make_infer_body()
@@ -131,6 +135,7 @@ class NormalActions(AbstractNormalActions):
             sensor_ids=getattr(self, self.CONFIG_WATCHER_IDS_KEY),
             min_lines=getattr(self, self.CONFIG_WATCHER_MIN_BASELINE_KEY),
             max_lines=getattr(self, self.CONFIG_WATCHER_MAX_BASELINE_KEY))
+
         self._rear_watcher: Watcher = default_edge_rear_watcher
         self._front_watcher: Watcher = default_edge_front_watcher
 
@@ -255,3 +260,5 @@ class NormalActions(AbstractNormalActions):
                                                               breaker_func=self._rear_watcher),),
                                 is_override_action=False),
                 new_ActionFrame()]
+
+    def idle(self, basic_speed: int) -> ComplexAction:
