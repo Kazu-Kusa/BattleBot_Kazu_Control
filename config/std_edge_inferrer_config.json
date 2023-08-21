@@ -7,10 +7,10 @@
       2050
     ],
     "EdgeMinBaseline": [
-      1800,
-      1900,
-      1900,
-      1800
+      1650,
+      1650,
+      1650,
+      1650
     ],
     "StraightActionDuration": 180,
     "CurveActionDuration": 150

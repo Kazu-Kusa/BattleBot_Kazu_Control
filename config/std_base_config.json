@@ -6,7 +6,7 @@
     "Detector": {
       "CameraId": 0,
       "CameraResolutionMultiplier": 0.3,
-      "StartDetectTag": false
+      "StartDetectTag": true
     },
     "OnBoardSensors": {
       "Debug": false

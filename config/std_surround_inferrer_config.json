@@ -1,7 +1,7 @@
 {
   "MotionSection": {
     "BasicDuration": 400,
-    "BasicSpeed": 5000,
+    "BasicSpeed": 3500,
     "DashTimeout": 6000
   },
   "InferSection": {
