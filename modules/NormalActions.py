@@ -4,7 +4,8 @@ from typing import final, Tuple
 
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
 from repo.uptechStar.module.algrithm_tools import float_multiplier_middle, float_multiplier_lower, random_sign, \
-    float_multiplier_upper, enlarge_multiplier_l, shrink_multiplier_l, enlarge_multiplier_ll, shrink_multiplier_lll
+    float_multiplier_upper, shrink_multiplier_l, enlarge_multiplier_ll, shrink_multiplier_lll, \
+    enlarge_multiplier_lll
 from repo.uptechStar.module.inferrer_base import InferrerBase, FlexActionFactory, ComplexAction
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX
 from repo.uptechStar.module.watcher import Watcher, default_edge_front_watcher, \
@@ -174,7 +175,7 @@ class NormalActions(AbstractNormalActions):
                                 break_action=(new_ActionFrame(),)),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(-sign * basic_speed, sign * basic_speed),
-                                action_speed_multiplier=enlarge_multiplier_l(),
+                                action_speed_multiplier=enlarge_multiplier_lll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 action_duration_multiplier=shrink_multiplier_l()),
                 new_ActionFrame()] * getattr(self, self.CONFIG_SCAN_CYCLES_KEY)
