@@ -119,7 +119,8 @@ class NormalActions(AbstractNormalActions):
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
             sensor_ids=surrounding_sensor_ids,
             min_lines=getattr(self, self.CONFIG_SURROUNDING_WATCHER_MIN_BASELINE_KEY),
-            max_lines=getattr(self, self.CONFIG_SURROUNDING_WATCHER_MAX_BASELINE_KEY))
+            max_lines=getattr(self, self.CONFIG_SURROUNDING_WATCHER_MAX_BASELINE_KEY),
+            use_any=True)
 
         edge_min_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY)
         edge_max_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY)
