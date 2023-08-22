@@ -86,7 +86,8 @@ class Bot(Configurable, metaclass=ABCMeta):
             indexed_mode_setter=__on_board_sensors.set_io_mode
         )
         self.sensor_hub = SensorHub(on_board_adc_updater=(__on_board_sensors.adc_all_channels, None),
-                                    on_board_io_updater=(__on_board_sensors.io_all_channels, None),
+                                    on_board_io_updater=(
+                                        __on_board_sensors.io_all_channels, __on_board_sensors.get_io_level),
                                     expansion_adc_updater=(None, __i2c_expansion_sensors.get_sensor_adc),
                                     expansion_io_updater=(None, None))
 
