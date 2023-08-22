@@ -9,7 +9,8 @@ from repo.uptechStar.module.algrithm_tools import float_multiplier_middle, float
     enlarge_multiplier_lll
 from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX
-from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl, build_delta_watcher_full_ctrl
+from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl, build_delta_watcher_full_ctrl, \
+    build_watcher_simple, watchers_merge
 
 
 def rand_drift(speed: int) -> Tuple[int, int, int, int]:
@@ -92,8 +93,8 @@ class NormalActions(AbstractNormalActions):
 
         self.register_config(self.CONFIG_IDLE_IDS_KEY, list(range(8)))
         self.register_config(self.CONFIG_IDLE_WEIGHT_KEY, 6)
-        self.register_config(self.CONFIG_IDLE_MIN_BASELINE_KEY, [0] * 8)
-        self.register_config(self.CONFIG_IDLE_MAX_BASELINE_KEY, [150] * 8)
+        self.register_config(self.CONFIG_IDLE_MIN_BASELINE_KEY, [150] * 8)
+        self.register_config(self.CONFIG_IDLE_MAX_BASELINE_KEY, [None] * 8)
 
         self.register_config(self.CONFIG_WATCHER_MAX_BASELINE_KEY, [1900] * 4)
         self.register_config(self.CONFIG_WATCHER_MIN_BASELINE_KEY, [1500] * 4)
@@ -109,14 +110,11 @@ class NormalActions(AbstractNormalActions):
         self.register_action(self.KEY_PLAIN_MOVE, self.plain_move)
         self.register_action(self.KEY_IDLE, self.idle)
 
-    def __init__(self, player: ActionPlayer,
-                 sensor_hub: SensorHub,
-                 edge_sensor_ids: Tuple[int, int, int, int],
-                 surrounding_sensor_ids: Tuple[int, int, int, int],
-                 config_path: str):
+    def __init__(self, player: ActionPlayer, sensor_hub: SensorHub, edge_sensor_ids: Tuple[int, int, int, int],
+                 surrounding_sensor_ids: Tuple[int, int, int, int], config_path: str,
+                 grays_sensor_ids: Tuple[int, int]):
         super().__init__(sensor_hub, player, config_path)
         self._infer_body = self._make_infer_body()
-        # TODO: consider use edge sensors to assist the judge
         self._surrounding_watcher: Watcher = build_watcher_full_ctrl(
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
             sensor_ids=surrounding_sensor_ids,
@@ -129,24 +127,37 @@ class NormalActions(AbstractNormalActions):
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
             sensor_ids=edge_sensor_ids,
             min_lines=edge_min_lines,
-            max_lines=edge_max_lines
+            max_lines=edge_max_lines,
+            use_any=True
         )
         self._rear_watcher: Watcher = build_watcher_full_ctrl(
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
             sensor_ids=[edge_sensor_ids[1], edge_sensor_ids[2]],
             min_lines=[edge_min_lines[1], edge_min_lines[2]],
-            max_lines=[edge_max_lines[1], edge_max_lines[2]])
+            max_lines=[edge_max_lines[1], edge_max_lines[2]],
+            use_any=True)
         self._front_watcher: Watcher = build_watcher_full_ctrl(
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
             sensor_ids=[edge_sensor_ids[0], edge_sensor_ids[3]],
             min_lines=[edge_min_lines[0], edge_min_lines[3]],
-            max_lines=[edge_max_lines[0], edge_max_lines[3]])
+            max_lines=[edge_max_lines[0], edge_max_lines[3]],
+            use_any=True)
+        self._front_watcher_grays: Watcher = build_watcher_simple(
+            sensor_update=self._sensors.on_board_io_updater[FU_INDEX],
+            sensor_id=grays_sensor_ids,
+            max_line=1,
+            use_any=True)
+
+        self._front_watcher_merged: Watcher = watchers_merge([self._front_watcher_grays,
+                                                              self._front_watcher],
+                                                             use_any=True)
 
         self._idle_watcher: Watcher = build_delta_watcher_full_ctrl(
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
             sensor_ids=getattr(self, self.CONFIG_IDLE_IDS_KEY),
             max_lines=getattr(self, self.CONFIG_IDLE_MAX_BASELINE_KEY),
-            min_lines=getattr(self, self.CONFIG_IDLE_MIN_BASELINE_KEY)
+            min_lines=getattr(self, self.CONFIG_IDLE_MIN_BASELINE_KEY),
+            use_any=True
         )
 
     def _make_infer_body(self):
