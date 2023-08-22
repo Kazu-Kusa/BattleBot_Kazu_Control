@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Sequence, Tuple
 
 from modules.AbsEdgeInferrer import AbstractEdgeInferrer, ActionPack
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
@@ -8,17 +8,12 @@ from repo.uptechStar.module.sensors import SensorHub, LocalFullUpdaterConstructo
 from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl
 
 
-# TODO use multiplier generator
 class StandardEdgeInferrer(AbstractEdgeInferrer):
     CONFIG_INFER_KEY = 'InferSection'
     CONFIG_EDGE_MAX_BASELINE_KEY = f'{CONFIG_INFER_KEY}/EdgeMaxBaseline'
     CONFIG_EDGE_MIN_BASELINE_KEY = f'{CONFIG_INFER_KEY}/EdgeMinBaseline'
     CONFIG_STRAIGHT_ACTION_DURATION_KEY = f'{CONFIG_INFER_KEY}/StraightActionDuration'
     CONFIG_CURVE_ACTION_DURATION_KEY = f'{CONFIG_INFER_KEY}/CurveActionDuration'
-
-    CONFIG_SENSOR_KEY = 'SensorSection'
-    CONFIG_SENSOR_IDS_KEY = f'{CONFIG_SENSOR_KEY}/SensorIds'
-    CONFIG_SENSOR_GRAYS_IDS_KEY = f'{CONFIG_SENSOR_KEY}/GraysIds'
 
     CONFIG_MOTION_KEY = 'MotionSection'
 
@@ -45,7 +40,6 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
     DO_FL_RL_RR_FR_STATUS_CODE = 15
 
     def register_all_config(self):
-        # TODO remember decouple the constant
         self.register_config(config_registry_path=self.CONFIG_EDGE_MAX_BASELINE_KEY,
                              value=[1900] * 4)
         self.register_config(config_registry_path=self.CONFIG_EDGE_MIN_BASELINE_KEY,
@@ -54,16 +48,12 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
                              value=200)
         self.register_config(config_registry_path=self.CONFIG_CURVE_ACTION_DURATION_KEY,
                              value=170)
-        self.register_config(config_registry_path=self.CONFIG_SENSOR_IDS_KEY,
-                             value=[6, 7, 1, 2])
-        self.register_config(config_registry_path=self.CONFIG_SENSOR_GRAYS_IDS_KEY,
-                             value=[3, 2])
         self.register_config(config_registry_path=self.CONFIG_BASIC_SPEED_KEY,
                              value=4000)
 
-    def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str):
+    def __init__(self, sensor_hub: SensorHub, edge_sensor_ids: Tuple[int, int, int, int],
+                 grays_sensor_ids: Tuple[int, int], action_player: ActionPlayer, config_path: str):
         super().__init__(sensor_hub=sensor_hub, player=action_player, config_path=config_path)
-        edge_sensor_ids = getattr(self, self.CONFIG_SENSOR_IDS_KEY)
         edge_min_lines = getattr(self, self.CONFIG_EDGE_MIN_BASELINE_KEY)
         edge_max_lines = getattr(self, self.CONFIG_EDGE_MAX_BASELINE_KEY)
         self.updater: FullUpdater = LocalFullUpdaterConstructor.from_full_updater(
@@ -72,7 +62,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         )
         self.gray_updater: FullUpdater = LocalFullUpdaterConstructor.from_indexed_updater(
             sensor_hub.expansion_io_updater[IU_INDEX],
-            getattr(self, self.CONFIG_SENSOR_GRAYS_IDS_KEY)
+            grays_sensor_ids
         )
 
         self._full_edge_watcher: Watcher = build_watcher_full_ctrl(

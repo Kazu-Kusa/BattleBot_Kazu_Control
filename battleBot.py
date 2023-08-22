@@ -1,5 +1,5 @@
-import time
 import warnings
+from time import sleep
 from typing import final
 
 from modules.EdgeInferrers import StandardEdgeInferrer
@@ -8,7 +8,7 @@ from modules.NormalActions import NormalActions
 from modules.SurroundInferrers import StandardSurroundInferrer
 from modules.bot import Bot
 from repo.uptechStar.constant import SIDES_SENSOR_ID, START_MIN_LINE
-from repo.uptechStar.module.actions import new_ActionFrame, ActionFrame
+from repo.uptechStar.module.actions import new_ActionFrame
 from repo.uptechStar.module.sensors import FU_INDEX
 from repo.uptechStar.module.watcher import build_watcher_simple, build_watcher_full_ctrl
 
@@ -84,6 +84,16 @@ class BattleBot(Bot):
         super().__init__(config_path=base_config)
 
         self.edge_inferrer = StandardEdgeInferrer(sensor_hub=self.sensor_hub,
+                                                  edge_sensor_ids=(
+                                                      getattr(self, self.CONFIG_EDGE_FR_KEY),
+                                                      getattr(self, self.CONFIG_EDGE_RR_KEY),
+                                                      getattr(self, self.CONFIG_EDGE_RL_KEY),
+                                                      getattr(self, self.CONFIG_EDGE_FL_KEY)
+                                                  ),
+                                                  grays_sensor_ids=(
+                                                      getattr(self, self.CONFIG_GRAY_L_KEY),
+                                                      getattr(self, self.CONFIG_GRAY_R_KEY)
+                                                  ),
                                                   action_player=self.player,
                                                   config_path=edge_inferrer_config)
         self.surrounding_inferrer = StandardSurroundInferrer(sensor_hub=self.sensor_hub,
