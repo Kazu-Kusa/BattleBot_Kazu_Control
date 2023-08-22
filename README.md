@@ -117,8 +117,8 @@ rb ad5
 
 <empty>  ad4
 
-gray l io7
-gray r io6
+gray l io3
+gray r io2
 
 l3 i0
 l4 i1
