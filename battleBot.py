@@ -1,4 +1,5 @@
 import warnings
+from random import seed
 from time import sleep, perf_counter_ns
 from typing import final
 
@@ -11,6 +12,8 @@ from repo.uptechStar.constant import SIDES_SENSOR_ID, START_MIN_LINE
 from repo.uptechStar.module.actions import new_ActionFrame
 from repo.uptechStar.module.sensors import FU_INDEX
 from repo.uptechStar.module.watcher import build_watcher_simple
+
+seed(2023)
 
 
 class BattleBot(Bot):
