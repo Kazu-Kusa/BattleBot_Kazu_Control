@@ -4,7 +4,7 @@ from modules.AbsEdgeInferrer import AbstractEdgeInferrer, ActionPack
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
 from repo.uptechStar.module.algrithm_tools import random_sign, \
     float_multiplier_upper, float_multiplier_lower, enlarge_multiplier_ll, enlarge_multiplier_l
-from repo.uptechStar.module.sensors import SensorHub, LocalFullUpdaterConstructor, FU_INDEX, FullUpdater
+from repo.uptechStar.module.sensors import SensorHub, LocalFullUpdaterConstructor, FU_INDEX, FullUpdater, IU_INDEX
 from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl
 
 
@@ -18,6 +18,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
 
     CONFIG_SENSOR_KEY = 'SensorSection'
     CONFIG_SENSOR_IDS_KEY = f'{CONFIG_SENSOR_KEY}/SensorIds'
+    CONFIG_SENSOR_GRAYS_IDS_KEY = f'{CONFIG_SENSOR_KEY}/GraysIds'
 
     CONFIG_MOTION_KEY = 'MotionSection'
 
@@ -46,16 +47,17 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
     def register_all_config(self):
         # TODO remember decouple the constant
         self.register_config(config_registry_path=self.CONFIG_EDGE_MAX_BASELINE_KEY,
-                             value=[2150] * 4)
+                             value=[1900] * 4)
         self.register_config(config_registry_path=self.CONFIG_EDGE_MIN_BASELINE_KEY,
-                             value=[1750] * 4)
+                             value=[1300] * 4)
         self.register_config(config_registry_path=self.CONFIG_STRAIGHT_ACTION_DURATION_KEY,
                              value=200)
         self.register_config(config_registry_path=self.CONFIG_CURVE_ACTION_DURATION_KEY,
                              value=170)
         self.register_config(config_registry_path=self.CONFIG_SENSOR_IDS_KEY,
                              value=[6, 7, 1, 2])
-
+        self.register_config(config_registry_path=self.CONFIG_SENSOR_GRAYS_IDS_KEY,
+                             value=[3, 2])
         self.register_config(config_registry_path=self.CONFIG_BASIC_SPEED_KEY,
                              value=4000)
 
@@ -68,6 +70,11 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
             sensor_hub.on_board_adc_updater[FU_INDEX],
             edge_sensor_ids
         )
+        self.gray_updater: FullUpdater = LocalFullUpdaterConstructor.from_indexed_updater(
+            sensor_hub.expansion_io_updater[IU_INDEX],
+            getattr(self, self.CONFIG_SENSOR_GRAYS_IDS_KEY)
+        )
+
         self._full_edge_watcher: Watcher = build_watcher_full_ctrl(
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
             sensor_ids=edge_sensor_ids,
@@ -268,5 +275,8 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
             map(lambda pack: pack[1] < pack[0] < pack[2], zip(edge_sensors, min_baselines, max_baselines)))
 
     def react(self) -> int:
-        return self.exc_action(self.action_table.get(self.infer(self.updater())),
-                               getattr(self, self.CONFIG_BASIC_SPEED_KEY))
+        gray_status = self.exc_action(self.action_table.get(self.infer(self.gray_updater())),
+                                      getattr(self, self.CONFIG_BASIC_SPEED_KEY))
+
+        return gray_status if gray_status else self.exc_action(self.action_table.get(self.infer(self.updater())),
+                                                               getattr(self, self.CONFIG_BASIC_SPEED_KEY))
