@@ -1,11 +1,26 @@
 {
   "MotionSection": {
     "BasicDuration": 200,
+    "BasicSpeed": 2500,
     "OffStageDashDuration": 600,
     "OffStageDashSpeed": -8000
   },
   "InferSection": {
     "FenceMaxBaseline": 1900,
     "FenceMinBaseline": 1500
+  },
+  "EdgeWatcher": {
+    "MaxBaseline": [
+      1900,
+      1900,
+      1900,
+      1900
+    ],
+    "MinBaseline": [
+      1300,
+      1500,
+      1500,
+      1300
+    ]
   }
 }

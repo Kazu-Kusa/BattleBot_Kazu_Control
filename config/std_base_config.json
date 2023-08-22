@@ -23,6 +23,9 @@
     "StartSpeed": 7000,
     "StartDuration": 600
   },
+  "MiscSection": {
+    "TeamColor": "blue"
+  },
   "Sensor": {
     "OnBoardAdc": {
       "Fl": 6,
@@ -45,8 +48,8 @@
       "Ftr": 7
     },
     "OnBoardIo": {
-      "GrayL": 7,
-      "GrayR": 6
+      "GrayL": 3,
+      "GrayR": 2
     }
   }
 }
