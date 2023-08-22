@@ -10,7 +10,7 @@ from modules.bot import Bot
 from repo.uptechStar.constant import SIDES_SENSOR_ID, START_MIN_LINE
 from repo.uptechStar.module.actions import new_ActionFrame
 from repo.uptechStar.module.sensors import FU_INDEX
-from repo.uptechStar.module.watcher import build_watcher_simple, build_watcher_full_ctrl
+from repo.uptechStar.module.watcher import build_watcher_simple
 
 
 class BattleBot(Bot):
@@ -26,24 +26,18 @@ class BattleBot(Bot):
     CONFIG_R1_KEY = f'{CONFIG_OB_ADC_KEY}/R1'
     CONFIG_FB_KEY = f'{CONFIG_OB_ADC_KEY}/Fb'
     CONFIG_RB_KEY = f'{CONFIG_OB_ADC_KEY}/Rb'
+
+    CONFIG_TRUE_GRAYS_KEY = f'{CONFIG_OB_ADC_KEY}/TrueGrays'
     # endregion
 
     # region OB_IO_CONFIG
     CONFIG_OB_IO_KEY = f"{CONFIG_SENSOR_KEY}/OnBoardIo"
     CONFIG_GRAY_L_KEY = f'{CONFIG_OB_IO_KEY}/GrayL'
     CONFIG_GRAY_R_KEY = f'{CONFIG_OB_IO_KEY}/GrayR'
-    # endregion
 
-    # region EXPAN_ADC_CONFIG
-    CONFIG_EXPAN_ADC_KEY = f'{CONFIG_SENSOR_KEY}/ExpansionAdc'
-    CONFIG_L3_KEY = f'{CONFIG_EXPAN_ADC_KEY}/L3'
-    CONFIG_L4_KEY = f'{CONFIG_EXPAN_ADC_KEY}/L4'
-    CONFIG_L2_KEY = f'{CONFIG_EXPAN_ADC_KEY}/L2'
-    CONFIG_FTL_KEY = f'{CONFIG_EXPAN_ADC_KEY}/Ftl'
-    CONFIG_R3_KEY = f'{CONFIG_EXPAN_ADC_KEY}/R3'
-    CONFIG_R4_KEY = f'{CONFIG_EXPAN_ADC_KEY}/R4'
-    CONFIG_R2_KEY = f'{CONFIG_EXPAN_ADC_KEY}/R2'
-    CONFIG_FTR_KEY = f'{CONFIG_EXPAN_ADC_KEY}/Ftr'
+    CONFIG_FTL_KEY = f'{CONFIG_OB_IO_KEY}/Ftl'
+    CONFIG_FTR_KEY = f'{CONFIG_OB_IO_KEY}/Ftr'
+    CONFIG_RTR_KEY = f'{CONFIG_OB_IO_KEY}/Rtr'
 
     # endregion
 
@@ -58,22 +52,21 @@ class BattleBot(Bot):
         self.register_config(self.CONFIG_R1_KEY, 0)
         self.register_config(self.CONFIG_FB_KEY, 3)
         self.register_config(self.CONFIG_RB_KEY, 5)
+
+        self.register_config(self.CONFIG_TRUE_GRAYS_KEY, 4)
         # endregion
 
         # region EXPAN_ADC
-        self.register_config(self.CONFIG_L3_KEY, 0)
-        self.register_config(self.CONFIG_L4_KEY, 1)
-        self.register_config(self.CONFIG_L2_KEY, 2)
-        self.register_config(self.CONFIG_FTL_KEY, 3)
-        self.register_config(self.CONFIG_R3_KEY, 4)
-        self.register_config(self.CONFIG_R4_KEY, 5)
-        self.register_config(self.CONFIG_R2_KEY, 6)
-        self.register_config(self.CONFIG_FTR_KEY, 7)
+
         # endregion
 
         # region IO
         self.register_config(self.CONFIG_GRAY_L_KEY, 7)
         self.register_config(self.CONFIG_GRAY_R_KEY, 6)
+
+        self.register_config(self.CONFIG_FTL_KEY, 7)
+        self.register_config(self.CONFIG_FTR_KEY, 6)
+        self.register_config(self.CONFIG_RTR_KEY, 5)
         # endregion
 
     def __init__(self, base_config: str,
@@ -100,6 +93,12 @@ class BattleBot(Bot):
             getattr(self, self.CONFIG_L1_KEY),
             getattr(self, self.CONFIG_R1_KEY)
         )
+
+        extra_io_sensor_ids = (
+            getattr(self, self.CONFIG_FTL_KEY),
+            getattr(self, self.CONFIG_FTR_KEY),
+            getattr(self, self.CONFIG_RTR_KEY)
+        )
         self.edge_inferrer = StandardEdgeInferrer(sensor_hub=self.sensor_hub,
                                                   edge_sensor_ids=edge_sensor_ids,
                                                   grays_sensor_ids=grays_sensor_ids,
@@ -119,14 +118,9 @@ class BattleBot(Bot):
         self.normal_actions = NormalActions(player=self.player, sensor_hub=self.sensor_hub,
                                             edge_sensor_ids=edge_sensor_ids,
                                             surrounding_sensor_ids=surrounding_sensor_ids,
-                                            config_path=normal_actions_config,
-                                            grays_sensor_ids=grays_sensor_ids)
-        # TODO remember decouple the constant
-        self._normal_alter_watcher = build_watcher_full_ctrl(
-            sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
-            sensor_ids=(8, 0, 3),
-            min_lines=(1200, 1200, 480),
-            max_lines=(None, None, None))
+                                            config_path=normal_actions_config, grays_sensor_ids=grays_sensor_ids,
+                                            extra_sensor_ids=extra_io_sensor_ids)
+
         self._start_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
                                                    sensor_id=SIDES_SENSOR_ID,
                                                    min_line=START_MIN_LINE)
@@ -211,6 +205,11 @@ class BattleBot(Bot):
 
     @final
     def save_all_config(self):
+        """
+        save all config to disk in json format
+        Returns:
+
+        """
         self.save_config()
         self.edge_inferrer.save_config()
         self.fence_inferrer.save_config()

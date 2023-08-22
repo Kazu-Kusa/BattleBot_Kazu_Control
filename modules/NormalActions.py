@@ -111,8 +111,8 @@ class NormalActions(AbstractNormalActions):
         self.register_action(self.KEY_IDLE, self.idle)
 
     def __init__(self, player: ActionPlayer, sensor_hub: SensorHub, edge_sensor_ids: Tuple[int, int, int, int],
-                 surrounding_sensor_ids: Tuple[int, int, int, int], config_path: str,
-                 grays_sensor_ids: Tuple[int, int]):
+                 surrounding_sensor_ids: Tuple[int, int, int, int], config_path: str, grays_sensor_ids: Tuple[int, int],
+                 extra_sensor_ids: Tuple[int, int, int]):
         super().__init__(sensor_hub, player, config_path)
         self._infer_body = self._make_infer_body()
         self._surrounding_watcher: Watcher = build_watcher_full_ctrl(
