@@ -1,12 +1,12 @@
 import warnings
 from random import choices, choice
-from typing import Tuple, List
+from typing import Tuple
 
 from AbstractNormalActions import AbstractNormalActions
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
-from repo.uptechStar.module.algrithm_tools import float_multiplier_middle, float_multiplier_lower, random_sign, \
-    float_multiplier_upper, enlarge_multiplier_ll, shrink_multiplier_lll, \
-    enlarge_multiplier_lll
+from repo.uptechStar.module.algrithm_tools import float_multiplier_middle, random_sign, \
+    enlarge_multiplier_ll, shrink_multiplier_lll, \
+    enlarge_multiplier_lll, float_multiplier_lower, enlarge_multiplier_l
 from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX
 from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl, build_delta_watcher_full_ctrl, \
@@ -161,20 +161,20 @@ class NormalActions(AbstractNormalActions):
         )
 
     def _make_infer_body(self):
-        action_keys: List[int] = [
-            self.KEY_SCAN,
+        action_keys: Tuple[int, ...] = (
+            self.KEY_PLAIN_MOVE,
+            self.KEY_TURN,
             self.KEY_SNAKE,
             self.KEY_DRIFTING,
-            self.KEY_TURN,
-            self.KEY_PLAIN_MOVE,
-            self.KEY_IDLE]
-        weights: List[int] = [
-            getattr(self, self.CONFIG_SCAN_WEIGHT_KEY),
+            self.KEY_SCAN,
+            self.KEY_IDLE)
+        weights: Tuple[int, ...] = (
+            getattr(self, self.CONFIG_PLAIN_MOVE_WEIGHT_KEY),
+            getattr(self, self.CONFIG_TURN_WEIGHT_KEY),
             getattr(self, self.CONFIG_SNAKE_WEIGHT_KEY),
             getattr(self, self.CONFIG_DRIFTING_WEIGHT_KEY),
-            getattr(self, self.CONFIG_TURN_WEIGHT_KEY),
-            getattr(self, self.CONFIG_PLAIN_MOVE_WEIGHT_KEY),
-            getattr(self, self.CONFIG_IDLE_WEIGHT_KEY)]
+            getattr(self, self.CONFIG_SCAN_WEIGHT_KEY),
+            getattr(self, self.CONFIG_IDLE_WEIGHT_KEY))
         warnings.warn('\nBuilding Normal Action selector\n'
                       f'{action_keys}\n'
                       f'{weights}')
@@ -200,15 +200,18 @@ class NormalActions(AbstractNormalActions):
 
         """
         scanning_speed = getattr(self, self.CONFIG_SCANNING_SPEED_KEY)
-        sign = random_sign()
-        return [new_ActionFrame(action_speed=(sign * scanning_speed, -sign * scanning_speed),
+        # sign = random_sign()
+        return [new_ActionFrame(action_speed=(-scanning_speed, scanning_speed),
                                 action_duration=getattr(self, self.CONFIG_SCANNING_DURATION_KEY),
                                 breaker_func=self._surrounding_watcher,
                                 break_action=(new_ActionFrame(),)),
-                new_ActionFrame(),
-                new_ActionFrame(action_speed=(-sign * basic_speed, sign * basic_speed),
-                                action_speed_multiplier=enlarge_multiplier_ll(),
-                                action_duration=2 * getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                new_ActionFrame(action_duration=50,
+                                breaker_func=self._full_edge_watcher,
+                                break_action=(new_ActionFrame(),),
+                                is_override_action=True),
+                new_ActionFrame(action_speed=(basic_speed, -basic_speed),
+                                action_speed_multiplier=enlarge_multiplier_l(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 action_duration_multiplier=enlarge_multiplier_lll()),
                 new_ActionFrame()] * getattr(self, self.CONFIG_SCAN_CYCLES_KEY)
 
@@ -223,16 +226,16 @@ class NormalActions(AbstractNormalActions):
         """
         basic_duration = getattr(self, self.CONFIG_BASIC_DURATION_KEY)
         return [new_ActionFrame(action_speed=(0, basic_speed, basic_speed, basic_speed),
-                                action_speed_multiplier=enlarge_multiplier_ll(),
+                                action_speed_multiplier=float_multiplier_lower(),
                                 action_duration=basic_duration,
-                                action_duration_multiplier=enlarge_multiplier_ll(),
-                                breaker_func=self._front_watcher),
+                                action_duration_multiplier=enlarge_multiplier_lll(),
+                                breaker_func=self._front_watcher_merged),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(basic_speed, basic_speed, basic_speed, 0),
-                                action_speed_multiplier=enlarge_multiplier_lll(),
+                                action_speed_multiplier=float_multiplier_lower(),
                                 action_duration=basic_duration,
-                                action_duration_multiplier=enlarge_multiplier_ll(),
-                                breaker_func=self._front_watcher),
+                                action_duration_multiplier=enlarge_multiplier_lll(),
+                                breaker_func=self._front_watcher_merged),
                 new_ActionFrame()] * getattr(self, self.CONFIG_SNAKE_CYCLES_KEY)
 
     def drifting(self, basic_speed: int) -> ComplexAction:
@@ -244,11 +247,14 @@ class NormalActions(AbstractNormalActions):
         Returns:
 
         """
-        return [new_ActionFrame(action_speed=rand_drift(basic_speed),
+        return [new_ActionFrame(action_speed=0,
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
+
+                new_ActionFrame(action_speed=rand_drift(basic_speed),
                                 action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 action_duration_multiplier=float_multiplier_middle(),
-                                breaker_func=self._front_watcher, ),
+                                breaker_func=self._front_watcher_grays, ),
                 new_ActionFrame()] * getattr(self, self.CONFIG_DRIFTING_CYCLES_KEY)
 
     def turn(self, basic_speed: int) -> ComplexAction:
@@ -262,7 +268,7 @@ class NormalActions(AbstractNormalActions):
         """
         sign = random_sign()
         return [new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
-                                action_speed_multiplier=float_multiplier_upper(),
+                                action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]
 
@@ -279,13 +285,7 @@ class NormalActions(AbstractNormalActions):
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 action_duration_multiplier=shrink_multiplier_lll(),
-                                breaker_func=self._full_edge_watcher,
-                                break_action=(new_ActionFrame(action_speed=-basic_speed,
-                                                              action_speed_multiplier=float_multiplier_lower(),
-                                                              action_duration=getattr(self,
-                                                                                      self.CONFIG_BASIC_DURATION_KEY),
-                                                              breaker_func=self._rear_watcher),),
-                                is_override_action=False),
+                                breaker_func=self._full_edge_watcher),
                 new_ActionFrame()]
 
     def idle(self, basic_speed: int) -> ComplexAction:
