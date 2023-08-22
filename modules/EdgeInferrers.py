@@ -262,7 +262,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         max_baselines = getattr(self, self.CONFIG_EDGE_MAX_BASELINE_KEY)
 
         return tuple(
-            map(lambda pack: pack[1] < pack[0] < pack[2], zip(edge_sensors, min_baselines, max_baselines)))
+            map(lambda pack: not (pack[0] < pack[1] < pack[2]), zip(min_baselines, edge_sensors, max_baselines)))
 
     def react(self) -> int:
         edge_sensor_status = self.exc_action(self.action_table.get(self.infer(self.updater())),
