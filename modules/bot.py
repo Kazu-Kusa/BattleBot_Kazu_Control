@@ -11,7 +11,7 @@ from repo.uptechStar.module.sensors import SensorHub
 BLIND_MODE = False
 try:
     from repo.uptechStar.module.camra import Camera
-    from repo.uptechStar.module.tagdetector import TagDetector
+    from repo.uptechStar.module.tagdetector import TagDetector, BLUE_TEAM
 except ModuleNotFoundError:
     BLIND_MODE = True
 
@@ -43,6 +43,9 @@ class Bot(Configurable, metaclass=ABCMeta):
     CONFIG_MOTION_START_SPEED_KEY = f'{CONFIG_MOTION_KEY}/StartSpeed'
     CONFIG_MOTION_START_DURATION_KEY = f'{CONFIG_MOTION_KEY}/StartDuration'
 
+    CONFIG_MISC_KEY = 'MiscSection'
+    CONFIG_MISC_TEAM_COLOR_KEY = f'{CONFIG_MISC_KEY}/TeamColor'
+
     @final
     def register_all_config(self):
         self.register_config(self.CONFIG_DEVICE_SCREEN_INIT_KEY, False)
@@ -60,6 +63,8 @@ class Bot(Configurable, metaclass=ABCMeta):
 
         self.register_config(self.CONFIG_MOTION_START_SPEED_KEY, 7000)
         self.register_config(self.CONFIG_MOTION_START_DURATION_KEY, 600)
+
+        self.register_config(self.CONFIG_MISC_TEAM_COLOR_KEY, BLUE_TEAM)
         self.register_all_children_config()
 
     def __init__(self, config_path: str):
@@ -70,7 +75,8 @@ class Bot(Configurable, metaclass=ABCMeta):
 
             self.tag_detector = TagDetector(camera=self.camera,
                                             start_detect_tag=getattr(self,
-                                                                     self.CONFIG_DEVICE_DETECTOR_START_DETECT_TAG_KEY))
+                                                                     self.CONFIG_DEVICE_DETECTOR_START_DETECT_TAG_KEY),
+                                            team_color=getattr(self, self.CONFIG_MISC_TEAM_COLOR_KEY))
             self.camera.set_cam_resolution(
                 resolution_multiplier=getattr(self, self.CONFIG_DEVICE_DETECTOR_CAMERA_RESOLUTION_MULTIPLIER_KEY))
         self.player = ActionPlayer()
