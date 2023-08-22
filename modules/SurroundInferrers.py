@@ -8,7 +8,7 @@ from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX
 from repo.uptechStar.module.tagdetector import TagDetector
 from repo.uptechStar.module.watcher import Watcher, \
-    build_watcher_full_ctrl
+    build_watcher_full_ctrl, build_watcher_simple, watchers_merge
 
 
 # TODO: use the newly developed action frame insert play to imp this class
@@ -504,13 +504,9 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         self.register_config(self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY, [2070, 2150, 2210, 2050])
         self.register_config(self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY, [1550, 1550, 1550, 1550])
 
-    def __init__(self,
-                 sensor_hub: SensorHub,
-                 surrounding_sensor_ids: Tuple[int, int, int, int],
-                 edge_sensor_ids: Tuple[int, int, int, int],
-                 action_player: ActionPlayer,
-                 config_path: str,
-                 tag_detector: Optional[TagDetector]):
+    def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str,
+                 tag_detector: Optional[TagDetector], surrounding_sensor_ids: Tuple[int, int, int, int],
+                 edge_sensor_ids: Tuple[int, int, int, int], grays_sensor_ids: Tuple[int, int]):
         super().__init__(sensor_hub=sensor_hub, player=action_player, config_path=config_path)
         self._tag_detector = tag_detector
         edge_min_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY)
@@ -531,6 +527,16 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
             sensor_ids=[edge_sensor_ids[0], edge_sensor_ids[3]],
             min_lines=[edge_min_lines[0], edge_min_lines[3]],
             max_lines=[edge_max_lines[0], edge_max_lines[3]])
+        self._front_watcher_grays: Watcher = build_watcher_simple(
+            sensor_update=self._sensors.on_board_io_updater[FU_INDEX],
+            sensor_id=grays_sensor_ids,
+            max_line=1,
+            use_any=True)
+
+        self._front_watcher_merged: Watcher = watchers_merge([self._front_watcher_grays,
+                                                              self._front_watcher],
+                                                             use_any=True)
+
         self._status_infer = self._make_infer_body(surrounding_sensor_ids)
 
     def _make_infer_body(self, sensor_ids: Tuple[int, int, int, int]):
