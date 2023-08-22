@@ -56,8 +56,8 @@ class BattleBot(Bot):
         self.register_config(self.CONFIG_EDGE_RR_KEY, 1)
         self.register_config(self.CONFIG_L1_KEY, 8)
         self.register_config(self.CONFIG_R1_KEY, 0)
-        self.register_config(self.CONFIG_FB_KEY, 5)
-        self.register_config(self.CONFIG_RB_KEY, 3)
+        self.register_config(self.CONFIG_FB_KEY, 3)
+        self.register_config(self.CONFIG_RB_KEY, 5)
         # endregion
 
         # region EXPAN_ADC
@@ -82,13 +82,14 @@ class BattleBot(Bot):
                  fence_inferrer_config: str,
                  normal_actions_config: str):
         super().__init__(config_path=base_config)
-
         edge_sensor_ids = (
-            getattr(self, self.CONFIG_EDGE_FR_KEY),
-            getattr(self, self.CONFIG_EDGE_RR_KEY),
+            getattr(self, self.CONFIG_EDGE_FL_KEY),
             getattr(self, self.CONFIG_EDGE_RL_KEY),
-            getattr(self, self.CONFIG_EDGE_FL_KEY)
+            getattr(self, self.CONFIG_EDGE_RR_KEY),
+            getattr(self, self.CONFIG_EDGE_FR_KEY)
+
         )
+
         self.edge_inferrer = StandardEdgeInferrer(sensor_hub=self.sensor_hub,
                                                   edge_sensor_ids=edge_sensor_ids,
                                                   grays_sensor_ids=(
@@ -172,13 +173,10 @@ class BattleBot(Bot):
         while True:
             on_stage() if is_on_stage() else off_stage()
 
-    def Battle_debug(self, normal_spead: int, team_color: str, use_cam: bool) -> None:
+    def Battle_debug(self) -> None:
         """
         the main function
-        :param use_cam:
-        :param team_color:
-        :param normal_spead:
-        :return:
+
         """
         self.screen.open()
         self.screen.set_font_size(self.screen.FONT_12X16)
@@ -191,6 +189,7 @@ class BattleBot(Bot):
             status_code = self.edge_inferrer.react()
             self.screen.fill_screen(self.screen.COLOR_BLACK)
             self.screen.put_string(0, 0, f'{status_code}')
+            self.screen.put_string(0, 12, f'{perf_counter_ns()}')
             self.screen.refresh()
             if status_code:
                 return
