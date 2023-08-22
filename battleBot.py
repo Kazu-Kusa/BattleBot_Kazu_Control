@@ -10,6 +10,7 @@ from modules.SurroundInferrers import StandardSurroundInferrer
 from modules.bot import Bot
 from repo.uptechStar.constant import SIDES_SENSOR_ID, START_MIN_LINE
 from repo.uptechStar.module.actions import new_ActionFrame
+from repo.uptechStar.module.algrithm_tools import MovingAverage
 from repo.uptechStar.module.sensors import FU_INDEX
 from repo.uptechStar.module.watcher import build_watcher_simple
 
@@ -43,6 +44,13 @@ class BattleBot(Bot):
     CONFIG_RTR_KEY = f'{CONFIG_OB_IO_KEY}/Rtr'
 
     # endregion
+    CONFIG_INFER_KEY = 'InferSection'
+    CONFIG_INFER_TRUE_GRAY_KEY = f'{CONFIG_INFER_KEY}/TrueGray'
+    CONFIG_INFER_TRUE_GRAY_MIN_BASELINE_KEY = f'{CONFIG_INFER_TRUE_GRAY_KEY}/MinBaseline'
+    CONFIG_INFER_TRUE_GRAY_MAX_BASELINE_KEY = f'{CONFIG_INFER_TRUE_GRAY_KEY}/MaxBaseline'
+
+    CONFIG_FILTERS_KEY = 'Filters'
+    CONFIG_FILTERS_MOVINGAVERAGE_WINDOW_SIZE_KEY = f'{CONFIG_FILTERS_KEY}/MovingaverageWindowSize'
 
     # endregion
     def register_all_children_config(self):
@@ -59,10 +67,6 @@ class BattleBot(Bot):
         self.register_config(self.CONFIG_TRUE_GRAYS_KEY, 4)
         # endregion
 
-        # region EXPAN_ADC
-
-        # endregion
-
         # region IO
         self.register_config(self.CONFIG_GRAY_L_KEY, 7)
         self.register_config(self.CONFIG_GRAY_R_KEY, 6)
@@ -71,6 +75,11 @@ class BattleBot(Bot):
         self.register_config(self.CONFIG_FTR_KEY, 6)
         self.register_config(self.CONFIG_RTR_KEY, 5)
         # endregion
+
+        self.register_config(self.CONFIG_INFER_TRUE_GRAY_MIN_BASELINE_KEY, 2930)
+        self.register_config(self.CONFIG_INFER_TRUE_GRAY_MAX_BASELINE_KEY, 4096)
+
+        self.register_config(self.CONFIG_FILTERS_MOVINGAVERAGE_WINDOW_SIZE_KEY, 20)
 
     def __init__(self, base_config: str,
                  edge_inferrer_config: str,
@@ -151,10 +160,14 @@ class BattleBot(Bot):
     # endregion
 
     def Battle(self) -> None:
+        mov_average_apply = MovingAverage(getattr(self, self.CONFIG_FILTERS_MOVINGAVERAGE_WINDOW_SIZE_KEY)).apply
+        true_gray_id = getattr(self, self.CONFIG_TRUE_GRAYS_KEY)
+        full_adc_updater = self.sensor_hub.on_board_adc_updater[FU_INDEX]
+        true_gray_min_line = getattr(self, self.CONFIG_INFER_TRUE_GRAY_MIN_BASELINE_KEY)
+        true_gray_max_line = getattr(self, self.CONFIG_INFER_TRUE_GRAY_MAX_BASELINE_KEY)
 
         def _is_on_stage() -> bool:
-            # TODO: do remember implement this stage check
-            return True
+            return true_gray_min_line < mov_average_apply(full_adc_updater()[true_gray_id]) < true_gray_max_line
 
         def _on_stage() -> None:
             if self.edge_inferrer.react():
@@ -166,7 +179,6 @@ class BattleBot(Bot):
 
         def _off_stage() -> None:
             self.fence_inferrer.react()
-            self.screen.set_led_color(1, self.screen.COLOR_GREEN)
 
         while True:
             _on_stage() if _is_on_stage() else _off_stage()
@@ -179,9 +191,20 @@ class BattleBot(Bot):
         self.screen.open()
         self.screen.set_font_size(self.screen.FONT_12X16)
 
+        mov_average_apply = MovingAverage(getattr(self, self.CONFIG_FILTERS_MOVINGAVERAGE_WINDOW_SIZE_KEY)).apply
+        true_gray_id = getattr(self, self.CONFIG_TRUE_GRAYS_KEY)
+        full_adc_updater = self.sensor_hub.on_board_adc_updater[FU_INDEX]
+        true_gray_min_line = getattr(self, self.CONFIG_INFER_TRUE_GRAY_MIN_BASELINE_KEY)
+        true_gray_max_line = getattr(self, self.CONFIG_INFER_TRUE_GRAY_MAX_BASELINE_KEY)
+        self.screen.open()
+
         def is_on_stage() -> bool:
-            # TODO: do remember implement this stage check
-            return True
+
+            apply = mov_average_apply(full_adc_updater()[true_gray_id])
+            is_on_stage = true_gray_min_line < apply < true_gray_max_line
+            print(f'is_on_stage: {is_on_stage}, apply: {apply}')
+            self.screen.set_led_color(0, self.screen.COLOR_BROWN if is_on_stage else self.screen.COLOR_BRED)
+            return is_on_stage
 
         def on_stage() -> None:
             status_code = self.edge_inferrer.react()
