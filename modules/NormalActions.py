@@ -302,7 +302,7 @@ class NormalActions(AbstractNormalActions):
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 action_duration_multiplier=enlarge_multiplier_lll(),
                                 breaker_func=self._idle_watcher,
-                                break_action=(new_ActionFrame(
+                                break_action=(new_ActionFrame(), new_ActionFrame(
                                     action_speed=(sign * basic_speed, -sign * basic_speed),
                                     action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                     action_speed_multiplier=enlarge_multiplier_lll(),
