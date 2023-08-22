@@ -92,7 +92,7 @@ class NormalActions(AbstractNormalActions):
 
         self.register_config(self.CONFIG_IDLE_IDS_KEY, list(range(8)))
         self.register_config(self.CONFIG_IDLE_WEIGHT_KEY, 6)
-        self.register_config(self.CONFIG_IDLE_MIN_BASELINE_KEY, [None] * 8)
+        self.register_config(self.CONFIG_IDLE_MIN_BASELINE_KEY, [0] * 8)
         self.register_config(self.CONFIG_IDLE_MAX_BASELINE_KEY, [150] * 8)
 
         self.register_config(self.CONFIG_WATCHER_MAX_BASELINE_KEY, [1900] * 4)
