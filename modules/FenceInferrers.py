@@ -119,13 +119,25 @@ class StandardFenceInferrer(AbstractFenceInferrer):
 
     def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str,
                  edge_sensor_ids: Tuple[int, int, int, int], surrounding_sensor_ids: Tuple[int, int, int, int],
-                 grays_sensor_ids: Tuple[int, int]):
+                 grays_sensor_ids: Tuple[int, int],
+                 extra_sensor_ids: Tuple[int, int, int]):
         super().__init__(sensor_hub=sensor_hub, player=action_player, config_path=config_path)
 
         def infer_body() -> int:
             # todo imp
             pass
 
+        self._front_object_watcher: Watcher = build_watcher_simple(
+            sensor_update=self._sensors.on_board_io_updater[FU_INDEX],
+            sensor_id=extra_sensor_ids[0:2],
+            max_line=1,
+            use_any=True
+        )
+        self._rear_object_watcher: Watcher = build_watcher_simple(
+            sensor_update=self._sensors.on_board_io_updater[FU_INDEX],
+            sensor_id=extra_sensor_ids[2:],  # actually, this watcher uses only one sensor ()
+            max_line=1
+        )
         self._infer_body = infer_body
 
         edge_min_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY)
