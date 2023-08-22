@@ -265,8 +265,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
             map(lambda pack: pack[1] < pack[0] < pack[2], zip(edge_sensors, min_baselines, max_baselines)))
 
     def react(self) -> int:
-        gray_status = self.exc_action(self.action_table.get(self.infer(self.gray_updater())),
-                                      getattr(self, self.CONFIG_BASIC_SPEED_KEY))
-
-        return gray_status if gray_status else self.exc_action(self.action_table.get(self.infer(self.updater())),
-                                                               getattr(self, self.CONFIG_BASIC_SPEED_KEY))
+        edge_sensor_status = self.exc_action(self.action_table.get(self.infer(self.updater())),
+                                             getattr(self, self.CONFIG_BASIC_SPEED_KEY))
+        return edge_sensor_status if edge_sensor_status else self.exc_action(self.action_table.get(self.gray_updater()),
+                                                                             getattr(self, self.CONFIG_BASIC_SPEED_KEY))
