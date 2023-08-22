@@ -194,6 +194,7 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()]
 
+
     def on_front_right_to_fence(self, basic_speed) -> ComplexAction:
         return [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
                                 action_speed_multiplier=float_multiplier_middle(),
