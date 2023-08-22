@@ -61,7 +61,7 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
             edge_sensor_ids
         )
         self.gray_updater: FullUpdater = LocalFullUpdaterConstructor.from_indexed_updater(
-            sensor_hub.expansion_io_updater[IU_INDEX],
+            sensor_hub.on_board_io_updater[IU_INDEX],
             grays_sensor_ids
         )
 
