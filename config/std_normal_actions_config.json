@@ -5,7 +5,7 @@
   },
   "Scan": {
     "Weight": 1,
-    "ScanningSpeed": 350,
+    "ScanningSpeed": 260,
     "ScanningDuration": 3500,
     "ScanCycles": 2
   },
@@ -56,23 +56,23 @@
       null
     ]
   },
-  "Watcher": {
+  "SurroundingWatcher": {
     "MaxBaseline": [
-      2050,
-      2050,
-      2050,
-      2050
+      null,
+      null,
+      null,
+      null
     ],
     "MinBaseline": [
-      800,
-      800,
-      800,
-      800
+      650,
+      650,
+      650,
+      650
     ]
   },
   "EdgeWatcher": {
     "MaxBaseline": [
-      1900,
+      1800,
       1900,
       1900,
       1900

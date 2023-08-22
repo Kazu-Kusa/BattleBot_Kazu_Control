@@ -55,10 +55,10 @@ class NormalActions(AbstractNormalActions):
     CONFIG_IDLE_MIN_BASELINE_KEY = f'{CONFIG_IDLE_KEY}/MinBaseline'
     CONFIG_IDLE_MAX_BASELINE_KEY = f'{CONFIG_IDLE_KEY}/MaxBaseline'
 
-    CONFIG_WATCHER_KEY = "Watcher"
+    CONFIG_SURROUNDING_WATCHER_KEY = "SurroundingWatcher"
 
-    CONFIG_WATCHER_MAX_BASELINE_KEY = f'{CONFIG_WATCHER_KEY}/MaxBaseline'
-    CONFIG_WATCHER_MIN_BASELINE_KEY = f'{CONFIG_WATCHER_KEY}/MinBaseline'
+    CONFIG_SURROUNDING_WATCHER_MAX_BASELINE_KEY = f'{CONFIG_SURROUNDING_WATCHER_KEY}/MaxBaseline'
+    CONFIG_SURROUNDING_WATCHER_MIN_BASELINE_KEY = f'{CONFIG_SURROUNDING_WATCHER_KEY}/MinBaseline'
 
     CONFIG_EDGE_WATCHER_KEY = "EdgeWatcher"
 
@@ -96,8 +96,8 @@ class NormalActions(AbstractNormalActions):
         self.register_config(self.CONFIG_IDLE_MIN_BASELINE_KEY, [150] * 8)
         self.register_config(self.CONFIG_IDLE_MAX_BASELINE_KEY, [None] * 8)
 
-        self.register_config(self.CONFIG_WATCHER_MAX_BASELINE_KEY, [1900] * 4)
-        self.register_config(self.CONFIG_WATCHER_MIN_BASELINE_KEY, [1500] * 4)
+        self.register_config(self.CONFIG_SURROUNDING_WATCHER_MAX_BASELINE_KEY, [1900] * 4)
+        self.register_config(self.CONFIG_SURROUNDING_WATCHER_MIN_BASELINE_KEY, [1500] * 4)
 
         self.register_config(self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY, [2070, 2150, 2210, 2050])
         self.register_config(self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY, [1550, 1550, 1550, 1550])
@@ -118,8 +118,8 @@ class NormalActions(AbstractNormalActions):
         self._surrounding_watcher: Watcher = build_watcher_full_ctrl(
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
             sensor_ids=surrounding_sensor_ids,
-            min_lines=getattr(self, self.CONFIG_WATCHER_MIN_BASELINE_KEY),
-            max_lines=getattr(self, self.CONFIG_WATCHER_MAX_BASELINE_KEY))
+            min_lines=getattr(self, self.CONFIG_SURROUNDING_WATCHER_MIN_BASELINE_KEY),
+            max_lines=getattr(self, self.CONFIG_SURROUNDING_WATCHER_MAX_BASELINE_KEY))
 
         edge_min_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY)
         edge_max_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY)
