@@ -112,11 +112,10 @@ class BattleBot(Bot):
                                                              edge_sensor_ids=edge_sensor_ids,
                                                              grays_sensor_ids=grays_sensor_ids)
 
-        self.fence_inferrer = StandardFenceInferrer(sensor_hub=self.sensor_hub,
-                                                    action_player=self.player,
-                                                    config_path=fence_inferrer_config,
-                                                    edge_sensor_ids=edge_sensor_ids,
-                                                    surrounding_sensor_ids=surrounding_sensor_ids)
+        self.fence_inferrer = StandardFenceInferrer(sensor_hub=self.sensor_hub, action_player=self.player,
+                                                    config_path=fence_inferrer_config, edge_sensor_ids=edge_sensor_ids,
+                                                    surrounding_sensor_ids=surrounding_sensor_ids,
+                                                    grays_sensor_ids=grays_sensor_ids)
         self.normal_actions = NormalActions(player=self.player, sensor_hub=self.sensor_hub,
                                             edge_sensor_ids=edge_sensor_ids,
                                             surrounding_sensor_ids=surrounding_sensor_ids,
