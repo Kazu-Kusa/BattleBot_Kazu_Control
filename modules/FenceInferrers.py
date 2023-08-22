@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from modules.AbsFenceInferrer import AbstractFenceInferrer
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
 from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplier_ll, float_multiplier_middle, \
@@ -18,7 +20,6 @@ class StandardFenceInferrer(AbstractFenceInferrer):
     CONFIG_FENCE_MIN_BASE_LINE_KEY = f'{CONFIG_FENCE_INFER_KEY}/FenceMinBaseline'
 
     CONFIG_EDGE_WATCHER_KEY = "EdgeWatcher"
-    CONFIG_EDGE_WATCHER_IDS_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/Ids'
     CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MaxBaseline'
     CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MinBaseline'
 
@@ -112,19 +113,20 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                              value=[1900] * 4)
         self.register_config(config_registry_path=self.CONFIG_FENCE_MIN_BASE_LINE_KEY,
                              value=[1500] * 4)
-        self.register_config(self.CONFIG_EDGE_WATCHER_IDS_KEY, [6, 7, 1, 2])
+
         self.register_config(self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY, [2070, 2150, 2210, 2050])
         self.register_config(self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY, [1550, 1550, 1550, 1550])
 
-    def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str):
+    def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str,
+                 edge_sensor_ids: Tuple[int, int, int, int], surrounding_sensor_ids: Tuple[int, int, int, int]):
         super().__init__(sensor_hub=sensor_hub, player=action_player, config_path=config_path)
 
         def infer_body() -> int:
+            # todo imp
             pass
 
         self._infer_body = infer_body
 
-        edge_sensor_ids = getattr(self, self.CONFIG_EDGE_WATCHER_IDS_KEY)
         edge_min_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY)
         edge_max_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY)
         self._full_edge_watcher: Watcher = build_watcher_full_ctrl(

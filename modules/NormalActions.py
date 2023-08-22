@@ -54,12 +54,12 @@ class NormalActions(AbstractNormalActions):
     CONFIG_IDLE_MAX_BASELINE_KEY = f'{CONFIG_IDLE_KEY}/MaxBaseline'
 
     CONFIG_WATCHER_KEY = "Watcher"
-    CONFIG_WATCHER_IDS_KEY = f'{CONFIG_WATCHER_KEY}/Ids'
+
     CONFIG_WATCHER_MAX_BASELINE_KEY = f'{CONFIG_WATCHER_KEY}/MaxBaseline'
     CONFIG_WATCHER_MIN_BASELINE_KEY = f'{CONFIG_WATCHER_KEY}/MinBaseline'
 
     CONFIG_EDGE_WATCHER_KEY = "EdgeWatcher"
-    CONFIG_EDGE_WATCHER_IDS_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/Ids'
+
     CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MaxBaseline'
     CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MinBaseline'
 
@@ -94,11 +94,9 @@ class NormalActions(AbstractNormalActions):
         self.register_config(self.CONFIG_IDLE_MIN_BASELINE_KEY, [None] * 8)
         self.register_config(self.CONFIG_IDLE_MAX_BASELINE_KEY, [150] * 8)
 
-        self.register_config(self.CONFIG_WATCHER_IDS_KEY, [8, 0, 5, 3])
         self.register_config(self.CONFIG_WATCHER_MAX_BASELINE_KEY, [1900] * 4)
         self.register_config(self.CONFIG_WATCHER_MIN_BASELINE_KEY, [1500] * 4)
 
-        self.register_config(self.CONFIG_EDGE_WATCHER_IDS_KEY, [6, 7, 1, 2])
         self.register_config(self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY, [2070, 2150, 2210, 2050])
         self.register_config(self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY, [1550, 1550, 1550, 1550])
 
@@ -110,17 +108,20 @@ class NormalActions(AbstractNormalActions):
         self.register_action(self.KEY_PLAIN_MOVE, self.plain_move)
         self.register_action(self.KEY_IDLE, self.idle)
 
-    def __init__(self, player: ActionPlayer, sensor_hub: SensorHub, config_path: str):
+    def __init__(self, player: ActionPlayer,
+                 sensor_hub: SensorHub,
+                 edge_sensor_ids: Tuple[int, int, int, int],
+                 surrounding_sensor_ids: Tuple[int, int, int, int],
+                 config_path: str):
         super().__init__(sensor_hub, player, config_path)
         self._infer_body = self._make_infer_body()
         # TODO: consider use edge sensors to assist the judge
         self._surrounding_watcher: Watcher = build_watcher_full_ctrl(
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
-            sensor_ids=getattr(self, self.CONFIG_WATCHER_IDS_KEY),
+            sensor_ids=surrounding_sensor_ids,
             min_lines=getattr(self, self.CONFIG_WATCHER_MIN_BASELINE_KEY),
             max_lines=getattr(self, self.CONFIG_WATCHER_MAX_BASELINE_KEY))
 
-        edge_sensor_ids = getattr(self, self.CONFIG_EDGE_WATCHER_IDS_KEY)
         edge_min_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY)
         edge_max_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY)
         self._full_edge_watcher: Watcher = build_watcher_full_ctrl(

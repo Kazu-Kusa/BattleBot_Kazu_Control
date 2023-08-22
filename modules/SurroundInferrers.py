@@ -1,4 +1,4 @@
-from typing import final, Optional
+from typing import final, Optional, Tuple
 
 from modules.AbsSurroundInferrer import AbstractSurroundInferrer
 from repo.uptechStar.module.actions import new_ActionFrame, ActionPlayer
@@ -453,12 +453,11 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
 
     CONFIG_INFER_KEY = 'InferSection'
     CONFIG_FRONT_OBJECT_TABLE_KEY = f'{CONFIG_INFER_KEY}/FrontObjectTable'
-    CONFIG_SENSOR_IDS_KEY = f'{CONFIG_INFER_KEY}/SensorIds'
+
     CONFIG_MIN_BASELINES_KEY = f'{CONFIG_INFER_KEY}/MinBaselines'
     CONFIG_MAX_BASELINES_KEY = f'{CONFIG_INFER_KEY}/MaxBaselines'
 
     CONFIG_EDGE_WATCHER_KEY = "EdgeWatcher"
-    CONFIG_EDGE_WATCHER_IDS_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/Ids'
     CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MaxBaseline'
     CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MinBaseline'
 
@@ -496,22 +495,24 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                     f'{3}/{True}': 200, f'{3}/{False}': 200})
         # the inferring currently only support four sensors;
         # each in the list is corresponding to [front,behind,left,right]
-        self.register_config(config_registry_path=self.CONFIG_SENSOR_IDS_KEY,
-                             value=[3, 5, 8, 0])
+
         self.register_config(config_registry_path=self.CONFIG_MIN_BASELINES_KEY,
                              value=[1300] * 4)
         self.register_config(config_registry_path=self.CONFIG_MAX_BASELINES_KEY,
                              value=[1900] * 4)
 
-        self.register_config(self.CONFIG_EDGE_WATCHER_IDS_KEY, [6, 7, 1, 2])
         self.register_config(self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY, [2070, 2150, 2210, 2050])
         self.register_config(self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY, [1550, 1550, 1550, 1550])
 
-    def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str,
+    def __init__(self,
+                 sensor_hub: SensorHub,
+                 surrounding_sensor_ids: Tuple[int, int, int, int],
+                 edge_sensor_ids: Tuple[int, int, int, int],
+                 action_player: ActionPlayer,
+                 config_path: str,
                  tag_detector: Optional[TagDetector]):
         super().__init__(sensor_hub=sensor_hub, player=action_player, config_path=config_path)
         self._tag_detector = tag_detector
-        edge_sensor_ids = getattr(self, self.CONFIG_EDGE_WATCHER_IDS_KEY)
         edge_min_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY)
         edge_max_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY)
         self._full_edge_watcher: Watcher = build_watcher_full_ctrl(
@@ -530,16 +531,16 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
             sensor_ids=[edge_sensor_ids[0], edge_sensor_ids[3]],
             min_lines=[edge_min_lines[0], edge_min_lines[3]],
             max_lines=[edge_max_lines[0], edge_max_lines[3]])
-        self._status_infer = self._make_infer_body()
+        self._status_infer = self._make_infer_body(surrounding_sensor_ids)
 
-    def _make_infer_body(self):
+    def _make_infer_body(self, sensor_ids: Tuple[int, int, int, int]):
         """
         make an infer_body with all variables bound locally, which can bring a better performance
         Returns:
 
         """
         tag_detector = self._tag_detector
-        sensor_ids = getattr(self, self.CONFIG_SENSOR_IDS_KEY)
+
         behind_left_right_weights = (
             self.KEY_BEHIND_OBJECT,
             self.KEY_LEFT_OBJECT,

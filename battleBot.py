@@ -83,30 +83,43 @@ class BattleBot(Bot):
                  normal_actions_config: str):
         super().__init__(config_path=base_config)
 
+        edge_sensor_ids = (
+            getattr(self, self.CONFIG_EDGE_FR_KEY),
+            getattr(self, self.CONFIG_EDGE_RR_KEY),
+            getattr(self, self.CONFIG_EDGE_RL_KEY),
+            getattr(self, self.CONFIG_EDGE_FL_KEY)
+        )
         self.edge_inferrer = StandardEdgeInferrer(sensor_hub=self.sensor_hub,
-                                                  edge_sensor_ids=(
-                                                      getattr(self, self.CONFIG_EDGE_FR_KEY),
-                                                      getattr(self, self.CONFIG_EDGE_RR_KEY),
-                                                      getattr(self, self.CONFIG_EDGE_RL_KEY),
-                                                      getattr(self, self.CONFIG_EDGE_FL_KEY)
-                                                  ),
+                                                  edge_sensor_ids=edge_sensor_ids,
                                                   grays_sensor_ids=(
                                                       getattr(self, self.CONFIG_GRAY_L_KEY),
                                                       getattr(self, self.CONFIG_GRAY_R_KEY)
                                                   ),
                                                   action_player=self.player,
                                                   config_path=edge_inferrer_config)
+        surrounding_sensor_ids = (
+            getattr(self, self.CONFIG_FB_KEY),
+            getattr(self, self.CONFIG_RB_KEY),
+            getattr(self, self.CONFIG_L1_KEY),
+            getattr(self, self.CONFIG_R1_KEY)
+        )
         self.surrounding_inferrer = StandardSurroundInferrer(sensor_hub=self.sensor_hub,
                                                              action_player=self.player,
                                                              config_path=surrounding_inferrer_config,
-                                                             tag_detector=self.tag_detector)
+                                                             tag_detector=self.tag_detector,
+                                                             surrounding_sensor_ids=surrounding_sensor_ids,
+                                                             edge_sensor_ids=edge_sensor_ids)
 
         self.fence_inferrer = StandardFenceInferrer(sensor_hub=self.sensor_hub,
                                                     action_player=self.player,
-                                                    config_path=fence_inferrer_config)
+                                                    config_path=fence_inferrer_config,
+                                                    edge_sensor_ids=edge_sensor_ids,
+                                                    surrounding_sensor_ids=surrounding_sensor_ids)
         self.normal_actions = NormalActions(sensor_hub=self.sensor_hub,
                                             player=self.player,
-                                            config_path=normal_actions_config)
+                                            config_path=normal_actions_config,
+                                            edge_sensor_ids=edge_sensor_ids,
+                                            surrounding_sensor_ids=surrounding_sensor_ids)
         # TODO remember decouple the constant
         self._normal_alter_watcher = build_watcher_full_ctrl(
             sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
