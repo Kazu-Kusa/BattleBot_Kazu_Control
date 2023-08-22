@@ -1,7 +1,8 @@
 pytest
 pyserial==3.5
-pyapriltags==3.3.0.3
 Cython==3.0.0
 opencv-python-headless==4.8.0.74
 numpy~=1.25.2
 dill==0.3.7
+
+apriltag~=0.0.16
