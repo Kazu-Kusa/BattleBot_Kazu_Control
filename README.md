@@ -115,19 +115,13 @@ r1 ad0
 fb ad3
 rb ad5
 
-<empty>  ad4
+gray scaler  ad4
 
-gray l io7
-gray r io6
+gray l io3
+gray r io2
 
-l3 i0
-l4 i1
-l2 i2
-ftl i3
-
-r3 i4
-r4 i5
-r2 i6
-ftr i7
+ftl io7
+ftr io6
+rtr io5
 """
 ```

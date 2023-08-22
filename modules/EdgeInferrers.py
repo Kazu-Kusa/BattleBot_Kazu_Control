@@ -1,23 +1,19 @@
-from typing import Sequence
+from typing import Sequence, Tuple
 
 from modules.AbsEdgeInferrer import AbstractEdgeInferrer, ActionPack
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
 from repo.uptechStar.module.algrithm_tools import random_sign, \
     float_multiplier_upper, float_multiplier_lower, enlarge_multiplier_ll, enlarge_multiplier_l
-from repo.uptechStar.module.sensors import SensorHub, LocalFullUpdaterConstructor, FU_INDEX, FullUpdater
-from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl
+from repo.uptechStar.module.sensors import SensorHub, LocalFullUpdaterConstructor, FU_INDEX, FullUpdater, IU_INDEX
+from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl, build_watcher_simple, watchers_merge
 
 
-# TODO use multiplier generator
 class StandardEdgeInferrer(AbstractEdgeInferrer):
     CONFIG_INFER_KEY = 'InferSection'
     CONFIG_EDGE_MAX_BASELINE_KEY = f'{CONFIG_INFER_KEY}/EdgeMaxBaseline'
     CONFIG_EDGE_MIN_BASELINE_KEY = f'{CONFIG_INFER_KEY}/EdgeMinBaseline'
     CONFIG_STRAIGHT_ACTION_DURATION_KEY = f'{CONFIG_INFER_KEY}/StraightActionDuration'
     CONFIG_CURVE_ACTION_DURATION_KEY = f'{CONFIG_INFER_KEY}/CurveActionDuration'
-
-    CONFIG_SENSOR_KEY = 'SensorSection'
-    CONFIG_SENSOR_IDS_KEY = f'{CONFIG_SENSOR_KEY}/SensorIds'
 
     CONFIG_MOTION_KEY = 'MotionSection'
 
@@ -44,46 +40,59 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
     DO_FL_RL_RR_FR_STATUS_CODE = 15
 
     def register_all_config(self):
-        # TODO remember decouple the constant
         self.register_config(config_registry_path=self.CONFIG_EDGE_MAX_BASELINE_KEY,
-                             value=[2150] * 4)
+                             value=[1900] * 4)
         self.register_config(config_registry_path=self.CONFIG_EDGE_MIN_BASELINE_KEY,
-                             value=[1750] * 4)
+                             value=[1300] * 4)
         self.register_config(config_registry_path=self.CONFIG_STRAIGHT_ACTION_DURATION_KEY,
                              value=200)
         self.register_config(config_registry_path=self.CONFIG_CURVE_ACTION_DURATION_KEY,
                              value=170)
-        self.register_config(config_registry_path=self.CONFIG_SENSOR_IDS_KEY,
-                             value=[6, 7, 1, 2])
-
         self.register_config(config_registry_path=self.CONFIG_BASIC_SPEED_KEY,
                              value=4000)
 
-    def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str):
+    def __init__(self, sensor_hub: SensorHub, edge_sensor_ids: Tuple[int, int, int, int],
+                 grays_sensor_ids: Tuple[int, int], action_player: ActionPlayer, config_path: str):
         super().__init__(sensor_hub=sensor_hub, player=action_player, config_path=config_path)
-        edge_sensor_ids = getattr(self, self.CONFIG_SENSOR_IDS_KEY)
         edge_min_lines = getattr(self, self.CONFIG_EDGE_MIN_BASELINE_KEY)
         edge_max_lines = getattr(self, self.CONFIG_EDGE_MAX_BASELINE_KEY)
         self.updater: FullUpdater = LocalFullUpdaterConstructor.from_full_updater(
             sensor_hub.on_board_adc_updater[FU_INDEX],
             edge_sensor_ids
         )
+        self.gray_updater: FullUpdater = LocalFullUpdaterConstructor.from_indexed_updater(
+            sensor_hub.on_board_io_updater[IU_INDEX],
+            grays_sensor_ids
+        )
+
         self._full_edge_watcher: Watcher = build_watcher_full_ctrl(
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
             sensor_ids=edge_sensor_ids,
             min_lines=edge_min_lines,
-            max_lines=edge_max_lines
+            max_lines=edge_max_lines,
+            use_any=True
         )
         self._rear_watcher: Watcher = build_watcher_full_ctrl(
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
             sensor_ids=[edge_sensor_ids[1], edge_sensor_ids[2]],
             min_lines=[edge_min_lines[1], edge_min_lines[2]],
-            max_lines=[edge_max_lines[1], edge_max_lines[2]])
+            max_lines=[edge_max_lines[1], edge_max_lines[2]],
+            use_any=True)
         self._front_watcher: Watcher = build_watcher_full_ctrl(
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
             sensor_ids=[edge_sensor_ids[0], edge_sensor_ids[3]],
             min_lines=[edge_min_lines[0], edge_min_lines[3]],
-            max_lines=[edge_max_lines[0], edge_max_lines[3]])
+            max_lines=[edge_max_lines[0], edge_max_lines[3]],
+            use_any=True)
+        self._front_watcher_grays: Watcher = build_watcher_simple(
+            sensor_update=self._sensors.on_board_io_updater[FU_INDEX],
+            sensor_id=grays_sensor_ids,
+            max_line=1,
+            use_any=True)
+
+        self._front_watcher_merged: Watcher = watchers_merge([self._front_watcher_grays,
+                                                              self._front_watcher],
+                                                             use_any=True)
 
     # region tapes
     # region 3 sides float case
@@ -265,8 +274,10 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
         max_baselines = getattr(self, self.CONFIG_EDGE_MAX_BASELINE_KEY)
 
         return tuple(
-            map(lambda pack: pack[1] < pack[0] < pack[2], zip(edge_sensors, min_baselines, max_baselines)))
+            map(lambda pack: not (pack[0] < pack[1] < pack[2]), zip(min_baselines, edge_sensors, max_baselines)))
 
     def react(self) -> int:
-        return self.exc_action(self.action_table.get(self.infer(self.updater())),
-                               getattr(self, self.CONFIG_BASIC_SPEED_KEY))
+        edge_sensor_status = self.exc_action(self.action_table.get(self.infer(self.updater())),
+                                             getattr(self, self.CONFIG_BASIC_SPEED_KEY))
+        return edge_sensor_status if edge_sensor_status else self.exc_action(self.action_table.get(self.gray_updater()),
+                                                                             getattr(self, self.CONFIG_BASIC_SPEED_KEY))

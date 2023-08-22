@@ -6,22 +6,18 @@
     "Detector": {
       "CameraId": 0,
       "CameraResolutionMultiplier": 0.3,
-      "StartDetectTag": false
+      "StartDetectTag": true
     },
     "OnBoardSensors": {
       "Debug": false
-    },
-    "I2CExpansionSensors": {
-      "SCLPin": 6,
-      "SDAPin": 7,
-      "Speed": 100,
-      "TargetAddr": 36,
-      "RegisterAddr": 16
     }
   },
   "MotionSection": {
     "StartSpeed": 7000,
     "StartDuration": 600
+  },
+  "MiscSection": {
+    "TeamColor": "blue"
   },
   "Sensor": {
     "OnBoardAdc": {
@@ -31,22 +27,25 @@
       "Rr": 1,
       "L1": 8,
       "R1": 0,
-      "Fb": 5,
-      "Rb": 3
-    },
-    "ExpansionAdc": {
-      "L3": 0,
-      "L4": 1,
-      "L2": 2,
-      "Ftl": 3,
-      "R3": 4,
-      "R4": 5,
-      "R2": 6,
-      "Ftr": 7
+      "Fb": 3,
+      "Rb": 5,
+      "TrueGrays": 4
     },
     "OnBoardIo": {
-      "GrayL": 7,
-      "GrayR": 6
+      "GrayL": 3,
+      "GrayR": 2,
+      "Ftl": 7,
+      "Ftr": 6,
+      "Rtr": 5
     }
+  },
+  "InferSection": {
+    "TrueGray": {
+      "MinBaseline": 2930,
+      "MaxBaseline": 4096
+    }
+  },
+  "Filters": {
+    "MovingaverageWindowSize": 20
   }
 }

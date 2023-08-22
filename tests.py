@@ -66,14 +66,16 @@ class InferrerTests(unittest.TestCase):
         print(a)
 
     def test_StandardFenceInferrer_create(self):
-        a = StandardFenceInferrer(action_player=ActionPlayer(), sensor_hub=SensorHub(updaters=[]),
-                                  config_path=EMPTY_JSON)
+        a = StandardFenceInferrer(sensor_hub=SensorHub(updaters=[]), action_player=ActionPlayer(),
+                                  config_path=EMPTY_JSON, edge_sensor_ids=, surrounding_sensor_ids=,
+                                  grays_sensor_ids=[], extra_sensor_ids=[])
         a.save_config('config/std_fence_inferrer_config.json')
         print(a)
 
     def test_StandardSurroundInferrer_create(self):
-        a = StandardSurroundInferrer(action_player=ActionPlayer(), sensor_hub=SensorHub(updaters=[]),
-                                     config_path=EMPTY_JSON)
+        a = StandardSurroundInferrer(sensor_hub=SensorHub(updaters=[]), action_player=ActionPlayer(),
+                                     config_path=EMPTY_JSON, tag_detector=, surrounding_sensor_ids=, edge_sensor_ids=,
+                                     grays_sensor_ids=[], extra_sensor_ids=[])
         a.save_config('config/std_surround_inferrer_config.json')
         print(a)
 
