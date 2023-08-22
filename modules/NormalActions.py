@@ -75,23 +75,23 @@ class NormalActions(AbstractNormalActions):
         return self._infer_body()
 
     def register_all_children_config(self):
-        self.register_config(self.CONFIG_SCAN_WEIGHT_KEY, 1)
+        self.register_config(self.CONFIG_SCAN_WEIGHT_KEY, 2)
         self.register_config(self.CONFIG_SCANNING_SPEED_KEY, 100)
         self.register_config(self.CONFIG_SCANNING_DURATION_KEY, 4500)
         self.register_config(self.CONFIG_SCAN_CYCLES_KEY, 1)
 
-        self.register_config(self.CONFIG_SNAKE_WEIGHT_KEY, 1)
+        self.register_config(self.CONFIG_SNAKE_WEIGHT_KEY, 2)
         self.register_config(self.CONFIG_SNAKE_CYCLES_KEY, 3)
 
-        self.register_config(self.CONFIG_DRIFTING_WEIGHT_KEY, 1)
+        self.register_config(self.CONFIG_DRIFTING_WEIGHT_KEY, 2)
         self.register_config(self.CONFIG_DRIFTING_CYCLES_KEY, 1)
 
-        self.register_config(self.CONFIG_TURN_WEIGHT_KEY, 1)
+        self.register_config(self.CONFIG_TURN_WEIGHT_KEY, 4)
 
-        self.register_config(self.CONFIG_PLAIN_MOVE_WEIGHT_KEY, 1)
+        self.register_config(self.CONFIG_PLAIN_MOVE_WEIGHT_KEY, 16)
 
         self.register_config(self.CONFIG_IDLE_IDS_KEY, list(range(8)))
-        self.register_config(self.CONFIG_IDLE_WEIGHT_KEY, 1)
+        self.register_config(self.CONFIG_IDLE_WEIGHT_KEY, 6)
         self.register_config(self.CONFIG_IDLE_MIN_BASELINE_KEY, [None] * 8)
         self.register_config(self.CONFIG_IDLE_MAX_BASELINE_KEY, [150] * 8)
 
@@ -197,7 +197,7 @@ class NormalActions(AbstractNormalActions):
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(-sign * basic_speed, sign * basic_speed),
                                 action_speed_multiplier=enlarge_multiplier_ll(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                action_duration=2 * getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 action_duration_multiplier=enlarge_multiplier_lll()),
                 new_ActionFrame()] * getattr(self, self.CONFIG_SCAN_CYCLES_KEY)
 
