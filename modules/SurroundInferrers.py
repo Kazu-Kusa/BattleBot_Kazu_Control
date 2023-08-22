@@ -515,18 +515,21 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
             sensor_ids=edge_sensor_ids,
             min_lines=edge_min_lines,
-            max_lines=edge_max_lines
+            max_lines=edge_max_lines,
+            use_any=True
         )
         self._rear_watcher: Watcher = build_watcher_full_ctrl(
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
             sensor_ids=[edge_sensor_ids[1], edge_sensor_ids[2]],
             min_lines=[edge_min_lines[1], edge_min_lines[2]],
-            max_lines=[edge_max_lines[1], edge_max_lines[2]])
+            max_lines=[edge_max_lines[1], edge_max_lines[2]],
+            use_any=True)
         self._front_watcher: Watcher = build_watcher_full_ctrl(
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
             sensor_ids=[edge_sensor_ids[0], edge_sensor_ids[3]],
             min_lines=[edge_min_lines[0], edge_min_lines[3]],
-            max_lines=[edge_max_lines[0], edge_max_lines[3]])
+            max_lines=[edge_max_lines[0], edge_max_lines[3]],
+            use_any=True)
         self._front_watcher_grays: Watcher = build_watcher_simple(
             sensor_update=self._sensors.on_board_io_updater[FU_INDEX],
             sensor_id=grays_sensor_ids,
