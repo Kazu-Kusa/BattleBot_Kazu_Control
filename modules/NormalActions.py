@@ -1,5 +1,6 @@
+import warnings
 from random import choices, choice
-from typing import Tuple
+from typing import Tuple, List
 
 from AbstractNormalActions import AbstractNormalActions
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
@@ -149,20 +150,23 @@ class NormalActions(AbstractNormalActions):
         )
 
     def _make_infer_body(self):
-        action_keys = [
+        action_keys: List[int] = [
             self.KEY_SCAN,
             self.KEY_SNAKE,
             self.KEY_DRIFTING,
             self.KEY_TURN,
             self.KEY_PLAIN_MOVE,
             self.KEY_IDLE]
-        weights = [
+        weights: List[int] = [
             getattr(self, self.CONFIG_SCAN_WEIGHT_KEY),
             getattr(self, self.CONFIG_SNAKE_WEIGHT_KEY),
             getattr(self, self.CONFIG_DRIFTING_WEIGHT_KEY),
             getattr(self, self.CONFIG_TURN_WEIGHT_KEY),
             getattr(self, self.CONFIG_PLAIN_MOVE_WEIGHT_KEY),
             getattr(self, self.CONFIG_IDLE_WEIGHT_KEY)]
+        warnings.warn('\nBuilding Normal Action selector\n'
+                      f'{action_keys}\n'
+                      f'{weights}')
 
         def infer_body() -> int:
             """
@@ -170,6 +174,7 @@ class NormalActions(AbstractNormalActions):
             Returns: the key that corresponds to the action
 
             """
+            nonlocal action_keys, weights
             return choices(action_keys, weights=weights)[0]
 
         return infer_body
