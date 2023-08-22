@@ -153,24 +153,24 @@ class BattleBot(Bot):
 
     def Battle(self) -> None:
 
-        def is_on_stage() -> bool:
+        def _is_on_stage() -> bool:
             # TODO: do remember implement this stage check
             return True
 
-        def on_stage() -> None:
+        def _on_stage() -> None:
             if self.edge_inferrer.react():
                 return
-            # if self.surrounding_inferrer.react():
-            #     self.edge_inferrer.react()
-            #     return
+            if self.surrounding_inferrer.react():
+                self.edge_inferrer.react()
+                return
             self.normal_actions.react()
 
-        def off_stage() -> None:
+        def _off_stage() -> None:
             self.fence_inferrer.react()
             self.screen.set_led_color(1, self.screen.COLOR_GREEN)
 
         while True:
-            on_stage() if is_on_stage() else off_stage()
+            _on_stage() if _is_on_stage() else _off_stage()
 
     def Battle_debug(self) -> None:
         """

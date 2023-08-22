@@ -200,7 +200,6 @@ class NormalActions(AbstractNormalActions):
 
         """
         scanning_speed = getattr(self, self.CONFIG_SCANNING_SPEED_KEY)
-        # sign = random_sign()
         return [new_ActionFrame(action_speed=(-scanning_speed, scanning_speed),
                                 action_duration=getattr(self, self.CONFIG_SCANNING_DURATION_KEY),
                                 breaker_func=self._surrounding_watcher,
