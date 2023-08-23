@@ -22,10 +22,10 @@
       800
     ],
     "MaxBaselines": [
-      null,
-      null,
-      null,
-      null
+      4096,
+      4096,
+      4096,
+      4096
     ]
   },
   "EdgeWatcher": {
