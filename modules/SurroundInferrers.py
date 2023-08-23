@@ -207,7 +207,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
                                 breaker_func=self._front_watcher_merged),
-                new_ActionFrame()]
+                new_ActionFrame(action_duration=10)]
 
     def on_enemy_box_encountered_at_front_with_behind_object(self, basic_speed) -> ComplexAction:
         # 在前遇到敌方箱子，后方有物品，我希望左转或右转后,后退（有中断）
@@ -326,19 +326,20 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         """
         # TODO: use break action to improve performance
         sign = random_sign()
+        duration = getattr(self, self.CONFIG_BASIC_DURATION_KEY)
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=enlarge_multiplier_l(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
                                 breaker_func=self._front_watcher_merged),
-                new_ActionFrame(),
+                new_ActionFrame(action_duration=10),
                 new_ActionFrame(action_speed=-basic_speed,
                                 action_speed_multiplier=shrink_multiplier_l(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                action_duration=duration,
                                 breaker_func=self._rear_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
                                 action_speed_multiplier=enlarge_multiplier_l(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
+                                action_duration=duration),
                 new_ActionFrame()]
 
     def on_nothing(self, basic_speed) -> ComplexAction:
@@ -350,7 +351,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 action_speed_multiplier=enlarge_multiplier_l(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
                                 breaker_func=self._front_watcher_merged),
-                new_ActionFrame(),
+                new_ActionFrame(action_duration=10),
                 new_ActionFrame(action_speed=-basic_speed,
                                 action_speed_multiplier=shrink_multiplier_l(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
@@ -363,7 +364,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 action_speed_multiplier=enlarge_multiplier_l(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
                                 breaker_func=self._front_watcher_merged),
-                new_ActionFrame(),
+                new_ActionFrame(action_duration=10),
                 new_ActionFrame(action_speed=-basic_speed,
                                 action_speed_multiplier=shrink_multiplier_l(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
@@ -377,7 +378,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
                                 breaker_func=self._front_watcher_merged),
-                new_ActionFrame(),
+                new_ActionFrame(action_duration=10),
                 new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
@@ -390,7 +391,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
                                 breaker_func=self._front_watcher_merged),
-                new_ActionFrame(),
+                new_ActionFrame(action_duration=10),
                 new_ActionFrame(action_speed=-basic_speed,
                                 action_speed_multiplier=shrink_multiplier_l(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
@@ -404,7 +405,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
                                 breaker_func=self._front_watcher_merged),
-                new_ActionFrame(),
+                new_ActionFrame(action_duration=10),
                 new_ActionFrame(action_speed=(basic_speed, - basic_speed),
                                 action_speed_multiplier=shrink_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
@@ -422,7 +423,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
                                 breaker_func=self._front_watcher_merged),
-                new_ActionFrame(),
+                new_ActionFrame(action_duration=10),
                 new_ActionFrame(action_speed=(-basic_speed, basic_speed),
                                 action_speed_multiplier=shrink_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
@@ -440,7 +441,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
                                 breaker_func=self._front_watcher_merged),
-                new_ActionFrame(),
+                new_ActionFrame(action_duration=10),
                 new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
                                 action_speed_multiplier=shrink_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
@@ -468,7 +469,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
                                 breaker_func=self._front_watcher_merged),
-                new_ActionFrame(),
+                new_ActionFrame(action_duration=10),
                 new_ActionFrame(action_speed=-basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
@@ -485,7 +486,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
                                 breaker_func=self._front_watcher_merged),
-                new_ActionFrame(),
+                new_ActionFrame(action_duration=10),
                 new_ActionFrame(action_speed=-basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
