@@ -29,6 +29,6 @@
     ]
   },
   "DeltaWatcher": {
-    "MinDeviation": 150
+    "MinDeviation": 50
   }
 }
