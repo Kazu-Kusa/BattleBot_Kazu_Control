@@ -267,7 +267,7 @@ class NormalActions(AbstractNormalActions):
                                 action_speed_multiplier=enlarge_multiplier_ll(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 action_duration_multiplier=float_multiplier_middle(),
-                                breaker_func=self._front_watcher_grays, ),
+                                breaker_func=self._front_watcher_grays),
                 new_ActionFrame()] * getattr(self, self.CONFIG_DRIFTING_CYCLES_KEY)
 
     def turn(self, basic_speed: int) -> ComplexAction:
