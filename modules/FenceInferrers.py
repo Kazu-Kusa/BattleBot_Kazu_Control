@@ -134,7 +134,7 @@ class StandardFenceInferrer(AbstractFenceInferrer):
             use_any=True
         )
         indexed_io_updater = self._sensors.on_board_io_updater[IU_INDEX]
-        rear_sensor_id = edge_sensor_ids[-1]
+        rear_sensor_id = extra_sensor_ids[-1]
         self._rear_object_watcher: Watcher = lambda: not bool(indexed_io_updater(rear_sensor_id))
 
         sensor_updater = self._sensors.on_board_adc_updater[FU_INDEX]
