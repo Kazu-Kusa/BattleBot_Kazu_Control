@@ -537,7 +537,6 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
 
     CONFIG_MIN_BASELINES_KEY = f'{CONFIG_INFER_KEY}/MinBaselines'
 
-    CONFIG_MAX_BASELINES_KEY = f'{CONFIG_INFER_KEY}/MaxBaselines'
     CONFIG_EDGE_WATCHER_KEY = "EdgeWatcher"
     CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MaxBaseline'
 
@@ -573,8 +572,6 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         # each in the list is corresponding to [front,behind,left,right]
         self.register_config(config_registry_path=self.CONFIG_MIN_BASELINES_KEY,
                              value=[1300] * 4)
-        self.register_config(config_registry_path=self.CONFIG_MAX_BASELINES_KEY,
-                             value=[1900] * 4)
 
         self.register_config(self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY, [2070, 2150, 2210, 2050])
         self.register_config(self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY, [1550, 1550, 1550, 1550])
@@ -626,11 +623,14 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                                               self._front_watcher],
                                                              use_any=True)
 
-        self._status_infer = self._make_infer_body(surrounding_sensor_ids)
+        self._status_infer = self._make_infer_body(surrounding_sensor_ids, extra_sensor_ids)
 
-    def _make_infer_body(self, sensor_ids: Tuple[int, int, int, int]):
+    def _make_infer_body(self, sensor_ids: Tuple[int, int, int, int], extra_sensor_ids: Tuple[int, int, int]):
         """
         make an infer_body with all variables bound locally, which can bring a better performance
+        Args:
+            extra_sensor_ids ():
+
         Returns:
 
         """
@@ -642,9 +642,14 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
             self.KEY_RIGHT_OBJECT
         )
         min_baselines = getattr(self, self.CONFIG_MIN_BASELINES_KEY)
-        max_baselines = getattr(self, self.CONFIG_MAX_BASELINES_KEY)
         front_object_table = self.__TAG_STATUS_CODE_TABLE.get(tag_detector.team_color)
-        updater = self._sensors.on_board_adc_updater[FU_INDEX]
+        adc_updater = self._sensors.on_board_adc_updater[FU_INDEX]
+        io_updater = self._sensors.on_board_io_updater[FU_INDEX]
+        fb_id, rb_id, l1_id, r1_id = sensor_ids
+        fb_min_line, rb_min_line, l1_min_line, r1_min_line = min_baselines
+        ftl_id, ftr_id, rtr_id = extra_sensor_ids
+
+        behind_status_weight, left_status_weight, right_status_weight = behind_left_right_weights
 
         def status_infer() -> int:
             """
@@ -652,12 +657,21 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
             Returns: the status code of surroundings.
 
             """
-            updated_data = updater()  # use updater to get updated sensor data
-            status_bools = tuple(
-                min_baseline < updated_data[sensor_id] < max_baseline for min_baseline, sensor_id, max_baseline in
-                zip(min_baselines, sensor_ids, max_baselines))  # calc for the three-direction status,behind,left,right
+            # use updater to get updated sensor data
+            adc_updated_data = adc_updater()
+            io_updated_data = io_updater()
+            # calc for the front status
+            status_bools = (
+                any([not io_updated_data[ftl_id], not io_updated_data[ftr_id], adc_updated_data[fb_id] > fb_min_line]),
+                any([not io_updated_data[rtr_id], adc_updated_data[rb_id] > rb_min_line]),
+                adc_updated_data[l1_id] > l1_min_line,
+                adc_updated_data[r1_id] > r1_min_line
+            )
+            # calc for the three-direction status, behind, left, right
             # calc for the surrounding status code except front
-            left_right_behind_status = sum(x * y for x, y in zip(status_bools[1:], behind_left_right_weights))
+            left_right_behind_status = status_bools[1] * behind_status_weight + \
+                                       status_bools[2] * left_status_weight + \
+                                       status_bools[3] * right_status_weight
             # use front sensors and tag to search the corresponding status code
             front_object_status = front_object_table.get(f'{tag_detector.tag_id}/{status_bools[0]}')
             # TODO: should add a tag-follow feature, because the tag may not be at the very front of the robot.
