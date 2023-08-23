@@ -212,15 +212,21 @@ class BattleBot(Bot):
             self.screen.put_string(0, 0, f'{status_code}')
             self.screen.put_string(0, 12, f'{perf_counter_ns()}')
             self.screen.refresh()
+
             if status_code:
                 return
             if self.surrounding_inferrer.react():
+                self.edge_inferrer.react()
                 return
             self.normal_actions.react()
 
         def off_stage() -> None:
-            self.fence_inferrer.react()
+            status_code = self.fence_inferrer.react()
+            self.screen.fill_screen(self.screen.COLOR_BLACK)
+            self.screen.put_string(0, 0, f'{status_code}')
+            self.screen.put_string(0, 15, f'{perf_counter_ns()}')
             self.screen.set_led_color(1, self.screen.COLOR_GREEN)
+            self.screen.refresh()
 
         while True:
             on_stage() if is_on_stage() else off_stage()
@@ -256,8 +262,8 @@ if __name__ == '__main__':
     # bot.start_match(normal_spead=3000, team_color='blue', use_cam=False)
 
     try:
-        bot.Battle()
-        # bot.Battle_debug()
+        # bot.Battle()
+        bot.Battle_debug()
     except KeyboardInterrupt:
         print('end')
         bot.player.append(new_ActionFrame())
