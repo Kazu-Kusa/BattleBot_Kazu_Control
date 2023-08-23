@@ -16,6 +16,9 @@ class StandardFenceInferrer(AbstractFenceInferrer):
     CONFIG_MOTION_KEY = 'MotionSection'
     CONFIG_BASIC_DURATION_KEY = f'{CONFIG_MOTION_KEY}/BasicDuration'
     CONFIG_BASIC_SPEED_KEY = f'{CONFIG_MOTION_KEY}/BasicSpeed'
+
+    CONFIG_LONG_TURN_DURATION_KEY = f'{CONFIG_MOTION_KEY}/LongTurnDuration'
+
     CONFIG_OFF_STAGE_DASH_DURATION_KEY = f'{CONFIG_MOTION_KEY}/OffStageDashDuration'
     CONFIG_OFF_STAGE_DASH_SPEED_KEY = f'{CONFIG_MOTION_KEY}/OffStageDashSpeed'
     CONFIG_FENCE_INFER_KEY = 'InferSection'
@@ -42,6 +45,9 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                              value=200)
         self.register_config(config_registry_path=self.CONFIG_BASIC_SPEED_KEY,
                              value=2500)
+        self.register_config(config_registry_path=self.CONFIG_LONG_TURN_DURATION_KEY,
+                             value=1000)
+
         self.register_config(config_registry_path=self.CONFIG_OFF_STAGE_DASH_DURATION_KEY,
                              value=600)
         self.register_config(config_registry_path=self.CONFIG_OFF_STAGE_DASH_SPEED_KEY,
