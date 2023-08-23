@@ -165,10 +165,14 @@ class StandardFenceInferrer(AbstractFenceInferrer):
     # region methods
 
     def on_front_to_fence(self, basic_speed) -> ComplexAction:
-        return [new_ActionFrame(action_speed=(-basic_speed),
-                                action_speed_multiplier=enlarge_multiplier_lll(),
+        return [new_ActionFrame(action_speed=basic_speed,
+                                action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
-                new_ActionFrame()]
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=getattr(self.CONFIG_OFF_STAGE_DASH_SPEED_KEY),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
+                new_ActionFrame()
+                ]
 
     def on_left_to_fence(self, basic_speed) -> ComplexAction:
         return [new_ActionFrame(action_speed=(-basic_speed, basic_speed),
