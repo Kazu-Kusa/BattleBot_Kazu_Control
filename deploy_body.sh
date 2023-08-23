@@ -281,4 +281,4 @@ sudo chmod -R 777 $TEMP_DIR_PATH
 
 
 OPENCV_LIB="export LD_PRELOAD=/usr/lib/arm-linux-gnueabihf/libatomic.so.1"
-sh -c "echo $OPENCV_LIB >> ~/.bashrc"
+sh -c "echo $OPENCV_LIB >> /etc/profile"

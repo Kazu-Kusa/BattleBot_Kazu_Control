@@ -21,7 +21,7 @@
     "Weight": 4
   },
   "PlainMove": {
-    "Weight": 15
+    "Weight": 22
   },
   "Idle": {
     "Ids": [
@@ -56,23 +56,23 @@
       null
     ]
   },
-  "Watcher": {
+  "SurroundingWatcher": {
     "MaxBaseline": [
-      2050,
-      2050,
-      2050,
-      2050
+      null,
+      null,
+      null,
+      null
     ],
     "MinBaseline": [
-      800,
-      800,
-      800,
-      800
+      200,
+      200,
+      200,
+      200
     ]
   },
   "EdgeWatcher": {
     "MaxBaseline": [
-      1900,
+      1800,
       1900,
       1900,
       1900
