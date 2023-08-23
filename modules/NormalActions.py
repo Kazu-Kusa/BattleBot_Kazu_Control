@@ -173,6 +173,9 @@ class NormalActions(AbstractNormalActions):
             min_lines=getattr(self, self.CONFIG_IDLE_MIN_BASELINE_KEY),
             use_any=True
         )
+        self._idle_watcher_merged: Watcher = watchers_merge([self._extra_sensor_watcher,
+                                                             self._idle_watcher],
+                                                            use_any=True)
 
     def _make_infer_body(self):
         action_keys: Tuple[int, ...] = (
@@ -324,7 +327,7 @@ class NormalActions(AbstractNormalActions):
         return [new_ActionFrame(action_speed=0,
                                 action_duration=duration,
                                 action_duration_multiplier=enlarge_multiplier_lll(),
-                                breaker_func=self._idle_watcher,
+                                breaker_func=self._idle_watcher_merged,
                                 break_action=(new_ActionFrame(), new_ActionFrame(
                                     action_speed=(sign * basic_speed, -sign * basic_speed),
                                     action_duration=duration,
