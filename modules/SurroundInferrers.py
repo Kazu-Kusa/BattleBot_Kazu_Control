@@ -450,21 +450,86 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                 breaker_func=self._front_watcher_merged),
                 new_ActionFrame()]
 
+    def on_allay_box_encountered_at_front(self, basic_speed: int) -> ComplexAction:
+        sign = random_sign()
+        return [new_ActionFrame(action_speed=-basic_speed,
+                                action_speed_multiplier=float_multiplier_middle(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=self._rear_watcher),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
+                                action_speed_multiplier=enlarge_multiplier_ll(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
+                new_ActionFrame()]
+
+    def on_enemy_box_encountered_at_front(self, basic_speed: int) -> ComplexAction:
+        sign = random_sign()
+        return [new_ActionFrame(action_speed=basic_speed,
+                                action_speed_multiplier=enlarge_multiplier_ll(),
+                                action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
+                                breaker_func=self._front_watcher_merged),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=-basic_speed,
+                                action_speed_multiplier=float_multiplier_middle(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=self._rear_watcher),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
+                                action_speed_multiplier=enlarge_multiplier_ll(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
+                new_ActionFrame()]
+
+    def on_enemy_car_encountered_at_front(self, basic_speed: int) -> ComplexAction:
+        # TODO: dash til the edge, then fall back,should add a block skill(?)
+        return [new_ActionFrame(action_speed=basic_speed,
+                                action_speed_multiplier=enlarge_multiplier_ll(),
+                                action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
+                                breaker_func=self._front_watcher_merged),
+                new_ActionFrame(),
+                new_ActionFrame(action_speed=-basic_speed,
+                                action_speed_multiplier=float_multiplier_middle(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=self._rear_watcher),
+                new_ActionFrame()]
+
+    def on_object_encountered_at_left(self, basic_speed: int) -> ComplexAction:
+        return [new_ActionFrame(action_speed=(-basic_speed, basic_speed),
+                                action_speed_multiplier=enlarge_multiplier_l(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=self._front_object_watcher),
+                new_ActionFrame()]
+
+    def on_object_encountered_at_right(self, basic_speed: int) -> ComplexAction:
+        return [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
+                                action_speed_multiplier=enlarge_multiplier_l(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=self._front_object_watcher),
+                new_ActionFrame()]
+
+    def on_object_encountered_at_behind(self, basic_speed: int) -> ComplexAction:
+        sign = random_sign()
+        return [new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
+                                action_speed_multiplier=enlarge_multiplier_ll(),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=self._front_object_watcher),
+                new_ActionFrame()]
+
     # endregion
 
     CONFIG_MOTION_KEY = 'MotionSection'
     CONFIG_BASIC_DURATION_KEY = f'{CONFIG_MOTION_KEY}/BasicDuration'
     CONFIG_BASIC_SPEED_KEY = f'{CONFIG_MOTION_KEY}/BasicSpeed'
+
     CONFIG_DASH_TIMEOUT_KEY = f'{CONFIG_MOTION_KEY}/DashTimeout'
-
     CONFIG_INFER_KEY = 'InferSection'
+
     CONFIG_FRONT_OBJECT_TABLE_KEY = f'{CONFIG_INFER_KEY}/FrontObjectTable'
-
     CONFIG_MIN_BASELINES_KEY = f'{CONFIG_INFER_KEY}/MinBaselines'
-    CONFIG_MAX_BASELINES_KEY = f'{CONFIG_INFER_KEY}/MaxBaselines'
 
+    CONFIG_MAX_BASELINES_KEY = f'{CONFIG_INFER_KEY}/MaxBaselines'
     CONFIG_EDGE_WATCHER_KEY = "EdgeWatcher"
     CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MaxBaseline'
+
     CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MinBaseline'
 
     def react(self) -> int:
@@ -595,73 +660,3 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
             return left_right_behind_status + front_object_status
 
         return status_infer
-
-    @final
-    def on_allay_box_encountered_at_front(self, basic_speed: int) -> ComplexAction:
-        sign = random_sign()
-        return [new_ActionFrame(action_speed=-basic_speed,
-                                action_speed_multiplier=float_multiplier_middle(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._rear_watcher),
-                new_ActionFrame(),
-                new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
-                                action_speed_multiplier=enlarge_multiplier_ll(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
-                new_ActionFrame()]
-
-    @final
-    def on_enemy_box_encountered_at_front(self, basic_speed: int) -> ComplexAction:
-        sign = random_sign()
-        return [new_ActionFrame(action_speed=basic_speed,
-                                action_speed_multiplier=enlarge_multiplier_ll(),
-                                action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
-                                breaker_func=self._front_watcher_merged),
-                new_ActionFrame(),
-                new_ActionFrame(action_speed=-basic_speed,
-                                action_speed_multiplier=float_multiplier_middle(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._rear_watcher),
-                new_ActionFrame(),
-                new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
-                                action_speed_multiplier=enlarge_multiplier_ll(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
-                new_ActionFrame()]
-
-    @final
-    def on_enemy_car_encountered_at_front(self, basic_speed: int) -> ComplexAction:
-        # TODO: dash til the edge, then fall back,should add a block skill(?)
-        return [new_ActionFrame(action_speed=basic_speed,
-                                action_speed_multiplier=enlarge_multiplier_ll(),
-                                action_duration=getattr(self, self.CONFIG_DASH_TIMEOUT_KEY),
-                                breaker_func=self._front_watcher_merged),
-                new_ActionFrame(),
-                new_ActionFrame(action_speed=-basic_speed,
-                                action_speed_multiplier=float_multiplier_middle(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._rear_watcher),
-                new_ActionFrame()]
-
-    @final
-    def on_object_encountered_at_left(self, basic_speed: int) -> ComplexAction:
-        return [new_ActionFrame(action_speed=(-basic_speed, basic_speed),
-                                action_speed_multiplier=enlarge_multiplier_l(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._front_object_watcher),
-                new_ActionFrame()]
-
-    @final
-    def on_object_encountered_at_right(self, basic_speed: int) -> ComplexAction:
-        return [new_ActionFrame(action_speed=(basic_speed, -basic_speed),
-                                action_speed_multiplier=enlarge_multiplier_l(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._front_object_watcher),
-                new_ActionFrame()]
-
-    @final
-    def on_object_encountered_at_behind(self, basic_speed: int) -> ComplexAction:
-        sign = random_sign()
-        return [new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
-                                action_speed_multiplier=enlarge_multiplier_ll(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._front_object_watcher),
-                new_ActionFrame()]
