@@ -28,7 +28,7 @@ class StandardFenceInferrer(AbstractFenceInferrer):
     CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MinBaseline'
 
     CONFIG_DELTA_WATCHER_KEY = 'DeltaWatcher'
-    CONFIG_DELTA_WATCHER_MIN_DEVIATION_KEY = f'{CONFIG_DELTA_WATCHER_KEY}/MinDeviation'
+    CONFIG_DELTA_WATCHER_MAX_DEVIATION_KEY = f'{CONFIG_DELTA_WATCHER_KEY}/MinDeviation'
 
     def react(self) -> int:
         status_code = self.infer()
@@ -55,7 +55,7 @@ class StandardFenceInferrer(AbstractFenceInferrer):
         self.register_config(self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY, [2070, 2150, 2210, 2050])
         self.register_config(self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY, [1550, 1550, 1550, 1550])
 
-        self.register_config(self.CONFIG_DELTA_WATCHER_MIN_DEVIATION_KEY, 300)
+        self.register_config(self.CONFIG_DELTA_WATCHER_MAX_DEVIATION_KEY, 300)
 
     def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str,
                  edge_sensor_ids: Tuple[int, int, int, int], surrounding_sensor_ids: Tuple[int, int, int, int],
@@ -145,12 +145,13 @@ class StandardFenceInferrer(AbstractFenceInferrer):
         self._front_delta_watcher: Watcher = build_delta_watcher_simple(
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
             sensor_id=(surrounding_sensor_ids[FRONT_INDEX],),
-            min_line=getattr(self, self.CONFIG_DELTA_WATCHER_MIN_DEVIATION_KEY)
+            max_line=getattr(self, self.CONFIG_DELTA_WATCHER_MAX_DEVIATION_KEY)
         )
+
         self._rear_delta_watcher: Watcher = build_delta_watcher_simple(
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
             sensor_id=(surrounding_sensor_ids[REAR_INDEX],),
-            min_line=getattr(self, self.CONFIG_DELTA_WATCHER_MIN_DEVIATION_KEY)
+            max_line=getattr(self, self.CONFIG_DELTA_WATCHER_MAX_DEVIATION_KEY)
         )
         weights = (
             self.KEY_FRONT_TO_FENCE,
