@@ -5,16 +5,6 @@
     "DashTimeout": 7200
   },
   "InferSection": {
-    "FrontObjectTable": {
-      "-1/True": 400,
-      "-1/False": 0,
-      "1/True": 100,
-      "1/False": 100,
-      "2/True": 300,
-      "2/False": 300,
-      "3/True": 200,
-      "3/False": 200
-    },
     "MinBaselines": [
       800,
       800,
