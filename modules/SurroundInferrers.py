@@ -3,7 +3,7 @@ from typing import final, Optional, Tuple
 from modules.AbsSurroundInferrer import AbstractSurroundInferrer
 from repo.uptechStar.module.actions import new_ActionFrame, ActionPlayer
 from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplier_ll, float_multiplier_middle, \
-    enlarge_multiplier_l, float_multiplier_upper, shrink_multiplier_ll, shrink_multiplier_l
+    enlarge_multiplier_l, float_multiplier_upper, shrink_multiplier_ll, shrink_multiplier_l, float_multiplier_lower
 from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX
 from repo.uptechStar.module.tagdetector import TagDetector
