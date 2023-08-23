@@ -27,5 +27,8 @@
       null,
       2100
     ]
+  },
+  "DeltaWatcher": {
+    "MinDeviation": 150
   }
 }

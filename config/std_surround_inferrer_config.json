@@ -1,8 +1,8 @@
 {
   "MotionSection": {
-    "BasicDuration": 400,
+    "BasicDuration": 360,
     "BasicSpeed": 3500,
-    "DashTimeout": 6000
+    "DashTimeout": 7200
   },
   "InferSection": {
     "FrontObjectTable": {
@@ -16,16 +16,16 @@
       "3/False": 200
     },
     "MinBaselines": [
-      650,
-      650,
-      650,
-      650
+      800,
+      800,
+      800,
+      800
     ],
     "MaxBaselines": [
-      4096,
-      4096,
-      4096,
-      4096
+      null,
+      null,
+      null,
+      null
     ]
   },
   "EdgeWatcher": {
