@@ -1,4 +1,4 @@
-from typing import final, Optional, Tuple
+from typing import final, Optional, Tuple, Dict
 
 from modules.AbsSurroundInferrer import AbstractSurroundInferrer
 from repo.uptechStar.module.actions import new_ActionFrame, ActionPlayer
@@ -6,12 +6,11 @@ from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplie
     enlarge_multiplier_l, float_multiplier_upper, shrink_multiplier_ll, shrink_multiplier_l, float_multiplier_lower
 from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX, IU_INDEX
-from repo.uptechStar.module.tagdetector import TagDetector
+from repo.uptechStar.module.tagdetector import TagDetector, BLUE_TEAM, YELLOW_TEAM
 from repo.uptechStar.module.watcher import Watcher, \
     build_watcher_full_ctrl, build_watcher_simple, watchers_merge
 
 
-# TODO: use the newly developed action frame insert play to imp this class
 class StandardSurroundInferrer(AbstractSurroundInferrer):
 
     # region Methods
@@ -516,6 +515,18 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                 new_ActionFrame()]
 
     # endregion
+    # TODO unbind these tag id constants
+    __TAG_STATUS_CODE_TABLE: Dict[str, Dict[str, int]] = {
+        BLUE_TEAM: {f'{-1}/{True}': 400, f'{-1}/{False}': 0,
+                    f'{0}/{True}': 100, f'{0}/{False}': 100,
+                    f'{2}/{True}': 300, f'{2}/{False}': 300,
+                    f'{1}/{True}': 200, f'{1}/{False}': 200},
+
+        YELLOW_TEAM: {f'{-1}/{True}': 400, f'{-1}/{False}': 0,
+                      f'{0}/{True}': 100, f'{0}/{False}': 100,
+                      f'{1}/{True}': 300, f'{1}/{False}': 300,
+                      f'{2}/{True}': 200, f'{2}/{False}': 200}
+    }
 
     CONFIG_MOTION_KEY = 'MotionSection'
     CONFIG_BASIC_DURATION_KEY = f'{CONFIG_MOTION_KEY}/BasicDuration'
@@ -524,7 +535,6 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
     CONFIG_DASH_TIMEOUT_KEY = f'{CONFIG_MOTION_KEY}/DashTimeout'
     CONFIG_INFER_KEY = 'InferSection'
 
-    CONFIG_FRONT_OBJECT_TABLE_KEY = f'{CONFIG_INFER_KEY}/FrontObjectTable'
     CONFIG_MIN_BASELINES_KEY = f'{CONFIG_INFER_KEY}/MinBaselines'
 
     CONFIG_MAX_BASELINES_KEY = f'{CONFIG_INFER_KEY}/MaxBaselines'
@@ -537,7 +547,6 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         status_code = self.infer()
         self.exc_action(self.action_table.get(status_code),
                         getattr(self, self.CONFIG_BASIC_SPEED_KEY))
-        # fixme deal with this status code problem
         return status_code
 
     def infer(self) -> int:
@@ -560,14 +569,8 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         self.register_config(config_registry_path=self.CONFIG_DASH_TIMEOUT_KEY,
                              value=6000)
 
-        self.register_config(config_registry_path=self.CONFIG_FRONT_OBJECT_TABLE_KEY,
-                             value={f'{-1}/{True}': 400, f'{-1}/{False}': 0,
-                                    f'{1}/{True}': 100, f'{1}/{False}': 100,
-                                    f'{2}/{True}': 300, f'{2}/{False}': 300,
-                                    f'{3}/{True}': 200, f'{3}/{False}': 200})
         # the inferring currently only support four sensors;
         # each in the list is corresponding to [front,behind,left,right]
-
         self.register_config(config_registry_path=self.CONFIG_MIN_BASELINES_KEY,
                              value=[1300] * 4)
         self.register_config(config_registry_path=self.CONFIG_MAX_BASELINES_KEY,
@@ -640,8 +643,8 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         )
         min_baselines = getattr(self, self.CONFIG_MIN_BASELINES_KEY)
         max_baselines = getattr(self, self.CONFIG_MAX_BASELINES_KEY)
-        front_object_table = getattr(self, self.CONFIG_FRONT_OBJECT_TABLE_KEY)
-        updater = self._sensors.on_board_adc_updater[0]
+        front_object_table = self.__TAG_STATUS_CODE_TABLE.get(tag_detector.team_color)
+        updater = self._sensors.on_board_adc_updater[FU_INDEX]
 
         def status_infer() -> int:
             """
