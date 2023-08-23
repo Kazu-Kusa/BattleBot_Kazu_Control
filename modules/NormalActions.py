@@ -13,7 +13,7 @@ from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl, bui
     build_watcher_simple, watchers_merge
 
 
-def rand_drift(speed: int) -> Tuple[int, int, int, int]:
+def full_rand_drift(speed: int) -> Tuple[int, int, int, int]:
     """
     随机漂移生成器
     Args:
@@ -176,18 +176,18 @@ class NormalActions(AbstractNormalActions):
 
     def _make_infer_body(self):
         action_keys: Tuple[int, ...] = (
-            self.KEY_PLAIN_MOVE,
-            self.KEY_TURN,
+            self.KEY_SCAN,
             self.KEY_SNAKE,
             self.KEY_DRIFTING,
-            self.KEY_SCAN,
+            self.KEY_TURN,
+            self.KEY_PLAIN_MOVE,
             self.KEY_IDLE)
         weights: Tuple[int, ...] = (
-            getattr(self, self.CONFIG_PLAIN_MOVE_WEIGHT_KEY),
-            getattr(self, self.CONFIG_TURN_WEIGHT_KEY),
+            getattr(self, self.CONFIG_SCAN_WEIGHT_KEY),
             getattr(self, self.CONFIG_SNAKE_WEIGHT_KEY),
             getattr(self, self.CONFIG_DRIFTING_WEIGHT_KEY),
-            getattr(self, self.CONFIG_SCAN_WEIGHT_KEY),
+            getattr(self, self.CONFIG_TURN_WEIGHT_KEY),
+            getattr(self, self.CONFIG_PLAIN_MOVE_WEIGHT_KEY),
             getattr(self, self.CONFIG_IDLE_WEIGHT_KEY))
         warnings.warn('\nBuilding Normal Action selector\n'
                       f'{action_keys}\n'
@@ -216,10 +216,10 @@ class NormalActions(AbstractNormalActions):
         scanning_speed = getattr(self, self.CONFIG_SCANNING_SPEED_KEY)
         return [new_ActionFrame(action_speed=(-scanning_speed, scanning_speed),
                                 action_duration=getattr(self, self.CONFIG_SCANNING_DURATION_KEY),
-                                breaker_func=self._surrounding_watcher,
+                                breaker_func=self._hall_surrounding_watcher,
                                 break_action=(new_ActionFrame(),)),
                 new_ActionFrame(action_duration=50,
-                                breaker_func=self._full_edge_watcher,
+                                breaker_func=self._full_edge_watcher_merged,
                                 break_action=(new_ActionFrame(),),
                                 is_override_action=True),
                 new_ActionFrame(action_speed=(basic_speed, -basic_speed),
@@ -238,13 +238,13 @@ class NormalActions(AbstractNormalActions):
 
         """
         basic_duration = getattr(self, self.CONFIG_BASIC_DURATION_KEY)
-        return [new_ActionFrame(action_speed=(0, basic_speed, basic_speed, basic_speed),
+        return [new_ActionFrame(action_speed=(basic_speed, 0, basic_speed, basic_speed),
                                 action_speed_multiplier=float_multiplier_lower(),
                                 action_duration=basic_duration,
                                 action_duration_multiplier=enlarge_multiplier_lll(),
                                 breaker_func=self._front_watcher_merged),
                 new_ActionFrame(),
-                new_ActionFrame(action_speed=(basic_speed, basic_speed, basic_speed, 0),
+                new_ActionFrame(action_speed=(basic_speed, basic_speed, 0, basic_speed),
                                 action_speed_multiplier=float_multiplier_lower(),
                                 action_duration=basic_duration,
                                 action_duration_multiplier=enlarge_multiplier_lll(),
@@ -260,15 +260,23 @@ class NormalActions(AbstractNormalActions):
         Returns:
 
         """
-        return [new_ActionFrame(action_speed=0,
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
+        duration = getattr(self, self.CONFIG_BASIC_DURATION_KEY)
+        return [
+            new_ActionFrame(action_speed=0,
+                            action_duration=duration,
+                            breaker_func=self._full_edge_watcher_merged,
+                            break_action=(new_ActionFrame(),),
+                            is_override_action=True),
 
-                new_ActionFrame(action_speed=rand_drift(basic_speed),
-                                action_speed_multiplier=enlarge_multiplier_ll(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                action_duration_multiplier=float_multiplier_middle(),
-                                breaker_func=self._front_watcher_grays),
-                new_ActionFrame()] * getattr(self, self.CONFIG_DRIFTING_CYCLES_KEY)
+            new_ActionFrame(action_speed=full_rand_drift(basic_speed),
+                            action_speed_multiplier=enlarge_multiplier_ll(),
+                            action_duration=duration,
+                            action_duration_multiplier=float_multiplier_middle(),
+                            breaker_func=self._front_watcher_grays,
+                            break_action=(new_ActionFrame(),),
+                            is_override_action=True),
+
+            new_ActionFrame()] * getattr(self, self.CONFIG_DRIFTING_CYCLES_KEY)
 
     def turn(self, basic_speed: int) -> ComplexAction:
         """
@@ -282,7 +290,8 @@ class NormalActions(AbstractNormalActions):
         sign = random_sign()
         return [new_ActionFrame(action_speed=(sign * basic_speed, -sign * basic_speed),
                                 action_speed_multiplier=float_multiplier_middle(),
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
+                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                breaker_func=self._extra_sensor_watcher),
                 new_ActionFrame()]
 
     def plain_move(self, basic_speed: int) -> ComplexAction:
@@ -298,7 +307,7 @@ class NormalActions(AbstractNormalActions):
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 action_duration_multiplier=shrink_multiplier_lll(),
-                                breaker_func=self._full_edge_watcher),
+                                breaker_func=self._full_edge_watcher_merged),
                 new_ActionFrame()]
 
     def idle(self, basic_speed: int) -> ComplexAction:
@@ -311,13 +320,14 @@ class NormalActions(AbstractNormalActions):
 
         """
         sign = random_sign()
+        duration = getattr(self, self.CONFIG_BASIC_DURATION_KEY)
         return [new_ActionFrame(action_speed=0,
-                                action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                action_duration=duration,
                                 action_duration_multiplier=enlarge_multiplier_lll(),
                                 breaker_func=self._idle_watcher,
                                 break_action=(new_ActionFrame(), new_ActionFrame(
                                     action_speed=(sign * basic_speed, -sign * basic_speed),
-                                    action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
+                                    action_duration=duration,
                                     action_speed_multiplier=enlarge_multiplier_lll(),
 
                                 ), new_ActionFrame())
