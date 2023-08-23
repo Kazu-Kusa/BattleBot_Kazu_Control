@@ -16,16 +16,16 @@
   },
   "EdgeWatcher": {
     "MaxBaseline": [
-      1900,
-      1900,
-      1900,
-      1900
+      null,
+      500,
+      500,
+      null
     ],
     "MinBaseline": [
-      1300,
-      1500,
-      1500,
-      1300
+      2100,
+      null,
+      null,
+      2100
     ]
   }
 }
