@@ -252,7 +252,7 @@ class MiscTest(unittest.TestCase):
     @staticmethod
     def test_indexing_performance():
         from time import perf_counter_ns
-        class Test():
+        class Test:
 
             def get(self, data):
                 return 0

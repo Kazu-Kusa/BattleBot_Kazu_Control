@@ -2,7 +2,7 @@ from typing import Tuple, List, Callable
 
 from modules.AbsFenceInferrer import AbstractFenceInferrer
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
-from repo.uptechStar.module.algrithm_tools import random_sign, float_multiplier_middle, \
+from repo.uptechStar.module.algrithm_tools import float_multiplier_middle, \
     float_multiplier_lower, shrink_multiplier_l
 from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX, IU_INDEX
@@ -211,7 +211,7 @@ class StandardFenceInferrer(AbstractFenceInferrer):
 
     def on_front_left_right_to_fence(self, basic_speed) -> ComplexAction:
         # 在前方和左右方向上遇到围栏，我希望右转
-        return [new_ActionFrame(action_speed=( basic_speed, - basic_speed),
+        return [new_ActionFrame(action_speed=(basic_speed, - basic_speed),
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 breaker_func=self._front_delta_watcher),
@@ -241,7 +241,7 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 breaker_func=self._front_delta_watcher),
                 new_ActionFrame(),
-                new_ActionFrame(action_speed=( basic_speed, -basic_speed),
+                new_ActionFrame(action_speed=(basic_speed, -basic_speed),
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 breaker_func=self._front_delta_watcher),

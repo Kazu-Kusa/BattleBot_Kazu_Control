@@ -1,7 +1,8 @@
 from abc import abstractmethod
 from typing import final, Tuple, Any, Callable, Sequence
-from repo.uptechStar.module.inferrer_base import InferrerBase
+
 from repo.uptechStar.module.actions import ActionFrame
+from repo.uptechStar.module.inferrer_base import InferrerBase
 
 ActionPack = Tuple[Sequence[ActionFrame], int]
 
