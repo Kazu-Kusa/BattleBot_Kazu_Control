@@ -13,7 +13,7 @@
     }
   },
   "MotionSection": {
-    "StartSpeed": 8500,
+    "StartSpeed": -8500,
     "StartDuration": 600
   },
   "MiscSection": {
