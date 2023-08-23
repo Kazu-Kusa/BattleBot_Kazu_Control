@@ -5,7 +5,7 @@ from repo.uptechStar.module.actions import new_ActionFrame, ActionPlayer
 from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplier_ll, float_multiplier_middle, \
     enlarge_multiplier_l, float_multiplier_upper, shrink_multiplier_ll, float_multiplier_lower
 from repo.uptechStar.module.inferrer_base import ComplexAction
-from repo.uptechStar.module.sensors import SensorHub, FU_INDEX
+from repo.uptechStar.module.sensors import SensorHub, FU_INDEX, IU_INDEX
 from repo.uptechStar.module.tagdetector import TagDetector
 from repo.uptechStar.module.watcher import Watcher, \
     build_watcher_full_ctrl, build_watcher_simple, watchers_merge
@@ -518,11 +518,9 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
             max_line=1,
             use_any=True
         )
-        self._rear_object_watcher: Watcher = build_watcher_simple(
-            sensor_update=self._sensors.on_board_io_updater[FU_INDEX],
-            sensor_id=extra_sensor_ids[2:],  # actually, this watcher uses only one sensor ()
-            max_line=1
-        )
+        indexed_io_updater = self._sensors.on_board_io_updater[IU_INDEX]
+        rear_sensor_id = extra_sensor_ids[-1]
+        self._rear_object_watcher: Watcher = lambda: not bool(indexed_io_updater(rear_sensor_id))
 
         self._full_edge_watcher: Watcher = build_watcher_full_ctrl(
             sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
