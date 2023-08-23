@@ -8,7 +8,6 @@ from modules.FenceInferrers import StandardFenceInferrer
 from modules.NormalActions import NormalActions
 from modules.SurroundInferrers import StandardSurroundInferrer
 from modules.bot import Bot
-from repo.uptechStar.constant import SIDES_SENSOR_ID, START_MIN_LINE
 from repo.uptechStar.module.actions import new_ActionFrame
 from repo.uptechStar.module.algrithm_tools import MovingAverage
 from repo.uptechStar.module.sensors import FU_INDEX
@@ -18,6 +17,9 @@ seed(2023)
 
 
 class BattleBot(Bot):
+    CONFIG_START_UP_KEY = 'StartUp'
+    CONFIG_START_UP_MAX_BASELINE_KEY = f'{CONFIG_START_UP_KEY}/MaxBaseline'
+
     # ad4未注册，暂时没有控制单元
     CONFIG_SENSOR_KEY = "Sensor"
     # region OB_ADC_CONFIG
@@ -54,6 +56,7 @@ class BattleBot(Bot):
 
     # endregion
     def register_all_children_config(self):
+        self.register_config(self.CONFIG_START_UP_MAX_BASELINE_KEY, 500)
         # region OB config
         self.register_config(self.CONFIG_EDGE_FL_KEY, 6)
         self.register_config(self.CONFIG_EDGE_FR_KEY, 2)
@@ -105,12 +108,16 @@ class BattleBot(Bot):
             getattr(self, self.CONFIG_L1_KEY),
             getattr(self, self.CONFIG_R1_KEY)
         )
-
+        side_sensor_ids = (
+            getattr(self, self.CONFIG_L1_KEY),
+            getattr(self, self.CONFIG_R1_KEY)
+        )
         extra_io_sensor_ids = (
             getattr(self, self.CONFIG_FTL_KEY),
             getattr(self, self.CONFIG_FTR_KEY),
             getattr(self, self.CONFIG_RTR_KEY)
         )
+
         self.edge_inferrer = StandardEdgeInferrer(sensor_hub=self.sensor_hub,
                                                   edge_sensor_ids=edge_sensor_ids,
                                                   grays_sensor_ids=grays_sensor_ids,
@@ -136,8 +143,8 @@ class BattleBot(Bot):
                                             extra_sensor_ids=extra_io_sensor_ids)
 
         self._start_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
-                                                   sensor_id=SIDES_SENSOR_ID,
-                                                   min_line=START_MIN_LINE)
+                                                   sensor_id=side_sensor_ids,
+                                                   max_line=getattr(self.CONFIG_START_UP_MAX_BASELINE_KEY))
 
     def wait_start(self) -> None:
         """
@@ -234,7 +241,7 @@ class BattleBot(Bot):
     def interrupt_handler(self):
         self.player.append(new_ActionFrame())
         self.screen.set_led_color(0, self.screen.COLOR_WHITE)
-
+        sleep(1)
         warnings.warn('\nexiting', stacklevel=4)
 
     @final
@@ -259,13 +266,13 @@ if __name__ == '__main__':
                     normal_actions_config='config/std_normal_actions_config.json')
 
     bot.save_all_config()
-    # bot.start_match(normal_spead=3000, team_color='blue', use_cam=False)
+    bot.start_match()
 
-    try:
-        # bot.Battle()
-        bot.Battle_debug()
-    except KeyboardInterrupt:
-        print('end')
-        bot.player.append(new_ActionFrame())
-
-        sleep(1)
+    # try:
+    #     bot.Battle()
+    #     # bot.Battle_debug()
+    # except KeyboardInterrupt:
+    #     print('end')
+    #     bot.player.append(new_ActionFrame())
+    #
+    #     sleep(1)
