@@ -13,11 +13,14 @@
     }
   },
   "MotionSection": {
-    "StartSpeed": 7000,
+    "StartSpeed": 8500,
     "StartDuration": 600
   },
   "MiscSection": {
     "TeamColor": "blue"
+  },
+  "StartUp": {
+    "MaxBaseline": 1100
   },
   "Sensor": {
     "OnBoardAdc": {

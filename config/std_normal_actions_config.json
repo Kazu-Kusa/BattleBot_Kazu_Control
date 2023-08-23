@@ -5,7 +5,7 @@
   },
   "Scan": {
     "Weight": 1,
-    "ScanningSpeed": 260,
+    "ScanningSpeed": 350,
     "ScanningDuration": 3500,
     "ScanCycles": 2
   },
@@ -64,10 +64,10 @@
       null
     ],
     "MinBaseline": [
-      300,
-      300,
-      300,
-      300
+      200,
+      200,
+      200,
+      200
     ]
   },
   "EdgeWatcher": {
