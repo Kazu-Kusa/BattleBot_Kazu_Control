@@ -2,11 +2,12 @@ from typing import Tuple, List, Callable
 
 from modules.AbsFenceInferrer import AbstractFenceInferrer
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
-from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplier_ll, float_multiplier_middle, \
-    float_multiplier_lower, enlarge_multiplier_lll, shrink_multiplier_lll, shrink_multiplier_l
+from repo.uptechStar.module.algrithm_tools import random_sign, float_multiplier_middle, \
+    float_multiplier_lower, shrink_multiplier_l
 from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX, IU_INDEX
-from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl, build_watcher_simple, watchers_merge
+from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl, build_watcher_simple, watchers_merge, \
+    build_delta_watcher_simple
 
 FRONT_INDEX, REAR_INDEX, LEFT_INDEX, RIGHT_INDEX = 0, 1, 2, 3
 
@@ -25,6 +26,9 @@ class StandardFenceInferrer(AbstractFenceInferrer):
     CONFIG_EDGE_WATCHER_KEY = "EdgeWatcher"
     CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MaxBaseline'
     CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MinBaseline'
+
+    CONFIG_DELTA_WATCHER_KEY = 'DeltaWatcher'
+    CONFIG_DELTA_WATCHER_MIN_DEVIATION_KEY = f'{CONFIG_DELTA_WATCHER_KEY}/MinDeviation'
 
     def on_left_right_to_fence(self, basic_speed) -> ComplexAction:
         # 在左方和右方向上遇到围栏，我希望随机转向
@@ -121,6 +125,8 @@ class StandardFenceInferrer(AbstractFenceInferrer):
         self.register_config(self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY, [2070, 2150, 2210, 2050])
         self.register_config(self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY, [1550, 1550, 1550, 1550])
 
+        self.register_config(self.CONFIG_DELTA_WATCHER_MIN_DEVIATION_KEY, 300)
+
     def __init__(self, sensor_hub: SensorHub, action_player: ActionPlayer, config_path: str,
                  edge_sensor_ids: Tuple[int, int, int, int], surrounding_sensor_ids: Tuple[int, int, int, int],
                  grays_sensor_ids: Tuple[int, int],
@@ -206,6 +212,16 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                                                               self._front_watcher],
                                                              use_any=True)
 
+        self._front_delta_watcher: Watcher = build_delta_watcher_simple(
+            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
+            sensor_id=(surrounding_sensor_ids[FRONT_INDEX],),
+            min_line=getattr(self, self.CONFIG_DELTA_WATCHER_MIN_DEVIATION_KEY)
+        )
+        self._rear_delta_watcher: Watcher = build_delta_watcher_simple(
+            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
+            sensor_id=(surrounding_sensor_ids[REAR_INDEX],),
+            min_line=getattr(self, self.CONFIG_DELTA_WATCHER_MIN_DEVIATION_KEY)
+        )
         weights = (
             self.KEY_FRONT_TO_FENCE,
             self.KEY_BEHIND_TO_FENCE,
