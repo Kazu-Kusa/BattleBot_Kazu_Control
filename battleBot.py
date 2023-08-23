@@ -8,7 +8,7 @@ from modules.FenceInferrers import StandardFenceInferrer
 from modules.NormalActions import NormalActions
 from modules.SurroundInferrers import StandardSurroundInferrer
 from modules.bot import Bot
-from repo.uptechStar.module.actions import new_ActionFrame
+from repo.uptechStar.module.actions import new_ActionFrame, ActionFrame
 from repo.uptechStar.module.algrithm_tools import MovingAverage
 from repo.uptechStar.module.sensors import FU_INDEX
 from repo.uptechStar.module.watcher import build_watcher_simple
@@ -152,6 +152,7 @@ class BattleBot(Bot):
         Returns:
 
         """
+        self.tag_detector.tag_detection_switch = False
         tape = [
             new_ActionFrame(breaker_func=self._start_watcher,
                             action_duration=99999999),
@@ -177,6 +178,7 @@ class BattleBot(Bot):
             return true_gray_min_line < mov_average_apply(full_adc_updater()[true_gray_id]) < true_gray_max_line
 
         def _on_stage() -> None:
+            self.tag_detector.tag_detection_switch = True
             if self.edge_inferrer.react():
                 return
             if self.surrounding_inferrer.react():
@@ -185,6 +187,7 @@ class BattleBot(Bot):
             self.normal_actions.react()
 
         def _off_stage() -> None:
+            self.tag_detector.tag_detection_switch = False
             self.fence_inferrer.react()
 
         while True:
@@ -214,6 +217,8 @@ class BattleBot(Bot):
             return is_on_stage
 
         def on_stage() -> None:
+            self.tag_detector.tag_detection_switch = True
+
             status_code = self.edge_inferrer.react()
             self.screen.fill_screen(self.screen.COLOR_BLACK)
             self.screen.put_string(0, 0, f'{status_code}')
@@ -228,6 +233,7 @@ class BattleBot(Bot):
             self.normal_actions.react()
 
         def off_stage() -> None:
+            self.tag_detector.tag_detection_switch = False
             status_code = self.fence_inferrer.react()
             self.screen.fill_screen(self.screen.COLOR_BLACK)
             self.screen.put_string(0, 0, f'{status_code}')
@@ -241,7 +247,9 @@ class BattleBot(Bot):
     def interrupt_handler(self):
         self.player.append(new_ActionFrame())
         self.screen.set_led_color(0, self.screen.COLOR_WHITE)
+
         sleep(1)
+        ActionFrame.save_cache()
         warnings.warn('\nexiting', stacklevel=4)
 
     @final
