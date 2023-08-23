@@ -144,7 +144,7 @@ class BattleBot(Bot):
 
         self._start_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
                                                    sensor_id=side_sensor_ids,
-                                                   max_line=getattr(self.CONFIG_START_UP_MAX_BASELINE_KEY))
+                                                   max_line=getattr(self, self.CONFIG_START_UP_MAX_BASELINE_KEY))
 
     def wait_start(self) -> None:
         """
