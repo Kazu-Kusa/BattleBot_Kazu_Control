@@ -121,7 +121,17 @@ class NormalActions(AbstractNormalActions):
             min_lines=getattr(self, self.CONFIG_SURROUNDING_WATCHER_MIN_BASELINE_KEY),
             max_lines=getattr(self, self.CONFIG_SURROUNDING_WATCHER_MAX_BASELINE_KEY),
             use_any=True)
-
+        self._extra_sensor_watcher: Watcher = build_watcher_simple(
+            sensor_update=self._sensors.on_board_io_updater[FU_INDEX],
+            sensor_id=extra_sensor_ids,
+            max_line=1,
+            use_any=True
+        )
+        self._hall_surrounding_watcher: Watcher = watchers_merge(
+            [self._extra_sensor_watcher,
+             self._surrounding_watcher],
+            use_any=True
+        )
         edge_min_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY)
         edge_max_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY)
         self._full_edge_watcher: Watcher = build_watcher_full_ctrl(
@@ -147,6 +157,9 @@ class NormalActions(AbstractNormalActions):
             sensor_update=self._sensors.on_board_io_updater[FU_INDEX],
             sensor_id=grays_sensor_ids,
             max_line=1,
+            use_any=True)
+        self._full_edge_watcher_merged: Watcher = watchers_merge([
+            self._front_watcher_grays, self._full_edge_watcher],
             use_any=True)
 
         self._front_watcher_merged: Watcher = watchers_merge([self._front_watcher_grays,
