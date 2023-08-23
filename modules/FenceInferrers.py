@@ -1,12 +1,14 @@
-from typing import Tuple
+from typing import Tuple, List, Callable
 
 from modules.AbsFenceInferrer import AbstractFenceInferrer
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
 from repo.uptechStar.module.algrithm_tools import random_sign, enlarge_multiplier_ll, float_multiplier_middle, \
     float_multiplier_lower
 from repo.uptechStar.module.inferrer_base import ComplexAction
-from repo.uptechStar.module.sensors import SensorHub, FU_INDEX
+from repo.uptechStar.module.sensors import SensorHub, FU_INDEX, IU_INDEX
 from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl, build_watcher_simple, watchers_merge
+
+FRONT_INDEX, REAR_INDEX, LEFT_INDEX, RIGHT_INDEX = 0, 1, 2, 3
 
 
 class StandardFenceInferrer(AbstractFenceInferrer):
@@ -16,8 +18,9 @@ class StandardFenceInferrer(AbstractFenceInferrer):
     CONFIG_OFF_STAGE_DASH_DURATION_KEY = f'{CONFIG_MOTION_KEY}/OffStageDashDuration'
     CONFIG_OFF_STAGE_DASH_SPEED_KEY = f'{CONFIG_MOTION_KEY}/OffStageDashSpeed'
     CONFIG_FENCE_INFER_KEY = 'InferSection'
-    CONFIG_FENCE_MAX_BASE_LINE_KEY = f"{CONFIG_FENCE_INFER_KEY}/FenceMaxBaseline"
     CONFIG_FENCE_MIN_BASE_LINE_KEY = f'{CONFIG_FENCE_INFER_KEY}/FenceMinBaseline'
+
+    CONFIG_FENCE_LR_MAX_Deviation_KEY = f'{CONFIG_FENCE_INFER_KEY}/LRMaxDeviation'
 
     CONFIG_EDGE_WATCHER_KEY = "EdgeWatcher"
     CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY = f'{CONFIG_EDGE_WATCHER_KEY}/MaxBaseline'
@@ -37,7 +40,7 @@ class StandardFenceInferrer(AbstractFenceInferrer):
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=float_multiplier_lower(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
-                new_ActionFrame
+                new_ActionFrame()
                 ]
 
     def on_front_left_right_to_fence(self, basic_speed) -> ComplexAction:
@@ -110,10 +113,10 @@ class StandardFenceInferrer(AbstractFenceInferrer):
         self.register_config(config_registry_path=self.CONFIG_OFF_STAGE_DASH_SPEED_KEY,
                              value=-8000)
 
-        self.register_config(config_registry_path=self.CONFIG_FENCE_MAX_BASE_LINE_KEY,
-                             value=[1900] * 4)
         self.register_config(config_registry_path=self.CONFIG_FENCE_MIN_BASE_LINE_KEY,
-                             value=[1500] * 4)
+                             value=[800] * 4)
+        self.register_config(self.CONFIG_FENCE_LR_MAX_Deviation_KEY,
+                             200)
 
         self.register_config(self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY, [2070, 2150, 2210, 2050])
         self.register_config(self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY, [1550, 1550, 1550, 1550])
@@ -130,11 +133,47 @@ class StandardFenceInferrer(AbstractFenceInferrer):
             max_line=1,
             use_any=True
         )
-        self._rear_object_watcher: Watcher = build_watcher_simple(
-            sensor_update=self._sensors.on_board_io_updater[FU_INDEX],
-            sensor_id=extra_sensor_ids[2:],  # actually, this watcher uses only one sensor ()
-            max_line=1
-        )
+        indexed_io_updater = self._sensors.on_board_io_updater[IU_INDEX]
+        rear_sensor_id = edge_sensor_ids[-1]
+        self._rear_object_watcher: Watcher = lambda: not bool(indexed_io_updater(rear_sensor_id))
+
+        sensor_updater = self._sensors.on_board_adc_updater[FU_INDEX]
+        left_sensor_id = surrounding_sensor_ids[LEFT_INDEX]
+        right_sensor_id = surrounding_sensor_ids[RIGHT_INDEX]
+        fence_min_baselines: List[int] = getattr(self, self.CONFIG_FENCE_MIN_BASE_LINE_KEY)
+        left_sensor_fence_min_baseline = fence_min_baselines[LEFT_INDEX]
+        right_sensor_fence_min_baseline = fence_min_baselines[RIGHT_INDEX]
+
+        lr_max_deviation = getattr(self, self.CONFIG_FENCE_LR_MAX_Deviation_KEY)
+
+        def left_right_objects_watcher() -> Tuple[bool, bool]:
+            """
+            a customized Watcher-liked func,judge fence existence in two directions
+            Returns: a tuple, represents left is the fence and right is the fence in order
+
+            """
+            sensor_data = sensor_updater()
+
+            left_is_fence, right_is_fence = False, False
+            left_data = sensor_data[left_sensor_id]
+            right_data = sensor_data[right_sensor_id]
+            if left_data < left_sensor_fence_min_baseline and right_data < right_sensor_fence_min_baseline:
+                # this checks the no activation case
+                return left_is_fence, right_is_fence
+
+            if left_data > right_data:
+                # this checks the single direction to fence case
+                left_is_fence = True
+            else:
+                right_is_fence = True
+
+            if abs(left_data - right_data) < lr_max_deviation:
+                # this checks the front to fence, parallel to the fence
+                return False, False
+            else:
+                return left_is_fence, right_is_fence
+
+        self._left_right_objects_watcher: Callable[[], Tuple[bool, bool]] = left_right_objects_watcher
 
         edge_min_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY)
         edge_max_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY)
@@ -167,9 +206,34 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                                                               self._front_watcher],
                                                              use_any=True)
 
+        weights = (
+            self.KEY_FRONT_TO_FENCE,
+            self.KEY_BEHIND_TO_FENCE,
+            self.KEY_LEFT_TO_FENCE,
+            self.KEY_RIGHT_TO_FENCE
+        )
+
+        fence_watchers: Tuple[Watcher, ...] = (
+            self._front_object_watcher,
+            self._rear_object_watcher,
+
+        )
+
         def infer_body() -> int:
-            # TODO imp this method
-            return 0
+            """
+            infer the fence in four-direction
+            Returns: status code that represents the fence surrounded
+
+            """
+            nonlocal fence_watchers, weights
+
+            status_code = 0
+            all_status = [fence_watcher() for fence_watcher in fence_watchers]
+            all_status.extend(left_right_objects_watcher())
+            for status, weight in zip(all_status, weights):
+                status_code += status * weight
+
+            return status_code
 
         self._infer_body = infer_body
 
