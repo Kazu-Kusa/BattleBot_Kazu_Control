@@ -263,7 +263,7 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame(),
-                new_ActionFrame(action_speed=getattr(self.CONFIG_OFF_STAGE_DASH_SPEED_KEY),
+                new_ActionFrame(action_speed=getattr(self, self.CONFIG_OFF_STAGE_DASH_SPEED_KEY),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY)),
                 new_ActionFrame()
                 ]
