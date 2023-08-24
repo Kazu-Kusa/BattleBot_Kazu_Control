@@ -122,7 +122,7 @@ class NormalActions(AbstractNormalActions):
             max_lines=getattr(self, self.CONFIG_SURROUNDING_WATCHER_MAX_BASELINE_KEY),
             use_any=True)
         self._extra_sensor_watcher: Watcher = build_io_watcher_from_indexed(
-            sensor_update=self._sensors.on_board_io_updater[FU_INDEX],
+            sensor_update=self._sensors.on_board_io_updater[IU_INDEX],
             sensor_ids=extra_sensor_ids,
             activate_status_describer=(0, 0, 0),
             use_any=True

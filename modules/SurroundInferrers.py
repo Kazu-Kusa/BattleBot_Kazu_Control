@@ -8,7 +8,7 @@ from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX, IU_INDEX
 from repo.uptechStar.module.tagdetector import TagDetector, BLUE_TEAM, YELLOW_TEAM
 from repo.uptechStar.module.watcher import Watcher, \
-    build_watcher_full_ctrl, build_watcher_simple, watchers_merge
+    build_watcher_full_ctrl, watchers_merge, build_io_watcher_from_indexed
 
 
 class StandardSurroundInferrer(AbstractSurroundInferrer):
@@ -584,12 +584,11 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         self._tag_detector = tag_detector
         edge_min_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MIN_BASELINE_KEY)
         edge_max_lines = getattr(self, self.CONFIG_EDGE_WATCHER_MAX_BASELINE_KEY)
-        self._front_object_watcher: Watcher = build_watcher_simple(
-            sensor_update=self._sensors.on_board_io_updater[FU_INDEX],
-            sensor_id=extra_sensor_ids[0:2],
-            max_line=1,
-            use_any=True
-        )
+        self._front_object_watcher: Watcher = build_io_watcher_from_indexed(
+            sensor_update=self._sensors.on_board_io_updater[IU_INDEX],
+            sensor_ids=extra_sensor_ids[0:2],
+            activate_status_describer=(0, 0),
+            use_any=True)
         indexed_io_updater = self._sensors.on_board_io_updater[IU_INDEX]
         rear_sensor_id = extra_sensor_ids[-1]
         self._rear_object_watcher: Watcher = lambda: not bool(indexed_io_updater(rear_sensor_id))
@@ -613,11 +612,12 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
             min_lines=[edge_min_lines[0], edge_min_lines[3]],
             max_lines=[edge_max_lines[0], edge_max_lines[3]],
             use_any=True)
-        self._front_watcher_grays: Watcher = build_watcher_simple(
-            sensor_update=self._sensors.on_board_io_updater[FU_INDEX],
-            sensor_id=grays_sensor_ids,
-            max_line=1,
-            use_any=True)
+        self._front_watcher_grays: Watcher = build_io_watcher_from_indexed(
+            sensor_update=self._sensors.on_board_io_updater[IU_INDEX],
+            sensor_ids=grays_sensor_ids,
+            activate_status_describer=(0, 0),
+            use_any=True
+        )
 
         self._front_watcher_merged: Watcher = watchers_merge([self._front_watcher_grays,
                                                               self._front_watcher],
@@ -644,7 +644,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
         min_baselines = getattr(self, self.CONFIG_MIN_BASELINES_KEY)
         front_object_table = self.__TAG_STATUS_CODE_TABLE.get(tag_detector.team_color)
         adc_updater = self._sensors.on_board_adc_updater[FU_INDEX]
-        io_updater = self._sensors.on_board_io_updater[FU_INDEX]
+        io_updater = self._sensors.on_board_io_updater[IU_INDEX]
         fb_id, rb_id, l1_id, r1_id = sensor_ids
         fb_min_line, rb_min_line, l1_min_line, r1_min_line = min_baselines
         ftl_id, ftr_id, rtr_id = extra_sensor_ids
@@ -659,11 +659,11 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
             """
             # use updater to get updated sensor data
             adc_updated_data = adc_updater()
-            io_updated_data = io_updater()
+
             # calc for the front status
             status_bools = (
-                any([not io_updated_data[ftl_id], not io_updated_data[ftr_id], adc_updated_data[fb_id] > fb_min_line]),
-                any([not io_updated_data[rtr_id], adc_updated_data[rb_id] > rb_min_line]),
+                any([not io_updater(ftl_id), not io_updater(ftr_id), adc_updated_data[fb_id] > fb_min_line]),
+                any([not io_updater(rtr_id), adc_updated_data[rb_id] > rb_min_line]),
                 adc_updated_data[l1_id] > l1_min_line,
                 adc_updated_data[r1_id] > r1_min_line
             )
