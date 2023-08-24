@@ -241,13 +241,13 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                 new_ActionFrame()]
 
     def on_left_right_behind_to_fence(self, basic_speed) -> ComplexAction:
-        # 在左右方和后方向上遇到围栏，我希望前进一段距离后左转
+        # 在左右方和后方向上遇到围栏，我希望前进一段距离后右转
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=float_multiplier_lower(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 breaker_func=self._front_delta_watcher),
                 new_ActionFrame(),
-                new_ActionFrame(action_speed=(-basic_speed, basic_speed),
+                new_ActionFrame(action_speed=(basic_speed, -basic_speed),
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
                                 breaker_func=self._front_delta_watcher),
@@ -275,7 +275,6 @@ class StandardFenceInferrer(AbstractFenceInferrer):
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                action_duration_multiplier=shrink_multiplier_l(),
                                 breaker_func=self._front_delta_watcher),
                 new_ActionFrame(),
                 new_ActionFrame(action_speed=getattr(self, self.CONFIG_OFF_STAGE_DASH_SPEED_KEY),
