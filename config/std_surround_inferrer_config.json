@@ -1,8 +1,8 @@
 {
   "MotionSection": {
     "BasicDuration": 360,
-    "BasicSpeed": 3500,
-    "DashTimeout": 7200
+    "BasicSpeed": 3600,
+    "DashTimeout": 6600
   },
   "InferSection": {
     "MinBaselines": [
@@ -14,10 +14,10 @@
   },
   "EdgeWatcher": {
     "MaxBaseline": [
-      1840,
-      2000,
-      2000,
-      1840
+      1880,
+      2080,
+      2080,
+      1880
     ],
     "MinBaseline": [
       0,

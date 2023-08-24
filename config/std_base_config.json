@@ -43,7 +43,7 @@
   },
   "InferSection": {
     "TrueGray": {
-      "MinBaseline": 2710,
+      "MinBaseline": 2755,
       "MaxBaseline": 4096
     }
   },
