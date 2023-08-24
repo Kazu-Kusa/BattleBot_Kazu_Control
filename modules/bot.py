@@ -25,7 +25,6 @@ class Bot(Configurable, metaclass=ABCMeta):
 
     CONFIG_DEVICE_DETECTOR_KEY = f'{CONFIG_DEVICE_KEY}/Detector'
     CONFIG_DEVICE_DETECTOR_CAMERA_ID_KEY = f'{CONFIG_DEVICE_DETECTOR_KEY}/CameraId'
-    CONFIG_DEVICE_DETECTOR_CAMERA_RESOLUTION_MULTIPLIER_KEY = f'{CONFIG_DEVICE_DETECTOR_KEY}/CameraResolutionMultiplier'
     CONFIG_DEVICE_DETECTOR_START_DETECT_TAG_KEY = f'{CONFIG_DEVICE_DETECTOR_KEY}/StartDetectTag'
 
     CONFIG_ONBOARD_SENSORS_KEY = f'{CONFIG_DEVICE_KEY}/OnBoardSensors'
@@ -42,7 +41,6 @@ class Bot(Configurable, metaclass=ABCMeta):
     def register_all_config(self):
         self.register_config(self.CONFIG_DEVICE_SCREEN_INIT_KEY, False)
         self.register_config(self.CONFIG_DEVICE_DETECTOR_CAMERA_ID_KEY, 0)
-        self.register_config(self.CONFIG_DEVICE_DETECTOR_CAMERA_RESOLUTION_MULTIPLIER_KEY, 0.4)
         self.register_config(self.CONFIG_DEVICE_DETECTOR_START_DETECT_TAG_KEY, False)
 
         self.register_config(self.CONFIG_ONBOARD_SENSORS_DEBUG_KEY, False)

@@ -5,7 +5,6 @@
     },
     "Detector": {
       "CameraId": 0,
-      "CameraResolutionMultiplier": 0.3,
       "StartDetectTag": true
     },
     "OnBoardSensors": {
@@ -44,11 +43,11 @@
   },
   "InferSection": {
     "TrueGray": {
-      "MinBaseline": 2930,
+      "MinBaseline": 2710,
       "MaxBaseline": 4096
     }
   },
   "Filters": {
-    "MovingaverageWindowSize": 20
+    "MovingaverageWindowSize": 30
   }
 }
