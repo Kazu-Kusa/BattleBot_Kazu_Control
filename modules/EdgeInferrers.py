@@ -6,7 +6,8 @@ from repo.uptechStar.module.algrithm_tools import random_sign, \
     float_multiplier_upper, float_multiplier_lower, enlarge_multiplier_ll, enlarge_multiplier_l, \
     float_multiplier_middle, shrink_multiplier_l
 from repo.uptechStar.module.sensors import SensorHub, LocalFullUpdaterConstructor, FU_INDEX, FullUpdater, IU_INDEX
-from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl, build_watcher_simple, watchers_merge
+from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl, watchers_merge, \
+    build_io_watcher_from_indexed
 
 
 class StandardEdgeInferrer(AbstractEdgeInferrer):
@@ -85,10 +86,10 @@ class StandardEdgeInferrer(AbstractEdgeInferrer):
             min_lines=[edge_min_lines[0], edge_min_lines[3]],
             max_lines=[edge_max_lines[0], edge_max_lines[3]],
             use_any=True)
-        self._front_watcher_grays: Watcher = build_watcher_simple(
-            sensor_update=self._sensors.on_board_io_updater[FU_INDEX],
-            sensor_id=grays_sensor_ids,
-            max_line=1,
+        self._front_watcher_grays: Watcher = build_io_watcher_from_indexed(
+            sensor_update=self._sensors.on_board_io_updater[IU_INDEX],
+            sensor_ids=grays_sensor_ids,
+            activate_status_describer=(0, 0),
             use_any=True)
 
         self._front_watcher_merged: Watcher = watchers_merge([self._front_watcher_grays,
