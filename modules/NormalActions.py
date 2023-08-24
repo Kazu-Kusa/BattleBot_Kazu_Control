@@ -1,6 +1,6 @@
 import warnings
 from random import choices, choice
-from typing import Tuple
+from typing import Tuple, List
 
 from AbstractNormalActions import AbstractNormalActions
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
@@ -178,23 +178,42 @@ class NormalActions(AbstractNormalActions):
                                                             use_any=True)
 
     def _make_infer_body(self):
-        action_keys: Tuple[int, ...] = (
-            self.KEY_SCAN,
-            self.KEY_SNAKE,
-            self.KEY_DRIFTING,
-            self.KEY_TURN,
-            self.KEY_PLAIN_MOVE,
-            self.KEY_IDLE)
-        weights: Tuple[int, ...] = (
-            getattr(self, self.CONFIG_SCAN_WEIGHT_KEY),
-            getattr(self, self.CONFIG_SNAKE_WEIGHT_KEY),
-            getattr(self, self.CONFIG_DRIFTING_WEIGHT_KEY),
-            getattr(self, self.CONFIG_TURN_WEIGHT_KEY),
-            getattr(self, self.CONFIG_PLAIN_MOVE_WEIGHT_KEY),
-            getattr(self, self.CONFIG_IDLE_WEIGHT_KEY))
+        action_key: List[int, ...] = []
+        action_weight: List[float, ...] = []
+
+        scan_weight = getattr(self, self.CONFIG_SCAN_WEIGHT_KEY)
+        snake_weight = getattr(self, self.CONFIG_SNAKE_WEIGHT_KEY)
+        drifting_weight = getattr(self, self.CONFIG_DRIFTING_WEIGHT_KEY)
+        turn_weight = getattr(self, self.CONFIG_TURN_WEIGHT_KEY)
+        plain_move_weight = getattr(self, self.CONFIG_PLAIN_MOVE_WEIGHT_KEY)
+        idle_weight = getattr(self, self.CONFIG_IDLE_WEIGHT_KEY)
+        if scan_weight:
+            action_key.append(self.KEY_SCAN)
+            action_weight.append(scan_weight)
+
+        if snake_weight:
+            action_key.append(self.KEY_SNAKE)
+            action_weight.append(snake_weight)
+
+        if drifting_weight:
+            action_key.append(self.KEY_DRIFTING)
+            action_weight.append(drifting_weight)
+
+        if turn_weight:
+            action_key.append(self.KEY_TURN)
+            action_weight.append(turn_weight)
+
+        if plain_move_weight:
+            action_key.append(self.KEY_PLAIN_MOVE)
+            action_weight.append(plain_move_weight)
+
+        if idle_weight:
+            action_key.append(self.KEY_IDLE)
+            action_weight.append(idle_weight)
+
         warnings.warn('\nBuilding Normal Action selector\n'
-                      f'{action_keys}\n'
-                      f'{weights}')
+                      f'{action_key}\n'
+                      f'{action_weight}')
 
         def infer_body() -> int:
             """
@@ -202,8 +221,8 @@ class NormalActions(AbstractNormalActions):
             Returns: the key that corresponds to the action
 
             """
-            nonlocal action_keys, weights
-            return choices(action_keys, weights=weights)[0]
+            nonlocal action_key, action_weight
+            return choices(action_key, weights=action_weight)[0]
 
         return infer_body
 
@@ -242,7 +261,7 @@ class NormalActions(AbstractNormalActions):
         """
         basic_duration = getattr(self, self.CONFIG_BASIC_DURATION_KEY)
         return [new_ActionFrame(action_speed=(basic_speed, 0, basic_speed, basic_speed),
-                                action_speed_multiplier=float_multiplier_lower(),
+                                action_speed_multiplier=float_multiplier_middle(),
                                 action_duration=basic_duration,
                                 action_duration_multiplier=enlarge_multiplier_lll(),
                                 breaker_func=self._front_watcher_merged),
