@@ -18,7 +18,7 @@ seed(2023)
 
 class BattleBot(Bot):
     CONFIG_START_UP_KEY = 'StartUp'
-    CONFIG_START_UP_MAX_BASELINE_KEY = f'{CONFIG_START_UP_KEY}/MaxBaseline'
+    CONFIG_START_UP_MIN_BASELINE_KEY = f'{CONFIG_START_UP_KEY}/MinBaseline'
 
     # ad4未注册，暂时没有控制单元
     CONFIG_SENSOR_KEY = "Sensor"
@@ -56,7 +56,7 @@ class BattleBot(Bot):
 
     # endregion
     def register_all_children_config(self):
-        self.register_config(self.CONFIG_START_UP_MAX_BASELINE_KEY, 500)
+        self.register_config(self.CONFIG_START_UP_MIN_BASELINE_KEY, 1800)
         # region OB config
         self.register_config(self.CONFIG_EDGE_FL_KEY, 6)
         self.register_config(self.CONFIG_EDGE_FR_KEY, 2)
@@ -144,7 +144,7 @@ class BattleBot(Bot):
 
         self._start_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
                                                    sensor_id=side_sensor_ids,
-                                                   max_line=getattr(self, self.CONFIG_START_UP_MAX_BASELINE_KEY))
+                                                   min_line=getattr(self, self.CONFIG_START_UP_MIN_BASELINE_KEY))
 
     def wait_start(self) -> None:
         """
@@ -273,7 +273,7 @@ if __name__ == '__main__':
                     fence_inferrer_config='config/std_fence_inferrer_config.json',
                     normal_actions_config='config/std_normal_actions_config.json')
 
-    bot.save_all_config()
+    # bot.save_all_config()
     bot.start_match()
 
     # try:

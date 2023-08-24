@@ -20,7 +20,7 @@
     "TeamColor": "blue"
   },
   "StartUp": {
-    "MaxBaseline": 1100
+    "MinBaseline": 1800
   },
   "Sensor": {
     "OnBoardAdc": {
