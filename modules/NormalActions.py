@@ -8,9 +8,9 @@ from repo.uptechStar.module.algrithm_tools import float_multiplier_middle, rando
     enlarge_multiplier_ll, shrink_multiplier_lll, \
     enlarge_multiplier_lll, float_multiplier_lower, enlarge_multiplier_l
 from repo.uptechStar.module.inferrer_base import ComplexAction
-from repo.uptechStar.module.sensors import SensorHub, FU_INDEX
+from repo.uptechStar.module.sensors import SensorHub, FU_INDEX, IU_INDEX
 from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl, build_delta_watcher_full_ctrl, \
-    build_watcher_simple, watchers_merge
+    watchers_merge, build_io_watcher_from_indexed
 
 
 def full_rand_drift(speed: int) -> Tuple[int, int, int, int]:
@@ -121,10 +121,10 @@ class NormalActions(AbstractNormalActions):
             min_lines=getattr(self, self.CONFIG_SURROUNDING_WATCHER_MIN_BASELINE_KEY),
             max_lines=getattr(self, self.CONFIG_SURROUNDING_WATCHER_MAX_BASELINE_KEY),
             use_any=True)
-        self._extra_sensor_watcher: Watcher = build_watcher_simple(
+        self._extra_sensor_watcher: Watcher = build_io_watcher_from_indexed(
             sensor_update=self._sensors.on_board_io_updater[FU_INDEX],
-            sensor_id=extra_sensor_ids,
-            max_line=1,
+            sensor_ids=extra_sensor_ids,
+            activate_status_describer=(0, 0, 0),
             use_any=True
         )
         self._hall_surrounding_watcher: Watcher = watchers_merge(
@@ -153,10 +153,10 @@ class NormalActions(AbstractNormalActions):
             min_lines=[edge_min_lines[0], edge_min_lines[3]],
             max_lines=[edge_max_lines[0], edge_max_lines[3]],
             use_any=True)
-        self._front_watcher_grays: Watcher = build_watcher_simple(
-            sensor_update=self._sensors.on_board_io_updater[FU_INDEX],
-            sensor_id=grays_sensor_ids,
-            max_line=1,
+        self._front_watcher_grays: Watcher = build_io_watcher_from_indexed(
+            sensor_update=self._sensors.on_board_io_updater[IU_INDEX],
+            sensor_ids=grays_sensor_ids,
+            activate_status_describer=(0, 0),
             use_any=True)
         self._full_edge_watcher_merged: Watcher = watchers_merge([
             self._front_watcher_grays, self._full_edge_watcher],
