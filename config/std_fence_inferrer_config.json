@@ -1,7 +1,7 @@
 {
   "MotionSection": {
-    "BasicDuration": 200,
-    "BasicSpeed": 4000,
+    "BasicDuration": 1300,
+    "BasicSpeed": 2200,
     "LongTurnDuration": 1000,
     "OffStageDashDuration": 600,
     "OffStageDashSpeed": -8000
@@ -30,6 +30,6 @@
     ]
   },
   "DeltaWatcher": {
-    "MinDeviation": 50
+    "MinDeviation": 120
   }
 }

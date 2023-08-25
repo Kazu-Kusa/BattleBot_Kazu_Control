@@ -4,9 +4,9 @@ from typing import Tuple, List
 
 from AbstractNormalActions import AbstractNormalActions
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
+from repo.uptechStar.module.algrithm_tools import MovingAverage, shrink_multiplier_l
 from repo.uptechStar.module.algrithm_tools import float_multiplier_middle, random_sign, \
-    enlarge_multiplier_ll, shrink_multiplier_lll, \
-    enlarge_multiplier_lll, float_multiplier_lower, enlarge_multiplier_l
+    enlarge_multiplier_ll, enlarge_multiplier_lll, float_multiplier_lower, enlarge_multiplier_l
 from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX, IU_INDEX
 from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl, build_delta_watcher_full_ctrl, \
@@ -176,6 +176,14 @@ class NormalActions(AbstractNormalActions):
         self._idle_watcher_merged: Watcher = watchers_merge([self._extra_sensor_watcher,
                                                              self._idle_watcher],
                                                             use_any=True)
+        mov_a = MovingAverage(16)
+        adc_updater = self._sensors.on_board_adc_updater[FU_INDEX]
+        min_line = 3300
+
+        def _center_watcher() -> bool:
+            return adc_updater()[4] > min_line
+
+        self._stage_center_watcher: Watcher = _center_watcher
 
     def _make_infer_body(self):
         action_key: List[int, ...] = []
@@ -325,12 +333,12 @@ class NormalActions(AbstractNormalActions):
         Returns:
 
         """
+        multiplier = enlarge_multiplier_l if self._stage_center_watcher() else shrink_multiplier_l
         return [new_ActionFrame(action_speed=basic_speed,
-                                action_speed_multiplier=float_multiplier_middle(),
+                                action_speed_multiplier=multiplier(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                action_duration_multiplier=shrink_multiplier_lll(),
-                                breaker_func=self._full_edge_watcher_merged),
-                new_ActionFrame()]
+                                breaker_func=self._front_watcher_merged,
+                                break_action=(new_ActionFrame(),))]
 
     def idle(self, basic_speed: int) -> ComplexAction:
         """

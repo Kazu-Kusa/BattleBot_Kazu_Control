@@ -1,10 +1,10 @@
 {
   "InferSection": {
     "EdgeMaxBaseline": [
-      1880,
+      1820,
       2080,
       2080,
-      1880
+      1820
     ],
     "EdgeMinBaseline": [
       0,
@@ -12,10 +12,10 @@
       0,
       0
     ],
-    "StraightActionDuration": 190,
-    "CurveActionDuration": 165
+    "StraightActionDuration": 200,
+    "CurveActionDuration": 180
   },
   "MotionSection": {
-    "BasicSpeed": 5500
+    "BasicSpeed": 5000
   }
 }

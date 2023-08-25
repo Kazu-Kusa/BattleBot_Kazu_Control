@@ -1,10 +1,10 @@
 {
   "MotionSection": {
-    "BasicSpeed": 4200,
+    "BasicSpeed": 3100,
     "BasicDuration": 300
   },
   "Scan": {
-    "Weight": 2,
+    "Weight": 0,
     "ScanningSpeed": 2000,
     "ScanningDuration": 3500,
     "ScanCycles": 2
@@ -18,10 +18,10 @@
     "DriftingCycles": 1
   },
   "Turn": {
-    "Weight": 8
+    "Weight": 1
   },
   "PlainMove": {
-    "Weight": 30
+    "Weight": 5
   },
   "Idle": {
     "Ids": [
@@ -34,7 +34,7 @@
       6,
       7
     ],
-    "Weight": 3,
+    "Weight": 0,
     "MinBaseline": [
       150,
       150,
@@ -73,8 +73,8 @@
   "EdgeWatcher": {
     "MaxBaseline": [
       1880,
-      2080,
-      2080,
+      2050,
+      2050,
       1880
     ],
     "MinBaseline": [

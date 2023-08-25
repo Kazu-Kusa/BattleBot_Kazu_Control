@@ -12,8 +12,8 @@
     }
   },
   "MotionSection": {
-    "StartSpeed": -8500,
-    "StartDuration": 600
+    "StartSpeed": -9000,
+    "StartDuration": 800
   },
   "MiscSection": {
     "TeamColor": "blue"
@@ -43,7 +43,7 @@
   },
   "InferSection": {
     "TrueGray": {
-      "MinBaseline": 2755,
+      "MinBaseline": 2600,
       "MaxBaseline": 4096
     }
   },

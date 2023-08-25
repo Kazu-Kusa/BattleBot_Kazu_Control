@@ -544,7 +544,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
 
     def react(self) -> int:
         status_code = self.infer()
-        self.exc_action(self.action_table.get(status_code),
+        self.exc_action(self.action_table.get(status_code, self.on_object_encountered_at_behind),
                         getattr(self, self.CONFIG_BASIC_SPEED_KEY))
         return status_code
 
@@ -662,8 +662,9 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
 
             # calc for the front status
             status_bools = (
-                any([not io_updater(ftl_id), not io_updater(ftr_id), adc_updated_data[fb_id] > fb_min_line]),
-                any([not io_updater(rtr_id), adc_updated_data[rb_id] > rb_min_line]),
+                any([not bool(io_updater(ftl_id)), not bool(io_updater(ftr_id)),
+                     adc_updated_data[fb_id] > fb_min_line]),
+                any([not bool(io_updater(rtr_id)), adc_updated_data[rb_id] > rb_min_line]),
                 adc_updated_data[l1_id] > l1_min_line,
                 adc_updated_data[r1_id] > r1_min_line
             )
@@ -675,6 +676,9 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
             # use front sensors and tag to search the corresponding status code
             front_object_status = front_object_table.get(f'{tag_detector.tag_id}/{status_bools[0]}')
             # TODO: should add a tag-follow feature, because the tag may not be at the very front of the robot.
-            return left_right_behind_status + front_object_status
+
+            code = left_right_behind_status + front_object_status
+            # warnings.warn(f'\rStatusCode: {code}')
+            return code
 
         return status_infer

@@ -158,7 +158,7 @@ class BattleBot(Bot):
                             action_duration=99999999),
             new_ActionFrame(action_speed=getattr(self, self.CONFIG_MOTION_START_SPEED_KEY),
                             action_duration=getattr(self, self.CONFIG_MOTION_START_DURATION_KEY)),
-            new_ActionFrame()]
+            new_ActionFrame(action_duration=300)]
         warnings.warn('\n>>>>>>>>>>Waiting for start<<<<<<<', stacklevel=4)
         self.player.extend(tape)
         warnings.warn("\n>>>>>>>>>Start<<<<<<<<", stacklevel=4)
@@ -174,8 +174,12 @@ class BattleBot(Bot):
         true_gray_min_line = getattr(self, self.CONFIG_INFER_TRUE_GRAY_MIN_BASELINE_KEY)
         true_gray_max_line = getattr(self, self.CONFIG_INFER_TRUE_GRAY_MAX_BASELINE_KEY)
 
+        float_gray_min_line = 2400
+
         def _is_on_stage() -> bool:
-            return true_gray_min_line < mov_average_apply(full_adc_updater()[true_gray_id]) < true_gray_max_line
+
+            applied_value = mov_average_apply(full_adc_updater()[true_gray_id])
+            return applied_value < float_gray_min_line or true_gray_min_line < applied_value < true_gray_max_line
 
         def _on_stage() -> None:
             self.tag_detector.tag_detection_switch = True
@@ -221,7 +225,7 @@ class BattleBot(Bot):
 
             status_code = self.edge_inferrer.react()
             self.screen.fill_screen(self.screen.COLOR_BLACK)
-            self.screen.put_string(0, 0, f'{status_code}')
+            self.screen.put_string(0, 0, f'edge: {status_code}')
             self.screen.put_string(0, 12, f'{perf_counter_ns()}')
             self.screen.refresh()
 
@@ -277,8 +281,8 @@ if __name__ == '__main__':
     bot.start_match()
 
     # try:
-    #     bot.Battle()
-    #     # bot.Battle_debug()
+    #     # bot.Battle()
+    #     bot.Battle_debug()
     # except KeyboardInterrupt:
     #     print('end')
     #     bot.player.append(new_ActionFrame())

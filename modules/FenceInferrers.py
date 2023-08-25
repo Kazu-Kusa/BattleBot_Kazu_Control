@@ -7,7 +7,7 @@ from repo.uptechStar.module.algrithm_tools import float_multiplier_middle, \
 from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX, IU_INDEX
 from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl, build_watcher_simple, watchers_merge, \
-    build_delta_watcher_simple
+    build_io_watcher_from_indexed
 
 FRONT_INDEX, REAR_INDEX, LEFT_INDEX, RIGHT_INDEX = 0, 1, 2, 3
 
@@ -69,10 +69,10 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                  extra_sensor_ids: Tuple[int, int, int]):
         super().__init__(sensor_hub=sensor_hub, player=action_player, config_path=config_path)
 
-        self._front_object_watcher: Watcher = build_watcher_simple(
-            sensor_update=self._sensors.on_board_io_updater[FU_INDEX],
-            sensor_id=extra_sensor_ids[0:2],
-            max_line=1,
+        self._front_object_watcher: Watcher = build_io_watcher_from_indexed(
+            sensor_update=self._sensors.on_board_io_updater[IU_INDEX],
+            sensor_ids=edge_sensor_ids[0:2],
+            activate_status_describer=(0, 0),
             use_any=True
         )
         indexed_io_updater = self._sensors.on_board_io_updater[IU_INDEX]
@@ -148,17 +148,9 @@ class StandardFenceInferrer(AbstractFenceInferrer):
                                                               self._front_watcher],
                                                              use_any=True)
 
-        self._front_delta_watcher: Watcher = build_delta_watcher_simple(
-            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
-            sensor_id=(surrounding_sensor_ids[FRONT_INDEX],),
-            max_line=getattr(self, self.CONFIG_DELTA_WATCHER_MAX_DEVIATION_KEY)
-        )
+        self._front_delta_watcher: Watcher = self._front_object_watcher
 
-        self._rear_delta_watcher: Watcher = build_delta_watcher_simple(
-            sensor_update=self._sensors.on_board_adc_updater[FU_INDEX],
-            sensor_id=(surrounding_sensor_ids[REAR_INDEX],),
-            max_line=getattr(self, self.CONFIG_DELTA_WATCHER_MAX_DEVIATION_KEY)
-        )
+        self._rear_delta_watcher: Watcher = self._rear_object_watcher
         weights = (
             self.KEY_FRONT_TO_FENCE,
             self.KEY_BEHIND_TO_FENCE,
