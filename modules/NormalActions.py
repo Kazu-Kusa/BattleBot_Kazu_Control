@@ -4,9 +4,9 @@ from typing import Tuple, List
 
 from AbstractNormalActions import AbstractNormalActions
 from repo.uptechStar.module.actions import ActionPlayer, new_ActionFrame
-from repo.uptechStar.module.algrithm_tools import MovingAverage, shrink_multiplier_l
 from repo.uptechStar.module.algrithm_tools import float_multiplier_middle, random_sign, \
     enlarge_multiplier_ll, enlarge_multiplier_lll, float_multiplier_lower, enlarge_multiplier_l
+from repo.uptechStar.module.algrithm_tools import shrink_multiplier_l
 from repo.uptechStar.module.inferrer_base import ComplexAction
 from repo.uptechStar.module.sensors import SensorHub, FU_INDEX, IU_INDEX
 from repo.uptechStar.module.watcher import Watcher, build_watcher_full_ctrl, build_delta_watcher_full_ctrl, \
@@ -48,6 +48,7 @@ class NormalActions(AbstractNormalActions):
 
     CONFIG_PLAIN_MOVE_KEY = "PlainMove"
     CONFIG_PLAIN_MOVE_WEIGHT_KEY = f'{CONFIG_PLAIN_MOVE_KEY}/Weight'
+    CONFIG_PLAIN_MOVE_GRAYS_MIN_LINE_KEY = f'{CONFIG_PLAIN_MOVE_KEY}/GraysMinLine'
 
     CONFIG_IDLE_KEY = 'Idle'
     CONFIG_IDLE_WEIGHT_KEY = f'{CONFIG_IDLE_KEY}/Weight'
@@ -90,6 +91,7 @@ class NormalActions(AbstractNormalActions):
         self.register_config(self.CONFIG_TURN_WEIGHT_KEY, 4)
 
         self.register_config(self.CONFIG_PLAIN_MOVE_WEIGHT_KEY, 16)
+        self.register_config(self.CONFIG_PLAIN_MOVE_GRAYS_MIN_LINE_KEY, 3300)
 
         self.register_config(self.CONFIG_IDLE_IDS_KEY, list(range(8)))
         self.register_config(self.CONFIG_IDLE_WEIGHT_KEY, 6)
@@ -112,7 +114,7 @@ class NormalActions(AbstractNormalActions):
 
     def __init__(self, player: ActionPlayer, sensor_hub: SensorHub, edge_sensor_ids: Tuple[int, int, int, int],
                  surrounding_sensor_ids: Tuple[int, int, int, int], config_path: str, grays_sensor_ids: Tuple[int, int],
-                 extra_sensor_ids: Tuple[int, int, int]):
+                 extra_sensor_ids: Tuple[int, int, int], true_gray_ids: Tuple[int]):
         super().__init__(sensor_hub, player, config_path)
         self._infer_body = self._make_infer_body()
         self._surrounding_watcher: Watcher = build_watcher_full_ctrl(
@@ -153,6 +155,7 @@ class NormalActions(AbstractNormalActions):
             min_lines=[edge_min_lines[0], edge_min_lines[3]],
             max_lines=[edge_max_lines[0], edge_max_lines[3]],
             use_any=True)
+
         self._front_watcher_grays: Watcher = build_io_watcher_from_indexed(
             sensor_update=self._sensors.on_board_io_updater[IU_INDEX],
             sensor_ids=grays_sensor_ids,
@@ -176,12 +179,13 @@ class NormalActions(AbstractNormalActions):
         self._idle_watcher_merged: Watcher = watchers_merge([self._extra_sensor_watcher,
                                                              self._idle_watcher],
                                                             use_any=True)
-        mov_a = MovingAverage(16)
+
         adc_updater = self._sensors.on_board_adc_updater[FU_INDEX]
-        min_line = 3300
+        min_line = getattr(self, self.CONFIG_PLAIN_MOVE_GRAYS_MIN_LINE_KEY)
+        true_gray_ids = edge_sensor_ids[0]  # current uses only one
 
         def _center_watcher() -> bool:
-            return adc_updater()[4] > min_line
+            return adc_updater()[true_gray_ids] > min_line
 
         self._stage_center_watcher: Watcher = _center_watcher
 
@@ -337,8 +341,9 @@ class NormalActions(AbstractNormalActions):
         return [new_ActionFrame(action_speed=basic_speed,
                                 action_speed_multiplier=multiplier(),
                                 action_duration=getattr(self, self.CONFIG_BASIC_DURATION_KEY),
-                                breaker_func=self._front_watcher_merged,
-                                break_action=(new_ActionFrame(),))]
+                                breaker_func=self._front_watcher,
+                                break_action=(new_ActionFrame(),),
+                                is_override_action=True), new_ActionFrame()]
 
     def idle(self, basic_speed: int) -> ComplexAction:
         """

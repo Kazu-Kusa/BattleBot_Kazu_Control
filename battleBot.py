@@ -117,6 +117,9 @@ class BattleBot(Bot):
             getattr(self, self.CONFIG_FTR_KEY),
             getattr(self, self.CONFIG_RTR_KEY)
         )
+        true_gray_ids = (
+            getattr(self, self.CONFIG_TRUE_GRAYS_KEY),
+        )
 
         self.edge_inferrer = StandardEdgeInferrer(sensor_hub=self.sensor_hub,
                                                   edge_sensor_ids=edge_sensor_ids,
@@ -140,7 +143,7 @@ class BattleBot(Bot):
                                             edge_sensor_ids=edge_sensor_ids,
                                             surrounding_sensor_ids=surrounding_sensor_ids,
                                             config_path=normal_actions_config, grays_sensor_ids=grays_sensor_ids,
-                                            extra_sensor_ids=extra_io_sensor_ids)
+                                            extra_sensor_ids=extra_io_sensor_ids, true_gray_ids=true_gray_ids)
 
         self._start_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
                                                    sensor_id=side_sensor_ids,
