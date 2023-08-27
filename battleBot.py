@@ -230,11 +230,17 @@ class BattleBot(Bot):
             self.screen.fill_screen(self.screen.COLOR_BLACK)
             self.screen.put_string(0, 0, f'edge: {status_code}')
             self.screen.put_string(0, 12, f'{perf_counter_ns()}')
-            self.screen.refresh()
 
             if status_code:
+                self.screen.refresh()
                 return
-            if self.surrounding_inferrer.react():
+
+            sur_code = self.surrounding_inferrer.react()
+            if sur_code:
+                self.screen.fill_screen(self.screen.COLOR_BLACK)
+                self.screen.put_string(0, 0, f'sur: {sur_code}')
+                self.screen.put_string(0, 12, f'{perf_counter_ns()}')
+                self.screen.refresh()
                 self.edge_inferrer.react()
                 return
             self.normal_actions.react()
