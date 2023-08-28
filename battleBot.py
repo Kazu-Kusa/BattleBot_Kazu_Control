@@ -290,8 +290,8 @@ if __name__ == '__main__':
     bot.start_match()
 
     # try:
-    #     # bot.Battle()
-    #     bot.Battle_debug()
+    #     bot.Battle()
+    #     # bot.Battle_debug()
     # except KeyboardInterrupt:
     #     print('end')
     #     bot.player.append(new_ActionFrame())
