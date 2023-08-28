@@ -1,6 +1,6 @@
 {
   "MotionSection": {
-    "BasicSpeed": 3100,
+    "BasicSpeed": 3600,
     "BasicDuration": 300
   },
   "Scan": {
@@ -21,7 +21,8 @@
     "Weight": 1
   },
   "PlainMove": {
-    "Weight": 5
+    "Weight": 5,
+    "GraysMinLine": 3300
   },
   "Idle": {
     "Ids": [
@@ -72,10 +73,10 @@
   },
   "EdgeWatcher": {
     "MaxBaseline": [
-      1880,
-      2050,
-      2050,
-      1880
+      1800,
+      2000,
+      2000,
+      1800
     ],
     "MinBaseline": [
       0,

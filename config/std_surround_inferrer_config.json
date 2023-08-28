@@ -1,15 +1,15 @@
 {
   "MotionSection": {
-    "BasicDuration": 360,
+    "BasicDuration": 270,
     "BasicSpeed": 2600,
     "DashTimeout": 6400
   },
   "InferSection": {
     "MinBaselines": [
-      800,
-      800,
-      1000,
-      800
+      1600,
+      1600,
+      1600,
+      1600
     ]
   },
   "EdgeWatcher": {
