@@ -1,3 +1,4 @@
+import warnings
 from typing import final, Optional, Tuple, Dict
 
 from modules.AbsSurroundInferrer import AbstractSurroundInferrer
@@ -544,7 +545,11 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
 
     def react(self) -> int:
         status_code = self.infer()
-        self.exc_action(self.action_table.get(status_code, self.on_object_encountered_at_behind),
+        if status_code not in self.action_table:
+            warnings.warn(f'\nUnknown status code: {status_code},please check the infer(), status code will reset to 0',
+                          stacklevel=2)
+            status_code = 0
+        self.exc_action(self.action_table.get(status_code),
                         getattr(self, self.CONFIG_BASIC_SPEED_KEY))
         return status_code
 
@@ -675,6 +680,7 @@ class StandardSurroundInferrer(AbstractSurroundInferrer):
                                        status_bools[3] * right_status_weight
             # use front sensors and tag to search the corresponding status code
             front_object_status = front_object_table.get(f'{tag_detector.tag_id}/{status_bools[0]}')
+            # fixme: here seems is a status calc bug, it generate a code that can't be found in the table.
             # TODO: should add a tag-follow feature, because the tag may not be at the very front of the robot.
 
             code = left_right_behind_status + front_object_status
