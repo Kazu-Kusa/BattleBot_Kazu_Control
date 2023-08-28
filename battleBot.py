@@ -8,8 +8,7 @@ from modules.FenceInferrers import StandardFenceInferrer
 from modules.NormalActions import NormalActions
 from modules.SurroundInferrers import StandardSurroundInferrer
 from modules.bot import Bot
-from repo.uptechStar.constant import SIDES_SENSOR_ID, START_MIN_LINE
-from repo.uptechStar.module.actions import new_ActionFrame
+from repo.uptechStar.module.actions import new_ActionFrame, ActionFrame
 from repo.uptechStar.module.algrithm_tools import MovingAverage
 from repo.uptechStar.module.sensors import FU_INDEX
 from repo.uptechStar.module.watcher import build_watcher_simple
@@ -18,6 +17,9 @@ seed(2023)
 
 
 class BattleBot(Bot):
+    CONFIG_START_UP_KEY = 'StartUp'
+    CONFIG_START_UP_MIN_BASELINE_KEY = f'{CONFIG_START_UP_KEY}/MinBaseline'
+
     # ad4未注册，暂时没有控制单元
     CONFIG_SENSOR_KEY = "Sensor"
     # region OB_ADC_CONFIG
@@ -54,6 +56,7 @@ class BattleBot(Bot):
 
     # endregion
     def register_all_children_config(self):
+        self.register_config(self.CONFIG_START_UP_MIN_BASELINE_KEY, 1800)
         # region OB config
         self.register_config(self.CONFIG_EDGE_FL_KEY, 6)
         self.register_config(self.CONFIG_EDGE_FR_KEY, 2)
@@ -105,12 +108,19 @@ class BattleBot(Bot):
             getattr(self, self.CONFIG_L1_KEY),
             getattr(self, self.CONFIG_R1_KEY)
         )
-
+        side_sensor_ids = (
+            getattr(self, self.CONFIG_L1_KEY),
+            getattr(self, self.CONFIG_R1_KEY)
+        )
         extra_io_sensor_ids = (
             getattr(self, self.CONFIG_FTL_KEY),
             getattr(self, self.CONFIG_FTR_KEY),
             getattr(self, self.CONFIG_RTR_KEY)
         )
+        true_gray_ids = (
+            getattr(self, self.CONFIG_TRUE_GRAYS_KEY),
+        )
+
         self.edge_inferrer = StandardEdgeInferrer(sensor_hub=self.sensor_hub,
                                                   edge_sensor_ids=edge_sensor_ids,
                                                   grays_sensor_ids=grays_sensor_ids,
@@ -133,11 +143,11 @@ class BattleBot(Bot):
                                             edge_sensor_ids=edge_sensor_ids,
                                             surrounding_sensor_ids=surrounding_sensor_ids,
                                             config_path=normal_actions_config, grays_sensor_ids=grays_sensor_ids,
-                                            extra_sensor_ids=extra_io_sensor_ids)
+                                            extra_sensor_ids=extra_io_sensor_ids, true_gray_ids=true_gray_ids)
 
         self._start_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
-                                                   sensor_id=SIDES_SENSOR_ID,
-                                                   min_line=START_MIN_LINE)
+                                                   sensor_id=side_sensor_ids,
+                                                   min_line=getattr(self, self.CONFIG_START_UP_MIN_BASELINE_KEY))
 
     def wait_start(self) -> None:
         """
@@ -145,12 +155,13 @@ class BattleBot(Bot):
         Returns:
 
         """
+        self.tag_detector.tag_detection_switch = False
         tape = [
             new_ActionFrame(breaker_func=self._start_watcher,
                             action_duration=99999999),
             new_ActionFrame(action_speed=getattr(self, self.CONFIG_MOTION_START_SPEED_KEY),
                             action_duration=getattr(self, self.CONFIG_MOTION_START_DURATION_KEY)),
-            new_ActionFrame()]
+            new_ActionFrame(action_duration=300)]
         warnings.warn('\n>>>>>>>>>>Waiting for start<<<<<<<', stacklevel=4)
         self.player.extend(tape)
         warnings.warn("\n>>>>>>>>>Start<<<<<<<<", stacklevel=4)
@@ -166,10 +177,15 @@ class BattleBot(Bot):
         true_gray_min_line = getattr(self, self.CONFIG_INFER_TRUE_GRAY_MIN_BASELINE_KEY)
         true_gray_max_line = getattr(self, self.CONFIG_INFER_TRUE_GRAY_MAX_BASELINE_KEY)
 
+        float_gray_min_line = 2400
+
         def _is_on_stage() -> bool:
-            return true_gray_min_line < mov_average_apply(full_adc_updater()[true_gray_id]) < true_gray_max_line
+
+            applied_value = mov_average_apply(full_adc_updater()[true_gray_id])
+            return applied_value < float_gray_min_line or true_gray_min_line < applied_value < true_gray_max_line
 
         def _on_stage() -> None:
+            self.tag_detector.tag_detection_switch = True
             if self.edge_inferrer.react():
                 return
             if self.surrounding_inferrer.react():
@@ -178,6 +194,7 @@ class BattleBot(Bot):
             self.normal_actions.react()
 
         def _off_stage() -> None:
+            self.tag_detector.tag_detection_switch = False
             self.fence_inferrer.react()
 
         while True:
@@ -207,20 +224,35 @@ class BattleBot(Bot):
             return is_on_stage
 
         def on_stage() -> None:
+            self.tag_detector.tag_detection_switch = True
+
             status_code = self.edge_inferrer.react()
             self.screen.fill_screen(self.screen.COLOR_BLACK)
-            self.screen.put_string(0, 0, f'{status_code}')
+            self.screen.put_string(0, 0, f'edge: {status_code}')
             self.screen.put_string(0, 12, f'{perf_counter_ns()}')
-            self.screen.refresh()
+
             if status_code:
+                self.screen.refresh()
                 return
-            if self.surrounding_inferrer.react():
+
+            sur_code = self.surrounding_inferrer.react()
+            if sur_code:
+                self.screen.fill_screen(self.screen.COLOR_BLACK)
+                self.screen.put_string(0, 0, f'sur: {sur_code}')
+                self.screen.put_string(0, 12, f'{perf_counter_ns()}')
+                self.screen.refresh()
+                self.edge_inferrer.react()
                 return
             self.normal_actions.react()
 
         def off_stage() -> None:
-            self.fence_inferrer.react()
+            self.tag_detector.tag_detection_switch = False
+            status_code = self.fence_inferrer.react()
+            self.screen.fill_screen(self.screen.COLOR_BLACK)
+            self.screen.put_string(0, 0, f'{status_code}')
+            self.screen.put_string(0, 15, f'{perf_counter_ns()}')
             self.screen.set_led_color(1, self.screen.COLOR_GREEN)
+            self.screen.refresh()
 
         while True:
             on_stage() if is_on_stage() else off_stage()
@@ -229,6 +261,8 @@ class BattleBot(Bot):
         self.player.append(new_ActionFrame())
         self.screen.set_led_color(0, self.screen.COLOR_WHITE)
 
+        sleep(1)
+        ActionFrame.save_cache()
         warnings.warn('\nexiting', stacklevel=4)
 
     @final
@@ -252,14 +286,14 @@ if __name__ == '__main__':
                     fence_inferrer_config='config/std_fence_inferrer_config.json',
                     normal_actions_config='config/std_normal_actions_config.json')
 
-    bot.save_all_config()
-    # bot.start_match(normal_spead=3000, team_color='blue', use_cam=False)
+    # bot.save_all_config()
+    bot.start_match()
 
-    try:
-        bot.Battle()
-        # bot.Battle_debug()
-    except KeyboardInterrupt:
-        print('end')
-        bot.player.append(new_ActionFrame())
-
-        sleep(1)
+    # try:
+    #     bot.Battle()
+    #     # bot.Battle_debug()
+    # except KeyboardInterrupt:
+    #     print('end')
+    #     bot.player.append(new_ActionFrame())
+    #
+    #     sleep(1)

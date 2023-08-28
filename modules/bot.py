@@ -25,7 +25,6 @@ class Bot(Configurable, metaclass=ABCMeta):
 
     CONFIG_DEVICE_DETECTOR_KEY = f'{CONFIG_DEVICE_KEY}/Detector'
     CONFIG_DEVICE_DETECTOR_CAMERA_ID_KEY = f'{CONFIG_DEVICE_DETECTOR_KEY}/CameraId'
-    CONFIG_DEVICE_DETECTOR_CAMERA_RESOLUTION_MULTIPLIER_KEY = f'{CONFIG_DEVICE_DETECTOR_KEY}/CameraResolutionMultiplier'
     CONFIG_DEVICE_DETECTOR_START_DETECT_TAG_KEY = f'{CONFIG_DEVICE_DETECTOR_KEY}/StartDetectTag'
 
     CONFIG_ONBOARD_SENSORS_KEY = f'{CONFIG_DEVICE_KEY}/OnBoardSensors'
@@ -42,7 +41,6 @@ class Bot(Configurable, metaclass=ABCMeta):
     def register_all_config(self):
         self.register_config(self.CONFIG_DEVICE_SCREEN_INIT_KEY, False)
         self.register_config(self.CONFIG_DEVICE_DETECTOR_CAMERA_ID_KEY, 0)
-        self.register_config(self.CONFIG_DEVICE_DETECTOR_CAMERA_RESOLUTION_MULTIPLIER_KEY, 0.4)
         self.register_config(self.CONFIG_DEVICE_DETECTOR_START_DETECT_TAG_KEY, False)
 
         self.register_config(self.CONFIG_ONBOARD_SENSORS_DEBUG_KEY, False)
@@ -57,14 +55,11 @@ class Bot(Configurable, metaclass=ABCMeta):
         super().__init__(config_path=config_path)
         self.screen = Screen(init_screen=getattr(self, self.CONFIG_DEVICE_SCREEN_INIT_KEY))
         if not BLIND_MODE:
-            self.camera = Camera(device_id=getattr(self, self.CONFIG_DEVICE_DETECTOR_CAMERA_ID_KEY))
-
-            self.tag_detector = TagDetector(camera=self.camera,
+            self.tag_detector = TagDetector(cam_id=getattr(self, self.CONFIG_DEVICE_DETECTOR_CAMERA_ID_KEY),
                                             start_detect_tag=getattr(self,
                                                                      self.CONFIG_DEVICE_DETECTOR_START_DETECT_TAG_KEY),
                                             team_color=getattr(self, self.CONFIG_MISC_TEAM_COLOR_KEY))
-            self.camera.set_cam_resolution(
-                resolution_multiplier=getattr(self, self.CONFIG_DEVICE_DETECTOR_CAMERA_RESOLUTION_MULTIPLIER_KEY))
+
         self.player = ActionPlayer()
         __on_board_sensors = OnBoardSensors(debug=getattr(self, self.CONFIG_ONBOARD_SENSORS_DEBUG_KEY))
         self.sensor_hub = SensorHub(on_board_adc_updater=(__on_board_sensors.adc_all_channels, None),

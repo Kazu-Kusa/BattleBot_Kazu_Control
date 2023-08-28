@@ -1,45 +1,29 @@
 {
   "MotionSection": {
-    "BasicDuration": 400,
-    "BasicSpeed": 3500,
-    "DashTimeout": 6000
+    "BasicDuration": 270,
+    "BasicSpeed": 2600,
+    "DashTimeout": 6400
   },
   "InferSection": {
-    "FrontObjectTable": {
-      "-1/True": 400,
-      "-1/False": 0,
-      "1/True": 100,
-      "1/False": 100,
-      "2/True": 300,
-      "2/False": 300,
-      "3/True": 200,
-      "3/False": 200
-    },
     "MinBaselines": [
-      650,
-      650,
-      650,
-      650
-    ],
-    "MaxBaselines": [
-      4096,
-      4096,
-      4096,
-      4096
+      1600,
+      1600,
+      1600,
+      1600
     ]
   },
   "EdgeWatcher": {
     "MaxBaseline": [
-      1800,
-      1900,
-      1900,
-      1900
+      1820,
+      2080,
+      2080,
+      1820
     ],
     "MinBaseline": [
-      1300,
-      1500,
-      1500,
-      1300
+      0,
+      0,
+      0,
+      0
     ]
   }
 }

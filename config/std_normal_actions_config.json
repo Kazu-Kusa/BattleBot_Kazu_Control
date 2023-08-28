@@ -1,27 +1,28 @@
 {
   "MotionSection": {
-    "BasicSpeed": 4000,
+    "BasicSpeed": 3600,
     "BasicDuration": 300
   },
   "Scan": {
-    "Weight": 1,
-    "ScanningSpeed": 260,
+    "Weight": 0,
+    "ScanningSpeed": 2000,
     "ScanningDuration": 3500,
     "ScanCycles": 2
   },
   "Snake": {
     "Weight": 0,
-    "SnakeCycles": 3
+    "SnakeCycles": 1
   },
   "Drifting": {
     "Weight": 0,
     "DriftingCycles": 1
   },
   "Turn": {
-    "Weight": 4
+    "Weight": 1
   },
   "PlainMove": {
-    "Weight": 15
+    "Weight": 5,
+    "GraysMinLine": 3300
   },
   "Idle": {
     "Ids": [
@@ -34,7 +35,7 @@
       6,
       7
     ],
-    "Weight": 3,
+    "Weight": 0,
     "MinBaseline": [
       150,
       150,
@@ -64,24 +65,24 @@
       null
     ],
     "MinBaseline": [
-      300,
-      300,
-      300,
-      300
+      200,
+      200,
+      200,
+      200
     ]
   },
   "EdgeWatcher": {
     "MaxBaseline": [
       1800,
-      1900,
-      1900,
-      1900
+      2000,
+      2000,
+      1800
     ],
     "MinBaseline": [
-      1300,
-      1500,
-      1500,
-      1300
+      0,
+      0,
+      0,
+      0
     ]
   }
 }

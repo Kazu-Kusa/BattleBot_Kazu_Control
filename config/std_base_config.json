@@ -5,7 +5,6 @@
     },
     "Detector": {
       "CameraId": 0,
-      "CameraResolutionMultiplier": 0.3,
       "StartDetectTag": true
     },
     "OnBoardSensors": {
@@ -13,11 +12,14 @@
     }
   },
   "MotionSection": {
-    "StartSpeed": 7000,
-    "StartDuration": 600
+    "StartSpeed": -9000,
+    "StartDuration": 800
   },
   "MiscSection": {
     "TeamColor": "blue"
+  },
+  "StartUp": {
+    "MinBaseline": 1800
   },
   "Sensor": {
     "OnBoardAdc": {
@@ -41,11 +43,11 @@
   },
   "InferSection": {
     "TrueGray": {
-      "MinBaseline": 2930,
+      "MinBaseline": 2600,
       "MaxBaseline": 4096
     }
   },
   "Filters": {
-    "MovingaverageWindowSize": 20
+    "MovingaverageWindowSize": 30
   }
 }

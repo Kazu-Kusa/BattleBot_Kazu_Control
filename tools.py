@@ -1,32 +1,23 @@
-import cv2
+from repo.uptechStar.module.hotConfigure.valueTest import read_sensors
 
-from repo.uptechStar.module.camra import Camera
-from repo.uptechStar.module.tagdetector import TagDetector
+adc_labels = {
+    6: 'EDGE_FL',
+    7: "EDGE_RL",
+    2: 'EDGE_FR',
+    1: 'EDGE_RR',
+    8: 'L1',
+    0: 'R1',
+    3: 'FB', 5: 'RB',
+    4: 'GRAY'
+}
 
-c = Camera()
-c.set_cam_resolution(resolution_multiplier=0.4)
-width = c._camera.get(cv2.CAP_PROP_FRAME_WIDTH)
-height = c._camera.get(cv2.CAP_PROP_FRAME_HEIGHT)
-print(width)
-print(height)
-a = TagDetector(c, 'blue')
+io_labels = {
+    3: "gray l",
+    2: "gray r",
 
-a.tag_monitor_switch = True
-c.update_frame()
-cv2.imwrite('test.jpg', c.latest_frame)
-c.update_frame()
-color = cv2.cvtColor(c.latest_frame, cv2.COLOR_BGR2GRAY)
-cv2.imwrite('test1.jpg', color)
+    7: 'ftl',
+    6: 'ftr',
+    5: 'rtr'
+}
 
-# from apriltag import Detector, DetectorOptions
-#
-# a = DetectorOptions()
-# d = Detector()
-# print(d.detect(color))
-# print('saved')
-while True:
-    print(a.tag_id)
-
-# cap = cv2.VideoCapture(0)
-# _, img = cap.read()
-# cv2.imwrite('test.jpg', img)
+read_sensors(adc_labels=adc_labels, io_labels=io_labels)
