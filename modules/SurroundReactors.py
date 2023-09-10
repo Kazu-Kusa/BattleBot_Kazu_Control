@@ -52,7 +52,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_neutral_box_encountered_at_front_with_left_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到中立箱子，左方有物体，希望更快地前进,有中断
         return [
@@ -72,7 +72,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_neutral_box_encountered_at_front_with_right_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到中立箱子，右方有物体，希望更快地前进,有中断
         return [
@@ -92,7 +92,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_neutral_box_encountered_at_front_with_behind_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到中立箱子，后方有物品，我希望先左转或右转后,后退（有中断）
         single = random_sign()
@@ -113,7 +113,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_neutral_box_encountered_at_front_with_left_right_objects(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到中立箱子，左右方有物体，希望更快地前进,有中断
         return [
@@ -127,7 +127,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_neutral_box_encountered_at_front_with_left_behind_objects(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到中立箱子，左方后方有物体，希望左转后进行后退(有中断)
         return [
@@ -147,7 +147,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_neutral_box_encountered_at_front_with_right_behind_objects(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到中立箱子，右方后方有物体，希望右转后进行后退(有中断)
         return [
@@ -167,7 +167,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_neutral_box_encountered_at_front_with_left_right_behind_objects(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到中立箱子，左右方后方有物体，希望前进(有中断)后，左或右转后，进行后退(有中断)
         single = random_sign()
@@ -195,7 +195,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_ally_box_encountered_at_front_with_left_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到友方箱子，左方有物体，希望进行差速左后退（有中断）（防止长时间检测到友方的箱子）
         return [
@@ -209,7 +209,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_ally_box_encountered_at_front_with_right_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到友方箱子，右方有物体，希望进行差速右后退（有中断）
         return [
@@ -223,7 +223,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_ally_box_encountered_at_front_with_behind_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到友方箱子，后方有物品，我希望前右轮锁死，其余轮子后退（有中断）
         return [
@@ -237,7 +237,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_ally_box_encountered_at_front_with_left_right_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到友方箱子，左右方有物体，希望更快地后退(有中断)后，进行左右转（防止长时间检测到友方的箱子）
         single = random_sign()
@@ -258,7 +258,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_ally_box_encountered_at_front_with_left_behind_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到友方箱子，左方后方有物体，我希望前右轮锁死，其余轮子后退（有中断）
         return [
@@ -272,7 +272,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_ally_box_encountered_at_front_with_right_behind_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到友方箱子，右方后方有物体，我希望前左轮锁死，其余轮子后退（有中断）
         return [
@@ -286,7 +286,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_ally_box_encountered_at_front_with_left_right_behind_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到友方箱子，左方右方后方有物体，我认为后面是箱子的可能性更大，是敌方车辆的可能性很小，所有我希望直接后退
         return [
@@ -300,7 +300,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_enemy_box_encountered_at_front_with_left_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到敌方箱子，左方有物体，希望前进(有中断)
         return [
@@ -314,7 +314,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_enemy_box_encountered_at_front_with_right_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到敌方箱子，右方有物体，希望前进(有中断)
         return [
@@ -328,7 +328,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_enemy_box_encountered_at_front_with_behind_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到敌方箱子，后方有物品，我希望左转或右转后,后退（有中断）
         single = random_sign()
@@ -349,7 +349,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_enemy_box_encountered_at_front_with_left_right_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到敌方箱子，左方右方有物体，希望进行后退(有中断)
         return [
@@ -363,7 +363,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_enemy_box_encountered_at_front_with_left_behind_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到敌方箱子，左方后方有物体，我希望前进(有中断)后，左转后，进行后退(有中断)
         return [
@@ -390,7 +390,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_enemy_box_encountered_at_front_with_right_behind_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到敌方箱子，右方后方有物体，我希望前进(有中断)后，右转后，进行后退(有中断)
         return [
@@ -417,7 +417,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_enemy_box_encountered_at_front_with_left_right_behind_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 在前遇到敌方箱子，左方右方后方有物体，太危险了，我们选择贪分，直接前进（有中断)，然后交给边缘，（强袭直接上它丫的啊）
         return [
@@ -521,7 +521,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         return []
 
     def on_enemy_car_encountered_at_front_with_left_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 当前面有车左边有障碍物时，撞下对面的车然后后退至安全位置
         return [
@@ -542,7 +542,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_enemy_car_encountered_at_front_with_right_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 当前面有车右边有障碍物时，撞下对面的车然后后退至安全位置
         return [
@@ -563,7 +563,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_enemy_car_encountered_at_front_with_behind_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 当前面有车后边有障碍物时，撞下对面的车然后随机转向至后对边缘
         sign = random_sign()
@@ -584,7 +584,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_enemy_car_encountered_at_front_with_left_right_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 当前面有车左右有障碍物时，撞下对面的车然后后退至安全位置
         return [
@@ -605,7 +605,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_enemy_car_encountered_at_front_with_left_behind_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 当前面有车左后有障碍物时，撞下对面的车然后右转，再前进至安全位置
 
@@ -633,7 +633,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_enemy_car_encountered_at_front_with_right_behind_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 当前面有车右后有障碍物时，撞下对面的车然后左转，再前进至安全位置
 
@@ -661,7 +661,7 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         ]
 
     def on_enemy_car_encountered_at_front_with_left_right_behind_object(
-            self, basic_speed
+        self, basic_speed
     ) -> ComplexAction:
         # 当前面有车左右后有障碍物时，撞下对面的车然后随机转向，再前进至安全位置
         sign = random_sign()
@@ -873,15 +873,15 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         )
 
     def __init__(
-            self,
-            sensor_hub: SensorHub,
-            action_player: ActionPlayer,
-            config_path: str,
-            tag_detector: Optional[TagDetector],
-            surrounding_sensor_ids: Tuple[int, int, int, int],
-            edge_sensor_ids: Tuple[int, int, int, int],
-            grays_sensor_ids: Tuple[int, int],
-            extra_sensor_ids: Tuple[int, int, int],
+        self,
+        sensor_hub: SensorHub,
+        action_player: ActionPlayer,
+        config_path: str,
+        tag_detector: Optional[TagDetector],
+        surrounding_sensor_ids: Tuple[int, int, int, int],
+        edge_sensor_ids: Tuple[int, int, int, int],
+        grays_sensor_ids: Tuple[int, int],
+        extra_sensor_ids: Tuple[int, int, int],
     ):
         super().__init__(
             sensor_hub=sensor_hub, player=action_player, config_path=config_path
@@ -938,9 +938,9 @@ class StandardSurroundReactor(AbstractSurroundReactor):
         )
 
     def _make_infer_body(
-            self,
-            sensor_ids: Tuple[int, int, int, int],
-            extra_sensor_ids: Tuple[int, int, int],
+        self,
+        sensor_ids: Tuple[int, int, int, int],
+        extra_sensor_ids: Tuple[int, int, int],
     ):
         """
         make an infer_body with all variables bound locally, which can bring a better performance
@@ -1001,9 +1001,9 @@ class StandardSurroundReactor(AbstractSurroundReactor):
             # calc for the three-direction status, behind, left, right
             # calc for the surrounding status code except front
             left_right_behind_status = (
-                    status_bools[1] * behind_status_weight
-                    + status_bools[2] * left_status_weight
-                    + status_bools[3] * right_status_weight
+                status_bools[1] * behind_status_weight
+                + status_bools[2] * left_status_weight
+                + status_bools[3] * right_status_weight
             )
             # use front sensors and tag to search the corresponding status code
             front_object_status = front_object_table.get(
