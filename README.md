@@ -1,107 +1,103 @@
 # 轮式格斗车主控程序
 
-- 主控
+------
 
-  树莓派
+[TOC]
 
-  stm32
+------
 
-- 架构
+## 简述
 
-  四驱电机
+本主控程序是在博创的标准人工智能控制器上开发的，这个控制器的官方资料可以在仓库[Reference-Material](https://github.com/Kazu-Kusa/Reference-Material/tree/main/TOTURIAL)
+查看，同时程序设计的对应模型版本为[BattleBot_Kazu_Models_v0.8.7.8](https://github.com/Kazu-Kusa/BattleBot_Kazu_Models/releases/tag/v0.8.7.8)
 
-  18路传感器+一路摄像头
+注：由于硬件原因和开发周期的原因，理想的计划的传感器数量（18）并没有被实现
 
-- 战法
+------
 
-  对箱子，对敌
+## 2023国赛实际配置
 
-- 调参
-  热调试
-  冷调试
+- **主控**
 
-# MPU6500功能简介
+    *
+  *
+  人工智能控制器（实质上是一块带扩展板的树莓派），详细说明见[人工智能版控制器硬件说明.pdf](https://github.com/Kazu-Kusa/Reference-Material/blob/main/TOTURIAL/创意之星人工智能版控制器硬件说明.pdf)
+  **
 
-MPU-6500是一款六轴运动处理传感器，在大小为3.0×3.0×0.9mm的芯片上，通过QFN 封装（无引线方形封装），集成了 3 轴 MEMS 陀螺仪，3 轴
-MEMS加速度计，以及一个数字运动处理器 DMP（ Digital Motion Processor）。还可以通过辅助I2C端口与多个非惯性数字传感器（例如压力传感器、磁力计）进行连接。
-![image](https://user-images.githubusercontent.com/88489697/213609141-13c99d10-06c6-4a6a-a45a-e8c5e3e89ee5.png)
+    - 树莓派系统内核版本 `v6.21`
+    - 树莓派超频设置将`1500MHz`（默认）超频到`2000Mhz`
+    - python解释器版本 `3.11.0`
 
-<details>
-<summary>展开细节</summary>
-<pre><code>
+- **架构**
 
-## 1.陀螺仪功能
+    *
+  *4路[BDMC2083](https://github.com/Kazu-Kusa/Reference-Material/tree/main/TOTURIAL/%E9%A9%B1%E5%8A%A8%E5%99%A8%E8%B0%83%E8%AF%95)
+  闭环驱动**
 
-MPU-6500中的三轴MEMS陀螺仪具有广泛的特性：
-<details>
-<summary>功能详情</summary>
-<pre><code>
-- 数字输出X、Y和Z轴角速度传感器(陀螺仪)，其用户可编程全量程为±250，±500，±1000和±2000°/秒，使用16位ADC采集数据。
-- 数字可编程低通滤波器
-- 陀螺仪工作电流：3.2mA
-- 工厂校准灵敏度标度因子
-- 自测试
-</code></pre>
-</details>
+    *
+  *4路[Faulhaber2342L012CR](https://item.taobao.com/item.htm?spm=a1z09.2.0.0.271e2e8dwBT4HS&id=20965620027&_u=a3un1ne9d249)
+  直流有刷减速编码电机**
 
-## 2.加速度计功能
+  **14路传感器**
 
-MPU-6500中的三轴MEMS加速度计具有广泛的功能：
-<details>
-<summary>功能详情</summary>
-<pre><code>
-- 数字输出X-，Y-，Z轴加速度计，可编程全量程为±2g，±4g，+8g和±16g，使用16位ADC采集数据。
-- 加速度计正常工作电流：450 uA
-- 低功率加速度计模式电流：0.98Hz为6.37uA，31.25Hz为17.75uA
-- 用户可编程中断
-- 用于应用程序处理器低功耗操作的唤醒运动中断
-- 自测
-</code></pre>
-</details>
+    - **9路模拟量传感器**
+        - 4路用于边缘检测
+        - 2路分别用于左右侧检测
+        - 2路分别用于前后侧检测
+        - 1路用于车体在台上/台下的判定检测
 
-## 3.附加功能
+    - **5路逻辑量传感器**
+        - 2路用于边缘检测
+        - 2路用于前侧物体检测
+        - 1路用于后侧物体检测
 
-MPU-6500包括下列附加功能：
-<details>
-<summary>功能详情</summary>
-<pre><code>
-- 从外部传感器(例如磁强计)读取数据的辅助IIC总线
-- 3.4mA工作电流当所有6轴都都工作时
-- VDD电源电压范围为1.8~3.3V±5%
-- VDDIO基准电压1.8~3.3V±5%提供至辅助IIC设备
-- 芯片大小：3x3x0.9mm
-- 加速度计和陀螺仪之间的最小交叉轴灵敏度
-- 512字节FIFO缓冲器，使应用程序处理器能够读取突发数据。
-- 数字输出温度传感器
-- 陀螺仪、加速度计和温度传感器可编程数字滤波器
-- 400 KHzIIC用于与所有寄存器通信
-- 1 MHz SPI串行接口用于与所有寄存器通信
-- 20 MHz SPL串行接口用于读取传感器和中断寄存器（提高读取速度）。
-- MEMS结构在硅片级密封和键合
-- 符合RoHS和绿色标准
-</code></pre>
-</details>
+​    *
+*
+1路[720P 30FPS的摄像头](https://detail.tmall.com/item.htm?abbucket=15&id=655422944269&ns=1&spm=a21n57.1.0.0.4402523ctOgRLp)
+**
 
-## 4.运动处理
+​
+实际使用过程中会使用最低分辨率用作识别以保证处理速度（实际可以更加的低），参考[不同分辨率下Apriltag识别精度测试_apriltag 评测比较](https://blog.csdn.net/zhuoqingjoking97298/article/details/122316966)
 
-<details>
-<summary>功能详情</summary>
-<pre><code>
-- 内部数字运动处理(DMP)引擎支持高级运动处理和低功耗功能，例如使用可编程中断的姿态识别。
-- 除角速度外，该设备还可以选择输出角度。
-- 低功率计步器功能允许主机处理器在DMP保持步数计数的同时进入睡眠状态。
-</code></pre>
-</details>
-</code></pre>
-</details>
+​    **单块6串联18650电池供电，标称电压24V**
 
-### MPU6500默认配置
+​
+树莓派供电适配器[LM2596S](https://detail.tmall.com/item.htm?_u=a3un1ne9688d&id=672825188272&spm=a1z09.2.0.0.3dee2e8dzyr0Xh)
+，树莓派的正常供电说明可以在[人工智能版控制器硬件说明.pdf](https://github.com/Kazu-Kusa/Reference-Material/blob/main/TOTURIAL/创意之星人工智能版控制器硬件说明.pdf)
 
-- 角速度量程±2000°/s
-- 加速度量程±8G
-- 采样率1kHz
+​        *
+*
+重要注意：从扩展板为树莓派供电时，供电电压必须随着树莓派负载增加而略有提高，但是一般不要超过16V，核心供电不足会有严重的降频，这是由于扩展板的降压原理，原理详情见扩展板板载稳压芯片[SY8286ARAC手册](https://item.szlcsc.com/189643.html)
+**
 
-### 传感器配置
+​ 电机驱动供电适配器，无，直接链接
+
+- **战斗逻辑**
+
+  台上任务优先级
+
+    1. 边缘响应
+    2. 周围物体响应
+    3. 寻物响应
+
+  台下
+
+    1. 围栏方向响应
+
+- **调参**
+
+  使用参数配置文件统一管理
+
+## 基础运作逻辑
+
+响应器
+
+通过多个响应器的串联可以实现优先级任务队列
+
+## 传感器默认配置
+
+注意：设备命名规则见[设备命名方式.pdf](https://github.com/Kazu-Kusa/Reference-Material/blob/main/技术参考/设备命名方式.pdf)
+，其中由于后期加入了额外的传感器，这些传感器是命名规则中不存在的，所以各个地方的命名还未统一，额外添加的使用`extra-added`标注了
 
 ```python
 """
@@ -115,13 +111,13 @@ r1 ad0
 fb ad3
 rb ad5
 
-gray scaler  ad4
+gray scaler  ad4  extra-added
 
 gray l io3
 gray r io2
 
-ftl io7
-ftr io6
-rtr io5
+ftl io7 	extra-added
+ftr io6		extra-added
+rtr io5		extra-added
 """
 ```
