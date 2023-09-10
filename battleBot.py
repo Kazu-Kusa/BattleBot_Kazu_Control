@@ -3,10 +3,10 @@ from random import seed
 from time import sleep, perf_counter_ns
 from typing import final
 
-from modules.EdgeInferrers import StandardEdgeInferrer
-from modules.FenceInferrers import StandardFenceInferrer
-from modules.NormalActions import NormalActions
-from modules.SurroundInferrers import StandardSurroundInferrer
+from modules.EdgeReactors import StandardEdgeReactor
+from modules.FenceReactors import StandardFenceInReactor
+from modules.SearchReactors import SearchReactor
+from modules.SurroundReactors import StandardSurroundReactor
 from modules.bot import Bot
 from repo.uptechStar.module.actions import new_ActionFrame, ActionFrame
 from repo.uptechStar.module.algrithm_tools import MovingAverage
@@ -17,42 +17,48 @@ seed(2023)
 
 
 class BattleBot(Bot):
-    CONFIG_START_UP_KEY = 'StartUp'
-    CONFIG_START_UP_MIN_BASELINE_KEY = f'{CONFIG_START_UP_KEY}/MinBaseline'
+    CONFIG_START_UP_KEY = "StartUp"
+    CONFIG_START_UP_MIN_BASELINE_KEY = f"{CONFIG_START_UP_KEY}/MinBaseline"
 
     # ad4未注册，暂时没有控制单元
     CONFIG_SENSOR_KEY = "Sensor"
     # region OB_ADC_CONFIG
     CONFIG_OB_ADC_KEY = f"{CONFIG_SENSOR_KEY}/OnBoardAdc"
     CONFIG_EDGE_FL_KEY = f"{CONFIG_OB_ADC_KEY}/Fl"
-    CONFIG_EDGE_FR_KEY = f'{CONFIG_OB_ADC_KEY}/Fr'
-    CONFIG_EDGE_RL_KEY = f'{CONFIG_OB_ADC_KEY}/Rl'
-    CONFIG_EDGE_RR_KEY = f'{CONFIG_OB_ADC_KEY}/Rr'
-    CONFIG_L1_KEY = f'{CONFIG_OB_ADC_KEY}/L1'
-    CONFIG_R1_KEY = f'{CONFIG_OB_ADC_KEY}/R1'
-    CONFIG_FB_KEY = f'{CONFIG_OB_ADC_KEY}/Fb'
-    CONFIG_RB_KEY = f'{CONFIG_OB_ADC_KEY}/Rb'
+    CONFIG_EDGE_FR_KEY = f"{CONFIG_OB_ADC_KEY}/Fr"
+    CONFIG_EDGE_RL_KEY = f"{CONFIG_OB_ADC_KEY}/Rl"
+    CONFIG_EDGE_RR_KEY = f"{CONFIG_OB_ADC_KEY}/Rr"
+    CONFIG_L1_KEY = f"{CONFIG_OB_ADC_KEY}/L1"
+    CONFIG_R1_KEY = f"{CONFIG_OB_ADC_KEY}/R1"
+    CONFIG_FB_KEY = f"{CONFIG_OB_ADC_KEY}/Fb"
+    CONFIG_RB_KEY = f"{CONFIG_OB_ADC_KEY}/Rb"
 
-    CONFIG_TRUE_GRAYS_KEY = f'{CONFIG_OB_ADC_KEY}/TrueGrays'
+    CONFIG_TRUE_GRAYS_KEY = f"{CONFIG_OB_ADC_KEY}/TrueGrays"
     # endregion
 
     # region OB_IO_CONFIG
     CONFIG_OB_IO_KEY = f"{CONFIG_SENSOR_KEY}/OnBoardIo"
-    CONFIG_GRAY_L_KEY = f'{CONFIG_OB_IO_KEY}/GrayL'
-    CONFIG_GRAY_R_KEY = f'{CONFIG_OB_IO_KEY}/GrayR'
+    CONFIG_GRAY_L_KEY = f"{CONFIG_OB_IO_KEY}/GrayL"
+    CONFIG_GRAY_R_KEY = f"{CONFIG_OB_IO_KEY}/GrayR"
 
-    CONFIG_FTL_KEY = f'{CONFIG_OB_IO_KEY}/Ftl'
-    CONFIG_FTR_KEY = f'{CONFIG_OB_IO_KEY}/Ftr'
-    CONFIG_RTR_KEY = f'{CONFIG_OB_IO_KEY}/Rtr'
+    CONFIG_FTL_KEY = f"{CONFIG_OB_IO_KEY}/Ftl"
+    CONFIG_FTR_KEY = f"{CONFIG_OB_IO_KEY}/Ftr"
+    CONFIG_RTR_KEY = f"{CONFIG_OB_IO_KEY}/Rtr"
 
     # endregion
-    CONFIG_INFER_KEY = 'InferSection'
-    CONFIG_INFER_TRUE_GRAY_KEY = f'{CONFIG_INFER_KEY}/TrueGray'
-    CONFIG_INFER_TRUE_GRAY_MIN_BASELINE_KEY = f'{CONFIG_INFER_TRUE_GRAY_KEY}/MinBaseline'
-    CONFIG_INFER_TRUE_GRAY_MAX_BASELINE_KEY = f'{CONFIG_INFER_TRUE_GRAY_KEY}/MaxBaseline'
+    CONFIG_INFER_KEY = "InferSection"
+    CONFIG_INFER_TRUE_GRAY_KEY = f"{CONFIG_INFER_KEY}/TrueGray"
+    CONFIG_INFER_TRUE_GRAY_MIN_BASELINE_KEY = (
+        f"{CONFIG_INFER_TRUE_GRAY_KEY}/MinBaseline"
+    )
+    CONFIG_INFER_TRUE_GRAY_MAX_BASELINE_KEY = (
+        f"{CONFIG_INFER_TRUE_GRAY_KEY}/MaxBaseline"
+    )
 
-    CONFIG_FILTERS_KEY = 'Filters'
-    CONFIG_FILTERS_MOVINGAVERAGE_WINDOW_SIZE_KEY = f'{CONFIG_FILTERS_KEY}/MovingaverageWindowSize'
+    CONFIG_FILTERS_KEY = "Filters"
+    CONFIG_FILTERS_MOVINGAVERAGE_WINDOW_SIZE_KEY = (
+        f"{CONFIG_FILTERS_KEY}/MovingaverageWindowSize"
+    )
 
     # endregion
     def register_all_children_config(self):
@@ -84,70 +90,86 @@ class BattleBot(Bot):
 
         self.register_config(self.CONFIG_FILTERS_MOVINGAVERAGE_WINDOW_SIZE_KEY, 20)
 
-    def __init__(self, base_config: str,
-                 edge_inferrer_config: str,
-                 surrounding_inferrer_config: str,
-                 fence_inferrer_config: str,
-                 normal_actions_config: str):
+    def __init__(
+            self,
+            base_config: str,
+            edge_inferrer_config: str,
+            surrounding_inferrer_config: str,
+            fence_inferrer_config: str,
+            normal_actions_config: str,
+    ):
         super().__init__(config_path=base_config)
         edge_sensor_ids = (
             getattr(self, self.CONFIG_EDGE_FL_KEY),
             getattr(self, self.CONFIG_EDGE_RL_KEY),
             getattr(self, self.CONFIG_EDGE_RR_KEY),
-            getattr(self, self.CONFIG_EDGE_FR_KEY)
-
+            getattr(self, self.CONFIG_EDGE_FR_KEY),
         )
 
         grays_sensor_ids = (
             getattr(self, self.CONFIG_GRAY_L_KEY),
-            getattr(self, self.CONFIG_GRAY_R_KEY)
+            getattr(self, self.CONFIG_GRAY_R_KEY),
         )
         surrounding_sensor_ids = (
             getattr(self, self.CONFIG_FB_KEY),
             getattr(self, self.CONFIG_RB_KEY),
             getattr(self, self.CONFIG_L1_KEY),
-            getattr(self, self.CONFIG_R1_KEY)
+            getattr(self, self.CONFIG_R1_KEY),
         )
         side_sensor_ids = (
             getattr(self, self.CONFIG_L1_KEY),
-            getattr(self, self.CONFIG_R1_KEY)
+            getattr(self, self.CONFIG_R1_KEY),
         )
         extra_io_sensor_ids = (
             getattr(self, self.CONFIG_FTL_KEY),
             getattr(self, self.CONFIG_FTR_KEY),
-            getattr(self, self.CONFIG_RTR_KEY)
+            getattr(self, self.CONFIG_RTR_KEY),
         )
-        true_gray_ids = (
-            getattr(self, self.CONFIG_TRUE_GRAYS_KEY),
+        true_gray_ids = (getattr(self, self.CONFIG_TRUE_GRAYS_KEY),)
+
+        self.edge_inferrer = StandardEdgeReactor(
+            sensor_hub=self.sensor_hub,
+            edge_sensor_ids=edge_sensor_ids,
+            grays_sensor_ids=grays_sensor_ids,
+            action_player=self.player,
+            config_path=edge_inferrer_config,
+        )
+        self.surrounding_inferrer = StandardSurroundReactor(
+            sensor_hub=self.sensor_hub,
+            action_player=self.player,
+            config_path=surrounding_inferrer_config,
+            tag_detector=self.tag_detector,
+            surrounding_sensor_ids=surrounding_sensor_ids,
+            edge_sensor_ids=edge_sensor_ids,
+            grays_sensor_ids=grays_sensor_ids,
+            extra_sensor_ids=extra_io_sensor_ids,
         )
 
-        self.edge_inferrer = StandardEdgeInferrer(sensor_hub=self.sensor_hub,
-                                                  edge_sensor_ids=edge_sensor_ids,
-                                                  grays_sensor_ids=grays_sensor_ids,
-                                                  action_player=self.player,
-                                                  config_path=edge_inferrer_config)
-        self.surrounding_inferrer = StandardSurroundInferrer(sensor_hub=self.sensor_hub, action_player=self.player,
-                                                             config_path=surrounding_inferrer_config,
-                                                             tag_detector=self.tag_detector,
-                                                             surrounding_sensor_ids=surrounding_sensor_ids,
-                                                             edge_sensor_ids=edge_sensor_ids,
-                                                             grays_sensor_ids=grays_sensor_ids,
-                                                             extra_sensor_ids=extra_io_sensor_ids)
+        self.fence_inferrer = StandardFenceInReactor(
+            sensor_hub=self.sensor_hub,
+            action_player=self.player,
+            config_path=fence_inferrer_config,
+            edge_sensor_ids=edge_sensor_ids,
+            surrounding_sensor_ids=surrounding_sensor_ids,
+            grays_sensor_ids=grays_sensor_ids,
+            extra_sensor_ids=extra_io_sensor_ids,
+        )
+        self.normal_actions = SearchReactor(
+            player=self.player,
+            sensor_hub=self.sensor_hub,
+            edge_sensor_ids=edge_sensor_ids,
+            surrounding_sensor_ids=surrounding_sensor_ids,
+            config_path=normal_actions_config,
+            grays_sensor_ids=grays_sensor_ids,
+            extra_sensor_ids=extra_io_sensor_ids,
+            true_gray_ids=true_gray_ids,
+        )
 
-        self.fence_inferrer = StandardFenceInferrer(sensor_hub=self.sensor_hub, action_player=self.player,
-                                                    config_path=fence_inferrer_config, edge_sensor_ids=edge_sensor_ids,
-                                                    surrounding_sensor_ids=surrounding_sensor_ids,
-                                                    grays_sensor_ids=grays_sensor_ids,
-                                                    extra_sensor_ids=extra_io_sensor_ids)
-        self.normal_actions = NormalActions(player=self.player, sensor_hub=self.sensor_hub,
-                                            edge_sensor_ids=edge_sensor_ids,
-                                            surrounding_sensor_ids=surrounding_sensor_ids,
-                                            config_path=normal_actions_config, grays_sensor_ids=grays_sensor_ids,
-                                            extra_sensor_ids=extra_io_sensor_ids, true_gray_ids=true_gray_ids)
-
-        self._start_watcher = build_watcher_simple(sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
-                                                   sensor_id=side_sensor_ids,
-                                                   min_line=getattr(self, self.CONFIG_START_UP_MIN_BASELINE_KEY))
+        self._start_watcher = build_watcher_simple(
+            sensor_update=self.sensor_hub.on_board_adc_updater[FU_INDEX],
+            sensor_id=side_sensor_ids,
+            min_line=getattr(self, self.CONFIG_START_UP_MIN_BASELINE_KEY),
+        )
 
     def wait_start(self) -> None:
         """
@@ -157,12 +179,14 @@ class BattleBot(Bot):
         """
         self.tag_detector.tag_detection_switch = False
         tape = [
-            new_ActionFrame(breaker_func=self._start_watcher,
-                            action_duration=99999999),
-            new_ActionFrame(action_speed=getattr(self, self.CONFIG_MOTION_START_SPEED_KEY),
-                            action_duration=getattr(self, self.CONFIG_MOTION_START_DURATION_KEY)),
-            new_ActionFrame(action_duration=300)]
-        warnings.warn('\n>>>>>>>>>>Waiting for start<<<<<<<', stacklevel=4)
+            new_ActionFrame(breaker_func=self._start_watcher, action_duration=99999999),
+            new_ActionFrame(
+                action_speed=getattr(self, self.CONFIG_MOTION_START_SPEED_KEY),
+                action_duration=getattr(self, self.CONFIG_MOTION_START_DURATION_KEY),
+            ),
+            new_ActionFrame(action_duration=300),
+        ]
+        warnings.warn("\n>>>>>>>>>>Waiting for start<<<<<<<", stacklevel=4)
         self.player.extend(tape)
         warnings.warn("\n>>>>>>>>>Start<<<<<<<<", stacklevel=4)
 
@@ -171,7 +195,9 @@ class BattleBot(Bot):
     # endregion
 
     def Battle(self) -> None:
-        mov_average_apply = MovingAverage(getattr(self, self.CONFIG_FILTERS_MOVINGAVERAGE_WINDOW_SIZE_KEY)).apply
+        mov_average_apply = MovingAverage(
+            getattr(self, self.CONFIG_FILTERS_MOVINGAVERAGE_WINDOW_SIZE_KEY)
+        ).apply
         true_gray_id = getattr(self, self.CONFIG_TRUE_GRAYS_KEY)
         full_adc_updater = self.sensor_hub.on_board_adc_updater[FU_INDEX]
         true_gray_min_line = getattr(self, self.CONFIG_INFER_TRUE_GRAY_MIN_BASELINE_KEY)
@@ -182,7 +208,10 @@ class BattleBot(Bot):
         def _is_on_stage() -> bool:
 
             applied_value = mov_average_apply(full_adc_updater()[true_gray_id])
-            return applied_value < float_gray_min_line or true_gray_min_line < applied_value < true_gray_max_line
+            return (
+                    applied_value < float_gray_min_line
+                    or true_gray_min_line < applied_value < true_gray_max_line
+            )
 
         def _on_stage() -> None:
             self.tag_detector.tag_detection_switch = True
@@ -208,7 +237,9 @@ class BattleBot(Bot):
         self.screen.open()
         self.screen.set_font_size(self.screen.FONT_12X16)
 
-        mov_average_apply = MovingAverage(getattr(self, self.CONFIG_FILTERS_MOVINGAVERAGE_WINDOW_SIZE_KEY)).apply
+        mov_average_apply = MovingAverage(
+            getattr(self, self.CONFIG_FILTERS_MOVINGAVERAGE_WINDOW_SIZE_KEY)
+        ).apply
         true_gray_id = getattr(self, self.CONFIG_TRUE_GRAYS_KEY)
         full_adc_updater = self.sensor_hub.on_board_adc_updater[FU_INDEX]
         true_gray_min_line = getattr(self, self.CONFIG_INFER_TRUE_GRAY_MIN_BASELINE_KEY)
@@ -219,8 +250,10 @@ class BattleBot(Bot):
 
             apply = mov_average_apply(full_adc_updater()[true_gray_id])
             is_on_stage = true_gray_min_line < apply < true_gray_max_line
-            print(f'is_on_stage: {is_on_stage}, apply: {apply}')
-            self.screen.set_led_color(0, self.screen.COLOR_BROWN if is_on_stage else self.screen.COLOR_BRED)
+            print(f"is_on_stage: {is_on_stage}, apply: {apply}")
+            self.screen.set_led_color(
+                0, self.screen.COLOR_BROWN if is_on_stage else self.screen.COLOR_BRED
+            )
             return is_on_stage
 
         def on_stage() -> None:
@@ -228,8 +261,8 @@ class BattleBot(Bot):
 
             status_code = self.edge_inferrer.react()
             self.screen.fill_screen(self.screen.COLOR_BLACK)
-            self.screen.put_string(0, 0, f'edge: {status_code}')
-            self.screen.put_string(0, 12, f'{perf_counter_ns()}')
+            self.screen.put_string(0, 0, f"edge: {status_code}")
+            self.screen.put_string(0, 12, f"{perf_counter_ns()}")
 
             if status_code:
                 self.screen.refresh()
@@ -238,8 +271,8 @@ class BattleBot(Bot):
             sur_code = self.surrounding_inferrer.react()
             if sur_code:
                 self.screen.fill_screen(self.screen.COLOR_BLACK)
-                self.screen.put_string(0, 0, f'sur: {sur_code}')
-                self.screen.put_string(0, 12, f'{perf_counter_ns()}')
+                self.screen.put_string(0, 0, f"sur: {sur_code}")
+                self.screen.put_string(0, 12, f"{perf_counter_ns()}")
                 self.screen.refresh()
                 self.edge_inferrer.react()
                 return
@@ -249,8 +282,8 @@ class BattleBot(Bot):
             self.tag_detector.tag_detection_switch = False
             status_code = self.fence_inferrer.react()
             self.screen.fill_screen(self.screen.COLOR_BLACK)
-            self.screen.put_string(0, 0, f'{status_code}')
-            self.screen.put_string(0, 15, f'{perf_counter_ns()}')
+            self.screen.put_string(0, 0, f"{status_code}")
+            self.screen.put_string(0, 15, f"{perf_counter_ns()}")
             self.screen.set_led_color(1, self.screen.COLOR_GREEN)
             self.screen.refresh()
 
@@ -263,7 +296,7 @@ class BattleBot(Bot):
 
         sleep(1)
         ActionFrame.save_cache()
-        warnings.warn('\nexiting', stacklevel=4)
+        warnings.warn("\nexiting", stacklevel=4)
 
     @final
     def save_all_config(self):
@@ -279,12 +312,14 @@ class BattleBot(Bot):
         self.normal_actions.save_config()
 
 
-if __name__ == '__main__':
-    bot = BattleBot(base_config='config/std_base_config.json',
-                    edge_inferrer_config='config/std_edge_inferrer_config.json',
-                    surrounding_inferrer_config='config/std_surround_inferrer_config.json',
-                    fence_inferrer_config='config/std_fence_inferrer_config.json',
-                    normal_actions_config='config/std_normal_actions_config.json')
+if __name__ == "__main__":
+    bot = BattleBot(
+        base_config="config/std_base_config.json",
+        edge_inferrer_config="config/std_edge_inferrer_config.json",
+        surrounding_inferrer_config="config/std_surround_inferrer_config.json",
+        fence_inferrer_config="config/std_fence_inferrer_config.json",
+        normal_actions_config="config/std_normal_actions_config.json",
+    )
 
     # bot.save_all_config()
     bot.start_match()

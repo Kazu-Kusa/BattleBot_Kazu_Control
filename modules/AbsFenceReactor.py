@@ -1,10 +1,14 @@
 from abc import abstractmethod
 from typing import final
 
-from repo.uptechStar.module.inferrer_base import InferrerBase, ComplexAction, FlexActionFactory
+from repo.uptechStar.module.reactor_base import (
+    ReactorBase,
+    ComplexAction,
+    FlexActionFactory,
+)
 
 
-class AbstractFenceInferrer(InferrerBase):
+class AbstractFenceReactor(ReactorBase):
     KEY_NO_FENCE = 0
 
     KEY_FRONT_TO_FENCE = 1
@@ -21,40 +25,86 @@ class AbstractFenceInferrer(InferrerBase):
 
     KEY_FRONT_BEHIND_TO_FENCE = KEY_FRONT_TO_FENCE + KEY_BEHIND_TO_FENCE  # code: 9
 
-    KEY_FRONT_LEFT_RIGHT_TO_FENCE = KEY_FRONT_TO_FENCE + KEY_LEFT_TO_FENCE + KEY_RIGHT_TO_FENCE  # code: 7
+    KEY_FRONT_LEFT_RIGHT_TO_FENCE = (
+            KEY_FRONT_TO_FENCE + KEY_LEFT_TO_FENCE + KEY_RIGHT_TO_FENCE
+    )  # code: 7
 
-    KEY_FRONT_LEFT_BEHIND_TO_FENCE = KEY_FRONT_TO_FENCE + KEY_LEFT_TO_FENCE + KEY_BEHIND_TO_FENCE  # code: 11
+    KEY_FRONT_LEFT_BEHIND_TO_FENCE = (
+            KEY_FRONT_TO_FENCE + KEY_LEFT_TO_FENCE + KEY_BEHIND_TO_FENCE
+    )  # code: 11
 
-    KEY_FRONT_RIGHT_BEHIND_TO_FENCE = KEY_FRONT_TO_FENCE + KEY_RIGHT_TO_FENCE + KEY_BEHIND_TO_FENCE  # code: 13
+    KEY_FRONT_RIGHT_BEHIND_TO_FENCE = (
+            KEY_FRONT_TO_FENCE + KEY_RIGHT_TO_FENCE + KEY_BEHIND_TO_FENCE
+    )  # code: 13
 
-    KEY_LEFT_RIGHT_BEHIND_TO_FENCE = KEY_LEFT_TO_FENCE + KEY_RIGHT_TO_FENCE + KEY_BEHIND_TO_FENCE  # code: 14
+    KEY_LEFT_RIGHT_BEHIND_TO_FENCE = (
+            KEY_LEFT_TO_FENCE + KEY_RIGHT_TO_FENCE + KEY_BEHIND_TO_FENCE
+    )  # code: 14
 
-    KEY_FRONT_LEFT_RIGHT_BEHIND_TO_FENCE = KEY_LEFT_RIGHT_TO_FENCE + KEY_FRONT_BEHIND_TO_FENCE  # code: 15
+    KEY_FRONT_LEFT_RIGHT_BEHIND_TO_FENCE = (
+            KEY_LEFT_RIGHT_TO_FENCE + KEY_FRONT_BEHIND_TO_FENCE
+    )  # code: 15
 
     def _action_table_init(self):
-        self.register_action(case=self.KEY_FRONT_TO_FENCE, complex_action=self.on_front_to_fence)
-        self.register_action(case=self.KEY_LEFT_TO_FENCE, complex_action=self.on_left_to_fence)
-        self.register_action(case=self.KEY_RIGHT_TO_FENCE, complex_action=self.on_right_to_fence)
-        self.register_action(case=self.KEY_BEHIND_TO_FENCE, complex_action=self.on_behind_to_fence)
+        self.register_action(
+            case=self.KEY_FRONT_TO_FENCE, complex_action=self.on_front_to_fence
+        )
+        self.register_action(
+            case=self.KEY_LEFT_TO_FENCE, complex_action=self.on_left_to_fence
+        )
+        self.register_action(
+            case=self.KEY_RIGHT_TO_FENCE, complex_action=self.on_right_to_fence
+        )
+        self.register_action(
+            case=self.KEY_BEHIND_TO_FENCE, complex_action=self.on_behind_to_fence
+        )
 
-        self.register_action(case=self.KEY_FRONT_LEFT_TO_FENCE, complex_action=self.on_front_left_to_fence)
-        self.register_action(case=self.KEY_FRONT_RIGHT_TO_FENCE, complex_action=self.on_front_right_to_fence)
-        self.register_action(case=self.KEY_BEHIND_LEFT_TO_FENCE, complex_action=self.on_behind_left_to_fence)
-        self.register_action(case=self.KEY_BEHIND_RIGHT_TO_FENCE, complex_action=self.on_behind_right_to_fence)
-        self.register_action(case=self.KEY_LEFT_RIGHT_TO_FENCE, complex_action=self.on_left_right_to_fence)
-        self.register_action(case=self.KEY_FRONT_BEHIND_TO_FENCE, complex_action=self.on_front_behind_to_fence)
+        self.register_action(
+            case=self.KEY_FRONT_LEFT_TO_FENCE,
+            complex_action=self.on_front_left_to_fence,
+        )
+        self.register_action(
+            case=self.KEY_FRONT_RIGHT_TO_FENCE,
+            complex_action=self.on_front_right_to_fence,
+        )
+        self.register_action(
+            case=self.KEY_BEHIND_LEFT_TO_FENCE,
+            complex_action=self.on_behind_left_to_fence,
+        )
+        self.register_action(
+            case=self.KEY_BEHIND_RIGHT_TO_FENCE,
+            complex_action=self.on_behind_right_to_fence,
+        )
+        self.register_action(
+            case=self.KEY_LEFT_RIGHT_TO_FENCE,
+            complex_action=self.on_left_right_to_fence,
+        )
+        self.register_action(
+            case=self.KEY_FRONT_BEHIND_TO_FENCE,
+            complex_action=self.on_front_behind_to_fence,
+        )
 
-        self.register_action(case=self.KEY_FRONT_LEFT_RIGHT_TO_FENCE,
-                             complex_action=self.on_front_left_right_to_fence)
-        self.register_action(case=self.KEY_FRONT_LEFT_BEHIND_TO_FENCE,
-                             complex_action=self.on_front_left_behind_to_fence)
-        self.register_action(case=self.KEY_FRONT_RIGHT_BEHIND_TO_FENCE,
-                             complex_action=self.on_front_right_behind_to_fence)
-        self.register_action(case=self.KEY_LEFT_RIGHT_BEHIND_TO_FENCE,
-                             complex_action=self.on_left_right_behind_to_fence)
+        self.register_action(
+            case=self.KEY_FRONT_LEFT_RIGHT_TO_FENCE,
+            complex_action=self.on_front_left_right_to_fence,
+        )
+        self.register_action(
+            case=self.KEY_FRONT_LEFT_BEHIND_TO_FENCE,
+            complex_action=self.on_front_left_behind_to_fence,
+        )
+        self.register_action(
+            case=self.KEY_FRONT_RIGHT_BEHIND_TO_FENCE,
+            complex_action=self.on_front_right_behind_to_fence,
+        )
+        self.register_action(
+            case=self.KEY_LEFT_RIGHT_BEHIND_TO_FENCE,
+            complex_action=self.on_left_right_behind_to_fence,
+        )
 
-        self.register_action(case=self.KEY_FRONT_LEFT_RIGHT_BEHIND_TO_FENCE,
-                             complex_action=self.on_front_left_right_behind_to_fence)
+        self.register_action(
+            case=self.KEY_FRONT_LEFT_RIGHT_BEHIND_TO_FENCE,
+            complex_action=self.on_front_left_right_behind_to_fence,
+        )
         self.register_action(case=self.KEY_NO_FENCE, complex_action=self.on_no_fence)
 
         # region methods

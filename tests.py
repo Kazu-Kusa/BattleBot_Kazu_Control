@@ -3,9 +3,9 @@ import unittest
 import warnings
 from typing import List, Dict
 
-from modules.EdgeInferrers import StandardEdgeInferrer
-from modules.FenceInferrers import StandardFenceInferrer
-from modules.SurroundInferrers import StandardSurroundInferrer
+from modules.EdgeReactors import StandardEdgeReactor
+from modules.FenceReactors import StandardFenceInReactor
+from modules.SurroundReactors import StandardSurroundReactor
 from repo.uptechStar.module.actions import ActionPlayer
 from repo.uptechStar.module.close_loop_controller import motor_speed_test
 from repo.uptechStar.module.sensors import SensorHub
@@ -60,22 +60,22 @@ class SerialTest(unittest.TestCase):
 class InferrerTests(unittest.TestCase):
 
     def test_StandardEdgeInferrer_create(self):
-        a = StandardEdgeInferrer(action_player=ActionPlayer(), sensor_hub=SensorHub(updaters=[]),
-                                 config_path=EMPTY_JSON)
+        a = StandardEdgeReactor(action_player=ActionPlayer(), sensor_hub=SensorHub(updaters=[]),
+                                config_path=EMPTY_JSON)
         a.save_config('config/std_edge_inferrer_config.json')
         print(a)
 
     def test_StandardFenceInferrer_create(self):
-        a = StandardFenceInferrer(sensor_hub=SensorHub(updaters=[]), action_player=ActionPlayer(),
-                                  config_path=EMPTY_JSON, edge_sensor_ids=, surrounding_sensor_ids=,
-                                  grays_sensor_ids=[], extra_sensor_ids=[])
+        a = StandardFenceInReactor(sensor_hub=SensorHub(updaters=[]), action_player=ActionPlayer(),
+                                   config_path=EMPTY_JSON, edge_sensor_ids=, surrounding_sensor_ids=,
+                                   grays_sensor_ids=[], extra_sensor_ids=[])
         a.save_config('config/std_fence_inferrer_config.json')
         print(a)
 
     def test_StandardSurroundInferrer_create(self):
-        a = StandardSurroundInferrer(sensor_hub=SensorHub(updaters=[]), action_player=ActionPlayer(),
-                                     config_path=EMPTY_JSON, tag_detector=, surrounding_sensor_ids=, edge_sensor_ids=,
-                                     grays_sensor_ids=[], extra_sensor_ids=[])
+        a = StandardSurroundReactor(sensor_hub=SensorHub(updaters=[]), action_player=ActionPlayer(),
+                                    config_path=EMPTY_JSON, tag_detector=, surrounding_sensor_ids=, edge_sensor_ids=,
+                                    grays_sensor_ids=[], extra_sensor_ids=[])
         a.save_config('config/std_surround_inferrer_config.json')
         print(a)
 
